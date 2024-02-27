@@ -10,6 +10,9 @@
     <OutputPath>.</OutputPath>
     <Name>CribbageSimulator</Name>
     <RootNamespace>CribbageSimulator</RootNamespace>
+    <TestFramework>unittest</TestFramework>
+    <UnitTestPattern>test*.py</UnitTestPattern>
+    <UnitTestRootDirectory>.</UnitTestRootDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,6 +37,13 @@
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test_FlushCombination.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_CribbageCombination.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_PairCombination.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

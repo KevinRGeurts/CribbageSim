@@ -1,4 +1,5 @@
 # Local imports
+from card import Card
 from hand import Hand
 
 class CribbageComboInfo(object):
@@ -48,6 +49,24 @@ class CribbageCombination(object):
         
     def get_name(self):
         return self._combo_name
+
+    def permutations(self, size, cards = []):
+        """
+        Utility function to generate all permutations of number of cards size in list cards. This utility is a critical step in searching for
+        different combinations.
+        :parameter size: The number of cards to include in each permutation, e.g., if size = 2, then permutations are all possible pairs, int
+        :parameter cards: The list of cards to permutate, list
+        """
+        # This if for a cribbage hand, so assert that size is between 2 and 5 inclusive
+        assert (size >= 2 and size <= 4)
+        # Create a list of all permutations of two cards in the hand.
+        permutations = []
+        match size:
+            case 2:
+                for i in range(len(cards)):
+                        for j in range(i+1,len(cards)):
+                            permutations.append([cards[i], cards[j]])
+        return permutations
         
 
 class PairCombination(CribbageCombination):
@@ -62,23 +81,27 @@ class PairCombination(CribbageCombination):
         self._combo_name = 'pair'
         self._score_per_combo = 2
         
-    def score(self, hand = Hand()):
+    def score(self, hand = Hand(), starter = Card()):
         """
         Search hand for all pairs, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The hand to search for pairs, Hand object
+        :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the pairs in the hand, CribbageComboInfo object
         """
+
+        # This is a cribbage hand, so make sure it has 4 cards
+        assert(hand.get_num_cards() == 4)
         
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
         
         cards = hand.get_cards()
+
+        # Add the starter card to the list of cards in the hand
+        cards.append(starter)
         
         # Create a list of all permutations of two cards in the hand.
-        permutations = []
-        for i in range(len(cards)):
-                for j in range(i+1,len(cards)):
-                    permutations.append([cards[i], cards[j]])
+        permutations = self.permutations(2, cards)
                     
         # Iterate through the permutations and determine how many of them are pairs
         for p in permutations:
@@ -88,6 +111,55 @@ class PairCombination(CribbageCombination):
                 
         # Set the score in the info object
         info.score = info.number_instances * self._score_per_combo      
+        
+        return info
+
+
+class FlushCombination(CribbageCombination):
+    """
+    Intended to search for, find, and score pairs in a cribbage hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for pair scoring combination in cribbage hand.
+        """
+        self._combo_name = 'flush'
+        self._score_per_combo = 4
+        
+    def score(self, hand = Hand(), starter = Card()):
+        """
+        Search hand for a flush, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The hand to search for a flush, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about the flush in the hand, CribbageComboInfo object
+        """
+        
+        # This is a cribbage hand, so make sure it has 4 cards
+        assert(hand.get_num_cards() == 4)
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        cards = hand.get_cards()
+
+        # Do all cards in the hand have the same suit?
+        is_flush = True
+        suit = cards[0].get_suit()
+        for i in range(1, len(cards)):
+            if cards[i].get_suit() != suit:
+                is_flush = False
+                break;
+
+        if is_flush:
+            info.number_instances = 1
+            info.instance_list = [cards]
+            info.score = info.number_instances * self._score_per_combo
+            
+            # Check if the starter is also the same suit as the flush
+            if starter.get_suit() == suit:
+                info.instance_list[0].append(starter)
+                info.score = info.score + 1
         
         return info
 

@@ -164,5 +164,53 @@ class FlushCombination(CribbageCombination):
         return info
 
 
+class HisNobsCombination(CribbageCombination):
+    """
+    Intended to search for, find, and score "his nobs" (Jack same suit as starter) in a cribbage hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for his nobs scoring combination in cribbage hand.
+        """
+        self._combo_name = 'his nobs'
+        self._score_per_combo = 1
+        
+    def score(self, hand = Hand(), starter = Card()):
+        """
+        Search hand for his nobs, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The hand to search for a flush, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about his nobs in the hand, CribbageComboInfo object
+        """
+        
+        # This is a cribbage hand, so make sure it has 4 cards
+        assert(hand.get_num_cards() == 4)
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        cards = hand.get_cards()
+
+        # Are any of the cards in the hand a Jack? If so, does the suit of the Jack match the starter? Then list them.
+        jacks_in_hand = []
+        for i in range(len(cards)):
+            if cards[i].get_pips() == "J":
+                if cards[i].get_suit() == starter.get_suit():
+                    jacks_in_hand.append(cards[i])
+
+        # Since cribbage should always be played with a single, non-infinite deck, we should never find more than one Jack where the suit
+        # matches the starter.
+
+        assert (len(jacks_in_hand) <= 1)
+                    
+        if len(jacks_in_hand) == 1:
+            info.number_instances = 1
+            info.instance_list = [jacks_in_hand]
+            info.score = info.number_instances * self._score_per_combo
+        
+        return info
+
+
 
 

@@ -1,3 +1,6 @@
+# Standard imports
+from itertools import combinations
+
 # Local imports
 from card import Card
 from hand import Hand
@@ -58,14 +61,14 @@ class CribbageCombination(object):
         :parameter cards: The list of cards to permutate, list
         """
         # This if for a cribbage hand, so assert that size is between 2 and 5 inclusive
-        assert (size >= 2 and size <= 4)
-        # Create a list of all permutations of two cards in the hand.
+        assert (size >= 2 and size <= 5)
+
         permutations = []
-        match size:
-            case 2:
-                for i in range(len(cards)):
-                        for j in range(i+1,len(cards)):
-                            permutations.append([cards[i], cards[j]])
+        
+        perm_iter = combinations(cards, size)
+        for perm in perm_iter:
+            permutations.append(perm)
+
         return permutations
         
 
@@ -208,6 +211,65 @@ class HisNobsCombination(CribbageCombination):
             info.number_instances = 1
             info.instance_list = [jacks_in_hand]
             info.score = info.number_instances * self._score_per_combo
+        
+        return info
+
+
+class FifteenCombination(CribbageCombination):
+    """
+    Intended to search for, find, and score 15's in a cribbage hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for 15's scoring combination in cribbage hand.
+        """
+        self._combo_name = 'fifteen'
+        self._score_per_combo = 2
+        
+    def score(self, hand = Hand(), starter = Card()):
+        """
+        Search hand for all fifteens, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The hand to search for fifteens, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about the fifteens in the hand, CribbageComboInfo object
+        """
+
+        # This is a cribbage hand, so make sure it has 4 cards
+        assert(hand.get_num_cards() == 4)
+        
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        cards = hand.get_cards()
+
+        # Add the starter card to the list of cards in the hand
+        cards.append(starter)
+        
+        # Create a list of all permutations of two cards in the hand.
+        permutations = self.permutations(2, cards)
+
+        # Add to the list all permutations of three cards in the hand.
+        permutations.extend(self.permutations(3, cards))
+
+        # Add to the list all permutations of four cards in the hand.
+        permutations.extend(self.permutations(4, cards))
+
+        # Add to the list all permutations of five cards in the hand.
+        permutations.extend(self.permutations(5, cards))
+                    
+        # Iterate through the many permutations and determine how many of them add to fifteen
+        for p in permutations:
+            # Add up the cards in the permutation
+            p_count = 0
+            for c in p:
+                p_count += c.count_card()
+            if p_count == 15:
+                info.number_instances += 1
+                info.instance_list.append(p)
+                
+        # Set the score in the info object
+        info.score = info.number_instances * self._score_per_combo      
         
         return info
 

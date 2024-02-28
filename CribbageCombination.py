@@ -67,9 +67,11 @@ class CribbageCombination(object):
         
         perm_iter = combinations(cards, size)
         for perm in perm_iter:
-            permutations.append(perm)
+            # Note: combinations(...) returns an iter that returns tuples. I want to return a list of lists, not a list of tuples.
+            # So, list(perm) converts the tuple perm to a list.
+            permutations.append(list(perm))
 
-        return permutations
+        return permutations 
         
 
 class PairCombination(CribbageCombination):
@@ -270,6 +272,75 @@ class FifteenCombination(CribbageCombination):
                 
         # Set the score in the info object
         info.score = info.number_instances * self._score_per_combo      
+        
+        return info
+
+class RunCombination(CribbageCombination):
+    """
+    Intended to search for, find, and score runs in a cribbage hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for run scoring combination in cribbage hand.
+        """
+        self._combo_name = 'run'
+        self._score_per_combo = 0 # Since scoring depends on length of run
+        
+    def score(self, hand = Hand(), starter = Card()):
+        """
+        Search hand for all runs, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The hand to search for runs, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about the runs in the hand, CribbageComboInfo object
+        """
+
+        # This is a cribbage hand, so make sure it has 4 cards
+        assert(hand.get_num_cards() == 4)
+        
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        cards = hand.get_cards()
+
+        # Add the starter card to the list of cards in the hand
+        cards.append(starter)
+        
+        # Must be a "greedy" algorithm, looking for long runs first
+
+        run_found = False
+        for size in range(5,2,-1): # The range is [5, 4, 3]
+        
+            # Create a list of all permutations of five cards in the hand.
+            permutations = self.permutations(size, cards)
+
+            # Do we have a run of size cards?
+            # Iterate through the size-card permutations and determine how many of them are a run
+            for p in permutations:
+                is_run = True
+                # Sort the cards in the permutation, this requires, Card class to have __lt__ method implemented
+                p.sort()
+                first_card = p.pop(0)
+                prev_sequence_count = first_card.get_sequence_count()
+                for c in p:
+                    if c.get_sequence_count() == prev_sequence_count + 1:
+                        prev_sequence_count = c.get_sequence_count()
+                    else:
+                        is_run = False
+                        break
+                if is_run:
+                    run_found = True
+                    info.number_instances += 1
+                    info.score += size
+                    # Since we popped the first card off p, when need to reassemble the original p to append it to the info.instance_list of lists
+                    list_to_append = [first_card]
+                    list_to_append.extend(p)
+                    info.instance_list.append(list_to_append)
+
+            # If we found one or more runs at the current size, then don't look for any more at the next lower size, because, of course
+            # if we have a run at (size+1) we will also have one at (size), but it will be duplicative.
+            # This is the algorithm being "greedy".
+            if run_found: break
         
         return info
 

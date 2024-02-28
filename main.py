@@ -8,7 +8,7 @@ from random import seed
 from deck import StackedDeck, Deck
 from card import Card
 from hand import Hand
-from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination
+from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 
 
@@ -23,40 +23,43 @@ def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
-    hnc = HisNobsCombination()
+    
+    rc = RunCombination()
+    
+    info = CribbageComboInfo()
+    info.combo_name = rc._combo_name
     
     hand = Hand()
-    hand.add_cards([Card('S','2'), Card('C','6'), Card('H','J'), Card('D','K')])
-    stater = Card('H','8')
+    hand.add_cards([Card('S','2'), Card('C','3'), Card('H','4'), Card('D','5')])
+    starter = Card('H','6')
     
-    # This is a cribbage hand, so make sure it has 4 cards
-    assert(hand.get_num_cards() == 4)
-
-    info = CribbageComboInfo()
-    info.combo_name = hnc.get_name()
-        
     cards = hand.get_cards()
-
-    # Are any of the cards in the hand a Jack? If so, does the suit of the Jack match the starter? Then list them.
-    jacks_in_hand = []
-    for i in range(len(cards)):
-        if cards[i].get_pips() == "J":
-            if cards[i].get_suit() == starter.get_suit():
-                jacks_in_hand.append(cards[i])
-
-    # Since cribbage should always be played with a single, non-infinite deck, we should never find more than one Jack where the suit
-    # matches the starter.
-
-    assert (len(jacks_in_hand) <= 1)
-                    
-    if len(jacks_in_hand) == 1:
-        info.number_instances = 1
-        info.instance_list = [jacks_in_hand]
-        # info.score = info.number_instances * self._score_per_combo
+    cards.append(starter)
     
-    #info = pc.score(h)
-    
-    print(info)
+    permutations = rc.permutations(5, cards)
+
+    # Do we have a run of five cards?
+    is_run = True
+    # Iterate through the five-card permutations and determine how many of them are a run
+    for p in permutations:
+        # Sort the cards in the permutation, this requires, Card class to have __lt__ method implemented
+        p.sort()
+        # TODO: From here the concept is to see if each successive card has a "value" that is one greater than the previous card
+        # This will require Card to have a method that returns a "sequencing count" where A=1, J=11, Q=12, K=13.
+        # Once this is implemented the Card.__lt__() can be rewritten to use the sequencing count.
+        first_card = p.pop(0)
+        prev_sequence_count = first_card.get_sequence_count()
+        for c in p:
+            if c.get_sequence_count() == prev_sequence_count + 1:
+                prev_sequence_count = c.get_sequence_count()
+            else:
+                is_run = False
+                break
+        if is_run:
+            info.number_instances += 1
+            info.score = 5
+            # Since we popped the first card off p, when need to reassemble the original p to append it to the info.instance_list of lists
+            info.instance_list.append([first_card].extend(p))
     
     return None
     

@@ -61,7 +61,9 @@ class CribbageCombination(object):
         :parameter cards: The list of cards to permutate, list
         """
         # This if for a cribbage hand, so assert that size is between 2 and 5 inclusive
-        assert (size >= 2 and size <= 5)
+        # NO during play the size will be greater than 2, but it might not be limited to 5
+        # assert (size >= 2 and size <= 5)
+        assert (size >= 2)
 
         permutations = []
         
@@ -86,7 +88,7 @@ class PairCombination(CribbageCombination):
         self._combo_name = 'pair'
         self._score_per_combo = 2
         
-    def score(self, hand = Hand(), starter = Card()):
+    def score(self, hand = Hand(), starter = None):
         """
         Search hand for all pairs, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The hand to search for pairs, Hand object
@@ -94,8 +96,8 @@ class PairCombination(CribbageCombination):
         :return: CribbageComboInfo object with information about the pairs in the hand, CribbageComboInfo object
         """
 
-        # This is a cribbage hand, so make sure it has 4 cards
-        assert(hand.get_num_cards() == 4)
+        # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
+        # assert(hand.get_num_cards() == 4)
         
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
@@ -103,7 +105,7 @@ class PairCombination(CribbageCombination):
         cards = hand.get_cards()
 
         # Add the starter card to the list of cards in the hand
-        cards.append(starter)
+        if starter is not None: cards.append(starter)
         
         # Create a list of all permutations of two cards in the hand.
         permutations = self.permutations(2, cards)
@@ -132,7 +134,8 @@ class FlushCombination(CribbageCombination):
         self._combo_name = 'flush'
         self._score_per_combo = 4
         
-    def score(self, hand = Hand(), starter = Card()):
+    # TODO: Fix bug that if hand is the crib, then suit of flush MUST match starter, that is, cannot score 4 
+    def score(self, hand = Hand(), starter = None):
         """
         Search hand for a flush, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The hand to search for a flush, Hand object
@@ -141,6 +144,7 @@ class FlushCombination(CribbageCombination):
         """
         
         # This is a cribbage hand, so make sure it has 4 cards
+        # This is the correct assert to use, since flush is not a scoring combination during play, when we might not have 4 cards in the pile
         assert(hand.get_num_cards() == 4)
 
         info = CribbageComboInfo()
@@ -190,6 +194,7 @@ class HisNobsCombination(CribbageCombination):
         """
         
         # This is a cribbage hand, so make sure it has 4 cards
+        # This is the correct assert to use, since his nobs is not a scoring combination during play, when we might not have 4 cards in the pile
         assert(hand.get_num_cards() == 4)
 
         info = CribbageComboInfo()
@@ -229,7 +234,7 @@ class FifteenCombination(CribbageCombination):
         self._combo_name = 'fifteen'
         self._score_per_combo = 2
         
-    def score(self, hand = Hand(), starter = Card()):
+    def score(self, hand = Hand(), starter = None):
         """
         Search hand for all fifteens, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The hand to search for fifteens, Hand object
@@ -237,8 +242,8 @@ class FifteenCombination(CribbageCombination):
         :return: CribbageComboInfo object with information about the fifteens in the hand, CribbageComboInfo object
         """
 
-        # This is a cribbage hand, so make sure it has 4 cards
-        assert(hand.get_num_cards() == 4)
+        # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
+        # assert(hand.get_num_cards() == 4)
         
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
@@ -246,19 +251,12 @@ class FifteenCombination(CribbageCombination):
         cards = hand.get_cards()
 
         # Add the starter card to the list of cards in the hand
-        cards.append(starter)
+        if starter is not None: cards.append(starter)
         
-        # Create a list of all permutations of two cards in the hand.
-        permutations = self.permutations(2, cards)
-
-        # Add to the list all permutations of three cards in the hand.
-        permutations.extend(self.permutations(3, cards))
-
-        # Add to the list all permutations of four cards in the hand.
-        permutations.extend(self.permutations(4, cards))
-
-        # Add to the list all permutations of five cards in the hand.
-        permutations.extend(self.permutations(5, cards))
+        permutations = []
+        for size in range(2,len(cards)+1):
+            # Add to the list of permutations all permutations of size of cards in the hand.
+            permutations.extend(self.permutations(size, cards))
                     
         # Iterate through the many permutations and determine how many of them add to fifteen
         for p in permutations:
@@ -287,7 +285,7 @@ class RunCombination(CribbageCombination):
         self._combo_name = 'run'
         self._score_per_combo = 0 # Since scoring depends on length of run
         
-    def score(self, hand = Hand(), starter = Card()):
+    def score(self, hand = Hand(), starter = None):
         """
         Search hand for all runs, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The hand to search for runs, Hand object
@@ -295,8 +293,8 @@ class RunCombination(CribbageCombination):
         :return: CribbageComboInfo object with information about the runs in the hand, CribbageComboInfo object
         """
 
-        # This is a cribbage hand, so make sure it has 4 cards
-        assert(hand.get_num_cards() == 4)
+        # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
+        # assert(hand.get_num_cards() == 4)
         
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
@@ -304,7 +302,7 @@ class RunCombination(CribbageCombination):
         cards = hand.get_cards()
 
         # Add the starter card to the list of cards in the hand
-        cards.append(starter)
+        if starter is not None: cards.append(starter)
         
         # Must be a "greedy" algorithm, looking for long runs first
 

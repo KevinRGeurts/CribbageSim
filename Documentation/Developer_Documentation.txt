@@ -1,0 +1,35 @@
+Cribbage Simulator Project Developer Documentation
+ 
+*** Algorithm steps for playing one deal of cribbage, implemented in CribbageDeal.play(...)
+
+        # Deal player and dealer hands from the deck. In a normal game, this would be one card at a time alternating.
+        # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
+
+        # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
+
+        # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
+
+        # Non-dealer, i.e., the player, leads the first "go" round. Use the player play strategy to do so.
+
+        # Dealer follows using the dealer play strategy.
+
+        # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer. Use the CribbageCombination's with
+        # hand constructed from the cards played by both player and dealer so far in the current go round to determine if any scoring has happened.
+
+        # Player follows using their play strategy, which could include not playing a card but instead declaring go.
+        # Have they scored, then peg? Have they finished the round by reaching 31, then peg, and end round.
+
+        # If go has not been declared, then continuing alternating follows, until the follower makes the play count 31, or their partner declares go.
+        
+        # If go has been declared, then other player/dealer must play as close to 31 as possible, even if that means playing multiple cards in a row.
+        # Have they scored while doing so, like playing a pair of 2's? If so peg. If they don't reach 31, peg 1 for them. If they do reach 31, peg 2
+        # for them.
+        
+        # Play continues until both dealer and player are out of cards.
+
+        # If at any time during play, player or dealer pegs to end of board, game is over.
+
+        # Time for "showing" that is scoring hands. Use the set of CribbageCombination's to score, in order, player's hand, dealer's hand, crib.
+        # Peg appropriately.
+
+        # If at any time during showing, player or dealer pegs to end of board, game is over.

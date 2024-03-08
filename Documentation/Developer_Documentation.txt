@@ -16,6 +16,14 @@ Cribbage Simulator Project Developer Documentation
         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer. Use the CribbageCombination's with
         # hand constructed from the cards played by both player and dealer so far in the current go round to determine if any scoring has happened.
 
+    # TODO: Logic for scoring while playing needs to be more complex. Can't just iterate through the list of combinations created for scoreing while showing.
+    # When looking for a pair (triple, quadruple), must only look at the last sequential two, three, or four cards in the combined pile
+    # When looking for a 15, this must follow the card play count in the current go round.
+    # When looking for a run, can look back more than three cards, but can't include all cards previously used to score a run unless we've made a longer run
+    # by adding the last card. That is, don't score the same run twice.
+    # Might need to do this by scoring twice. Once with the current pile less last card, and then again with the current pile as is, and compare the two results.
+    # But honestly, I'm a bit at a loss on this.
+
         # Player follows using their play strategy, which could include not playing a card but instead declaring go.
         # Have they scored, then peg? Have they finished the round by reaching 31, then peg, and end round.
 
@@ -33,3 +41,18 @@ Cribbage Simulator Project Developer Documentation
         # Peg appropriately.
 
         # If at any time during showing, player or dealer pegs to end of board, game is over.
+
+        How might this look in a loop?
+
+            While there are still any cards left in any hand to play, and 
+            While cumulative score for the go round has not produced a go, and then resolved the go
+
+                Play cards back and forth, adding to the cumulative score, and pegging for any pairs, 15's, runs
+
+                One player issues a GO
+
+                Other player plays out to 31 if possible
+
+                Go round is over
+
+            Deal will nearly always end due to both hands running out of cards, as a go or 31 will rarely be the final event of a deal

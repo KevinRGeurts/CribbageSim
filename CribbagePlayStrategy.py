@@ -1,6 +1,7 @@
 # Standard imports
 
 # Local imports
+from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 
 
 class CribbagePlayStrategy:
@@ -12,6 +13,7 @@ class CribbagePlayStrategy:
         follow(...) - For selecting subsequent cards to play seeking finally a "go". This logic will depend on all cards played so far during
             the current "go" round by both dealer and player. Could also depend on how close to done the game is, since when a player is a few
             pegs from winning and the game is close, scoring during play may be more valualbe than getting a high count during show.
+        go(...) - For playing out as many cards as possible AFTER opponent has declared "go".
     """
 
     # Note: Will need separate strategies for dealer and player, since, for example, form_crib(...) logic will depend heavily on who dealt
@@ -23,45 +25,230 @@ class DummyCribbagePlayStrategy(CribbagePlayStrategy):
     so that overall algorithmic flow of playing can be worked out before working about playing well.
     """
     
-    def form_crib(self, xfer_to_crib_callback):
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback):
         """
         Forms the crib by providing the first two cards in the hand, regardless of what they are.
         :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
         :return: None
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(xfer_to_crib_callback))
-        
+        assert(callable(get_hand_callback))
+
         # This is a dumb former of the crib, so just dump the first two cards in the hand
         xfer_to_crib_callback(0)
         xfer_to_crib_callback(0)
+
         return None
 
-    def lead(self, play_card_callback):
+    def lead(self, play_card_callback, get_hand_callback):
         """
         Leads (plays) the first remaining card in the hand, regardless of what it is.
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
-        :return: None
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: The pips count of the card played, int 
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
         
         # This is a dumb player, always playing the first card left in the hand
-        play_card_callback(0)
-        return None
+        count = play_card_callback(0)
+        return count
 
-    def follow(self, play_card_callback):
+    def follow(self, go_count, play_card_callback, get_hand_callback):
         """
         Follows (plays) by playing the first remaining card in the hand, regardless of what it is.
+        :parameter go_count: The current cumulative count of the go round before the follow, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
-        :return: None
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: (The pips count of the card played as int, Go declared as boolean), tuple
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        
+        # Deteremine if any card can be played without go_count exceeding 31. If not, then return (0, True)
         
         # This is a dumb player, always playing the first card left in the hand
-        play_card_callback(0)
+        count = play_card_callback(0)
+        return (count, False)
+
+    def go(self, go_count, play_card_callback, get_hand_callback):
+        """
+        """
+        # This isn't implemented, so assert
+        assert(False)
+        return count
+
+
+class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
+    """
+    Implementation of CribbagePlayStrategy where a human player is asked to decide what to do.
+    """
+    
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback):
+        """
+        Ask human player which cards from the hand to place in the crib.
+        :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: None
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(xfer_to_crib_callback))
+        assert(callable(get_hand_callback))
+
+        # We're interactive here, so ask the user which cards from their hand they want in the crib
+
+        # Build a query for the user to obtain a decision on first card to put in the crib
+        query_preface = 'What is the first card you wish to place in the crib?'
+        query_dic = {}
+        position = 0
+        for card in get_hand_callback():
+            query_dic[str(position)] = str(card)
+            position += 1
+        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        xfer_to_crib_callback(int(response))
+        
+        # Build a query for the user to obtain a decision on second card to put in the crib
+        query_preface = 'What is the second card you wish to place in the crib?'
+        query_dic = {}
+        position = 0
+        for card in get_hand_callback():
+            query_dic[str(position)] = str(card)
+            position += 1
+        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        xfer_to_crib_callback(int(response))
+
         return None
+
+    def lead(self, play_card_callback, get_hand_callback):
+        """
+        Ask human player which card to Lead (play) in a go round.
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: The pips count of the card played, int 
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        
+        # We're interactive here, so ask the user which card from their hand they want to lead
+
+        # Build a query for the user to obtain a decision on card to lead
+        query_preface = 'What card do you wish to lead?'
+        query_dic = {}
+        position = 0
+        for card in get_hand_callback():
+            query_dic[str(position)] = str(card)
+            position += 1
+        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        count = play_card_callback(int(response))
+        
+        return count
+
+    def follow(self, go_count, play_card_callback, get_hand_callback):
+        """
+        Ask human player which card to follow (play) in a go round.
+        :parameter go_count: The current cumulative count of the go round before the follow, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: (The pips count of the card played as int, Go declared as boolean), tuple
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        
+        # We're interactive here, so ask the user which card from their hand they want to play
+
+        declare_go = False
+        valid_choice = False
+        
+        # Build a query for the user to obtain a decision on card to play
+        query_preface = 'Current play count is ' + str(go_count) + '. What card do you wish to play?'
+        query_dic = {}
+        position = 0
+        for card in get_hand_callback():
+            query_dic[str(position)] = str(card)
+            position += 1
+        query_dic['g'] = 'Go'
+        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        
+        while not valid_choice:
+
+            if response == 'g':
+                # TODO: Add code to check that user really has no valid play
+                valid_choice = True
+                declare_go = True
+                count = 0
+            else:
+                # Determine if the chosen card can be played without go_count exceeding 31.
+                chosen_card_count = get_hand_callback()[int(response)].count_card()
+                if (go_count + chosen_card_count) <= 31:
+                    # Card can be played
+                    count = play_card_callback(int(response))
+                    valid_choice = True
+                else:
+                    # Card cannot be played
+                    # Inform the user and ask for another card choice
+                    query_preface = 'Chosen card would cause cumulative play count to exceed 31. What card do you wish to play?'
+                    query_dic = {}
+                    position = 0
+                    for card in get_hand_callback():
+                        query_dic[str(position)] = str(card)
+                        position += 1
+                    query_dic['g'] = 'Go'
+                    response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        
+        return (count, declare_go)
+
+    def go(self, go_count, play_card_callback, get_hand_callback):
+        """
+        Ask human player which card(s) if any to play in a go round after their opponent has declared go.
+        :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: The sum of pips count of any cards played, int
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        
+        play_count = go_count
+
+        # Generate list of which if any cards can still be played
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+
+        # TODO: The while logic can probably be simplified. The non-zero length of playable, play_count < 31, and can_play == True are all reall
+        # duplicte information
+        while (len(playable) > 0):
+        
+            # We're interactive here, so ask the user which card from playable they want to play
+
+            # Build a query for the user to obtain a decision on card to play
+            query_preface = 'Opponent has declared GO. Current play count is ' + str(play_count) + '. What card do you wish to play?'
+            query_dic = {}
+            position = 0
+            for card in playable:
+                query_dic[str(position)] = str(card)
+                position += 1
+            response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+
+            # Play card
+            count = play_card_callback(int(response))
+            play_count += playable[int(response)].count_card()
+
+            # TODO: Score any pairs or runs do to the played card
+
+            # Generate list of which if any cards can still be played
+            playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+        
+        return (play_count - go_count)

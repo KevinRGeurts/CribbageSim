@@ -5,7 +5,7 @@ from card import Card
 from deck import Deck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
+from CribbageCombination import PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying
 
 
 class CribbageDeal:
@@ -36,7 +36,7 @@ class CribbageDeal:
         self._player_score = 0
         self._combined_pile = Hand()
         self._starter = Card()
-        self._play_combinations = [PairCombination(), FifteenCombination(), RunCombination()]
+        self._play_combinations = [PairCombinationPlaying(), RunCombinationPlaying()]
         self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
 
     def set_player_play_strategy(self, ps = CribbagePlayStrategy()):
@@ -75,6 +75,20 @@ class CribbageDeal:
         """
         return self._player_hand.add_cards(self._deck.draw(number))
 
+    def get_player_hand(self):
+        """
+        Return the cards remaining in the player's hand as a list.
+        :return: List of cards that are remaining in the player's hand, list
+        """
+        return list(self._player_hand.get_cards())
+
+    def get_dealer_hand(self):
+        """
+        Return the cards remaining in the dealer's hand as a list.
+        :return: List of cards that are remaining in the dealer's hand, list
+        """
+        return list(self._dealer_hand.get_cards())
+
     def draw_starter_card(self):
         """
         Draw one card from deck to be the starter card.
@@ -87,21 +101,23 @@ class CribbageDeal:
         """
         Play the card at index location in the player's hand. Remove it from the player's hand, and add it to the player's and combined piles.
         :parameter index: The index location in the player's hand of the card to play, int [0...number of cards in hand - 1]
+        :return: The pips count of the card played, int
         """
         card = self._player_hand.remove_card(index)
         self._player_pile.add_cards(card)
         self._combined_pile.add_cards(card)
-        return None
+        return card.count_card()
         
     def play_card_for_dealer(self, index = 0):
         """
         Play the card at index location in the dealer's hand. Remove it from the dealer's hand, and add it to the dealer's and combined piles.
         :parameter index: The index location in the dealer's hand of the card to play, int [0...number of cards in hand - 1]
+        :return: The pips count of the card played, int
         """
         card = self._dealer_hand.remove_card(index)
         self._dealer_pile.add_cards(card)
         self._combined_pile.add_cards(card)
-        return None
+        return card.count_card()
 
     def peg_for_player(self, count = 1):
         """
@@ -109,7 +125,7 @@ class CribbageDeal:
         :parameter count: The number of pegs (points) to add to the player's score, int
         :return: The current player point score, int
         """
-        _player_score += count
+        self._player_score += count
         return self._player_score
 
     def peg_for_dealer(self, count = 1):
@@ -141,6 +157,20 @@ class CribbageDeal:
         self._crib_hand.add_cards(card)
         return None
 
+    def determine_score_showing(self, hand = Hand(), starter = None):
+        """
+        Determine the score of hand during show.
+        :parameter hand: The hand to score, Hand instance
+        :parameter starter: The starter card, Card instance
+        :return: The total score of all combinations in the hand, int
+        """
+        score = 0
+        for combo in self._show_combinations:
+            info = combo.score(hand, starter)
+            print(info)
+            score += info.score
+        return score
+
     # TODO: Logic for scoring while playing needs to be more complex. Can't just iterate through the list of combinations.
     # When looking for a pair, must only look at the last two cards in the combined pile
     # When looking for a 15, can look back more than two cards, but can't include all cards previously used to score a 15. That is, don't score the same 15 twice.
@@ -148,25 +178,22 @@ class CribbageDeal:
     # by adding the last card. That is, don't score the same run twice.
     # Might need to do this by scoring twice. Once with the current pile less last card, and then again with the current pile as is, and compare the two results.
     # But honestly, I'm a bit at a loss on this.
-    def determine_score(self, hand = Hand(), starter = None, playing = True):
+    def determine_score_playing(self, play_count = 0, combined_pile = Hand()):
         """
-        Determine the score of hand either during play or show.
-        :parameter hand: The hand to score, Hand instance
-        :parameter starter: The starter card. Ignored if playing = True., Card instance
-        :parameter playing: If True, then score hand as if during play. If False, then score hand as if during show., boolean
+        Determine the score during play.
+        :parameter play_count: The current count for the current go round, int
+        :parameter hand: The combined, ordered pile of played cards to check for a score, Hand instance
+        :return: Points scored based on play of last card, int
         """
         score = 0
-        if playing:
-            # We're scoring during playing
-            for combo in self._play_combinations:
-                info = combo.score(hand, None)
-                score += info.score
-        else:
-            # We're scoring during showing
-            for combo in self._show_combinations:
-                info = combo.score(hand, starter)
-                print(info)
-                score += info.score
+        # Check for 15 by looking only at the current play_count
+        if (play_count == 15):
+            score += 2
+        # Check for a double pair royal, pair royal, and pair
+        for combo in self._play_combinations:
+            info = combo.score(combined_pile)
+            print(info)
+            score += info.score
         return score
 
     def play(self):
@@ -184,12 +211,11 @@ class CribbageDeal:
         print('Dealt dealer hand: ', str(self._dealer_hand))
        
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
-        self._player_play_strategy.form_crib(self.xfer_player_card_to_crib)
-        self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib)
+        self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand)
+        self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib, self.get_dealer_hand)
         print('Player hand after crib formed: ', str(self._player_hand))
         print('Dealer hand after crib formed: ', str(self._dealer_hand))
         print('Crib hand: ', str(self._crib_hand))
-       
 
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
         starter = self.draw_starter_card()
@@ -198,36 +224,101 @@ class CribbageDeal:
             # Peg 2 for dealer
             self.peg_for_dealer(2)
 
+        # Set the go round cumulative score to 0
+        go_round_count = 0
+        go_declared = False
+
         # Non-dealer, i.e., the player, leads the first "go" round. Use the player play strategy to do so.
-        self._player_play_strategy.lead(self.play_card_for_player)
+        count = self._player_play_strategy.lead(self.play_card_for_player, self.get_player_hand)
+        go_round_count += count
         print('Player hand after lead: ', str(self._player_hand))
         print('Player pile after lead: ', str(self._player_pile))
         print('Combined pile after lead: ', str(self._combined_pile))
+        print('Play count after lead: ', str(go_round_count))
 
-        # Dealer follows using the dealer play strategy.
-        self._dealer_play_strategy.follow(self.play_card_for_dealer)
-        print('Dealer hand after follow: ', str(self._dealer_hand))
-        print('Dealer pile after follow: ', str(self._dealer_pile))
-        print('Combined pile after follow: ', str(self._combined_pile))
+        while not go_declared:
 
-        # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer. Use the CribbageCombination's with
-        # hand constructed from the cards played by both player and dealer so far in the current go round to determine if any scoring has happened.
-        score = self.determine_score(self._combined_pile)
-        print('Score: ', str(score))
-        self.peg_for_dealer(score)
+            # Dealer follows using the dealer play strategy.
+            (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer, self.get_dealer_hand)
+            go_round_count += count
+            
+            print('Dealer hand after follow: ', str(self._dealer_hand))
+            print('Dealer pile after follow: ', str(self._dealer_pile))
+            print('Combined pile after follow: ', str(self._combined_pile))
+            print('Play count after follow: ', str(go_round_count))
+            print('Go Declared?: ', str(go_declared))
 
-        # Player follows using their play strategy, which could include not playing a card but instead declaring go.
-        # Have they scored, then peg? Have they finished the round by reaching 31, then peg, and end round.
+            # TODO: Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
+            # score = self.determine_score(self._combined_pile)
+            # print('Score: ', str(score))
+            # self.peg_for_dealer(score)
+            
+            if (go_declared):
+                # Instruct the player to try to play out to 31
+                count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand)
+                # Score 1 or 2 for the player, or 1 for the dealer, depending on how they player played out the go
+                if count > 0:
+                    # Player was able to play one or more cards, peg 2 for a 31 or 1 for the go
+                    go_round_count += count
+                    if (go_round_count) == 31:
+                        self.peg_for_player(2)
+                    else:
+                        self.peg_for_player(1)
+                else:
+                    # Player was not able to play any cards, so peg one for the dealer, for the go
+                    self.peg_for_dealer(1)
+                print('Dealer hand after go: ', str(self._dealer_hand))
+                print('Dealer pile after go: ', str(self._dealer_pile))
+                print('Player hand after go: ', str(self._player_hand))
+                print('Player pile after go: ', str(self._player_pile))
+                print('Combined pile after go ', str(self._combined_pile))
+                print('Play count after go: ', str(go_round_count))
+                continue # Get us out of the while.
 
-        # If go has not been declared, then continuing alternating follows, until the follower makes the play count 31, or their partner declares go.
+            # Player follows using the player play strategy
+            (count, go_declared) = self._player_play_strategy.follow(go_round_count, self.play_card_for_player, self.get_player_hand)
+            go_round_count += count
+            
+            print('Player hand after follow: ', str(self._player_hand))
+            print('Player pile after follow: ', str(self._player_pile))
+            print('Combined pile after follow: ', str(self._combined_pile))
+            print('Play count after follow: ', str(go_round_count))
+            print('Go Declared?: ', str(go_declared))
+
+            # TODO: Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
+            # score = self.determine_score(self._combined_pile)
+            # print('Score: ', str(score))
+            # self.peg_for_dealer(score)
+
+            if (go_declared):
+                # Instruct the dealer to try to play out to 31
+                count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand)
+                # Score 1 or 2 for the dealer, or 1 for the player, depending on how they dealer played out the go
+                if count > 0:
+                    # dealer was able to play one or more cards, peg 2 for a 31 or 1 for the go
+                    go_round_count += count
+                    if (go_round_count) == 31:
+                        self.peg_for_dealer(2)
+                    else:
+                        self.peg_for_dealer(1)
+                else:
+                    # Dealer was not able to play any cards, so peg one for the player, for the go
+                    self.peg_for_player(1)
+                print('Dealer hand after go: ', str(self._dealer_hand))
+                print('Dealer pile after go: ', str(self._dealer_pile))
+                print('Player hand after go: ', str(self._player_hand))
+                print('Player pile after go: ', str(self._player_pile))
+                print('Combined pile after go ', str(self._combined_pile))
+                print('Play count after go: ', str(go_round_count))
+                continue # Get us out of the while.
+
+                # If go has not been declared, then continuing alternating follows, until go is declared, or we run out of cards in both hands
+                # That is, the while should keep cycling
         
-        # If go has been declared, then other player/dealer must play as close to 31 as possible, even if that means playing multiple cards in a row.
-        # Have they scored while doing so, like playing a pair of 2's? If so peg. If they don't reach 31, peg 1 for them. If they do reach 31, peg 2
-        # for them.
         
-        # Play continues until both dealer and player are out of cards.
+            # Play continues until both dealer and player are out of cards.
 
-        # If at any time during play, player or dealer pegs to end of board, game is over.
+            # If at any time during play, player or dealer pegs to end of board, game is over.
 
         # Time for "showing" that is scoring hands. Use the set of CribbageCombination's to score, in order, player's hand, dealer's hand, crib.
         # Peg appropriately.

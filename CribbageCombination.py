@@ -342,6 +342,118 @@ class RunCombination(CribbageCombination):
         
         return info
 
+    
+class PairCombinationPlaying(CribbageCombination):
+    """
+    Intended to search for, find, and score pairs in a cribbage play pile.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for pair scoring combination in cribbage play pile.
+        """
+        self._combo_name = 'pair'
+        self._score_per_combo = 2
+        
+    def score(self, pile = Hand()):
+        """
+        Search pile for all "uninteruppted" pairs in the most recently played cards, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The play pile to search for pairs, Hand object
+        :return: CribbageComboInfo object with information about the pairs in the hand, CribbageComboInfo object
+        """
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        # Note that it is important that the if strucure here is "greedy" attempting to score the higher combinations first
+        if (len(pile) >= 4) and (pile[-2].get_pips() == pile[-1].get_pips()) and (pile[-3].get_pips() == pile[-2].get_pips()) and (pile[-4].get_pips() == pile[-3].get_pips()):
+                # Last card played made a double pair royal (4 of a kind)
+                info.combo_name = 'double pair royal'
+                info.number_instances = 1
+                info.score = 12
+                info.instance_list.append([pile[-4], pile[-3], pile[-2], pile[-1]])
+        elif (len(pile) >= 3) and (pile[-2].get_pips() == pile[-1].get_pips()) and (pile[-3].get_pips() == pile[-2].get_pips()):
+                # Last card played made a pair royal (3 of a kind)
+                info.combo_name = 'pair royal'
+                info.number_instances = 1
+                info.score = 6
+                info.instance_list.append([pile[-3], pile[-2], pile[-1]])
+        elif (len(pile) >= 2) and (pile[-2].get_pips() == pile[-1].get_pips()):
+                # Last card played made a pair royal (3 of a kind)
+                info.combo_name = 'pair'
+                info.number_instances = 1
+                info.score = 2
+                info.instance_list.append([pile[-2], pile[-1]])
+        
+        return info
+
+
+class RunCombinationPlaying(CribbageCombination):
+    """
+    Intended to search for, find, and score runs in a cribbage play pile.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for run scoring combination in cribbage play pile.
+        """
+        self._combo_name = 'run'
+        self._score_per_combo = 0 # Since scoring depends on length of run
+        
+    def score(self, pile = Hand()):
+        """
+        Search pile for all "uninteruppted" runs in the most recently played cards, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The play pile to search for runs, Hand object
+        :return: CribbageComboInfo object with information about the runs in the hand, CribbageComboInfo object
+        """
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+
+        run_size = 0
+        
+        # A run is a minimum of 3 cards and can't be more than 8 because each player only has 4 cards to play
+        # for x in range(len(pile),3,-1):
+        for x in range(3,8):
+            if not self.test_last_x_cards_for_run(pile, x):
+                break
+            else:
+                run_size = x
+                
+        if run_size > 0:
+            info.number_instances = 1
+            info.score = run_size
+            the_run = [pile[i] for i in range(-1,(-run_size-1),-1)]
+            the_run.sort()
+            info.instance_list.append(the_run)
+            print(str(info))
+        
+        return info
+
+    def test_last_x_cards_for_run(self, pile = Hand(), x = 3):
+        """
+        Utility function called by score().
+        :parameter pile: The pile of played cards to be examined for runs, Hand instance
+        :parameter x: The number of cards backwards from the last card played to examine, int
+        :return: True if last x cards in pile are a run, otherwise False, boolean
+        """
+        if len(pile) >= x:
+            is_run = True
+            # pile has at least x cards, so
+            # form a list of the last x cards in pile
+            cards = [pile[i] for i in range(-1,(-x-1),-1)]
+            cards.sort()
+            prev_sequence_count = cards.pop(0).get_sequence_count()
+            for c in cards:
+                if c.get_sequence_count() == prev_sequence_count + 1:
+                    prev_sequence_count = c.get_sequence_count()
+                else:
+                    is_run = False
+                    break
+        else:
+            is_run = False
+        return is_run
+
 
 
 

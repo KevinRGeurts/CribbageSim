@@ -8,9 +8,9 @@ from random import seed
 from deck import StackedDeck, Deck
 from card import Card
 from hand import Hand
-from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination
+from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination, PairCombinationPlaying, RunCombinationPlaying
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
-from CribbagePlayStrategy import DummyCribbagePlayStrategy
+from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 
 
@@ -19,6 +19,10 @@ def play_interactive():
     Use CribbageSimulator to play an interactive game.
     """
 
+    pile = Hand()
+    pile.add_cards([Card('D','J'), Card('S','2'), Card('C','2'), Card('H','2'), Card('D','2')])
+    pcp = PairCombinationPlaying()
+    info = pcp.score(pile)
 
 
     return None
@@ -28,15 +32,17 @@ def play_debug():
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
     
-    deal = CribbageDeal(DummyCribbagePlayStrategy(), DummyCribbagePlayStrategy())
-    deal.play()
+    # deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+    # deal.play()
 
-    # h = Hand()
-    # h.add_cards([Card('S','K'), Card('C','2'), Card('H','A'), Card('D','A')])
-    # s = Card('S','A')
-    # fc = FifteenCombination()
-    # info = fc.score(h, s)
-    # print(str(info))
+    pile = Hand()
+    pile.add_cards([Card('S','A'), Card('S','3'), Card('C','6'), Card('H','4'), Card('D','5'), Card('D','7')])
+    rcp = RunCombinationPlaying()
+    info = rcp.score(pile)
+
+    exp_val = 'run: 1 for 5: 3S 4H 5D 6C 7D , '
+    act_val = str(info)
+ 
     
     return None
     

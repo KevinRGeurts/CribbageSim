@@ -40,6 +40,28 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         exp_val = 'run: 1 for 5: 3S 4H 5D 6C 7D , '
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
+
+    def test_score_with_run_of_6(self):
+        
+        pile = Hand()
+        pile.add_cards([Card('S','3'), Card('C','6'), Card('H','4'), Card('D','5'), Card('D','7'), Card('H','2')])
+        rcp = RunCombinationPlaying()
+        info = rcp.score(pile)
+
+        exp_val = 'run: 1 for 6: 2H 3S 4H 5D 6C 7D , '
+        act_val = str(info)
+        self.assertEqual(exp_val, act_val)
+
+    def test_score_with_run_of_7(self):
+        
+        pile = Hand()
+        pile.add_cards([Card('S','A'), Card('S','3'), Card('C','6'), Card('H','4'), Card('D','5'), Card('D','7'), Card('H','2')])
+        rcp = RunCombinationPlaying()
+        info = rcp.score(pile)
+
+        exp_val = 'run: 1 for 7: AS 2H 3S 4H 5D 6C 7D , '
+        act_val = str(info)
+        self.assertEqual(exp_val, act_val)
             
     def test_score_without_run(self):
         

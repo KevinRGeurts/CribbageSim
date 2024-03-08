@@ -413,12 +413,13 @@ class RunCombinationPlaying(CribbageCombination):
         run_size = 0
         
         # A run is a minimum of 3 cards and can't be more than 8 because each player only has 4 cards to play
-        # for x in range(len(pile),3,-1):
-        for x in range(3,8):
+        # This is a "greedy" algortihm, seeking to find the largest run first, and stopping there
+        for x in range(len(pile),2,-1):
             if not self.test_last_x_cards_for_run(pile, x):
-                break
+                continue
             else:
                 run_size = x
+                break
                 
         if run_size > 0:
             info.number_instances = 1
@@ -426,7 +427,6 @@ class RunCombinationPlaying(CribbageCombination):
             the_run = [pile[i] for i in range(-1,(-run_size-1),-1)]
             the_run.sort()
             info.instance_list.append(the_run)
-            print(str(info))
         
         return info
 

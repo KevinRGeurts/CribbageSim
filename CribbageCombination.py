@@ -359,7 +359,7 @@ class PairCombinationPlaying(CribbageCombination):
         """
         Search pile for all "uninteruppted" pairs in the most recently played cards, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The play pile to search for pairs, Hand object
-        :return: CribbageComboInfo object with information about the pairs in the hand, CribbageComboInfo object
+        :return: CribbageComboInfo object with information about the pairs in the play pile, CribbageComboInfo object
         """
 
         info = CribbageComboInfo()
@@ -404,7 +404,7 @@ class RunCombinationPlaying(CribbageCombination):
         """
         Search pile for all "uninteruppted" runs in the most recently played cards, tally up the score, and return a CribbageComboInfo object.
         :parameter hand: The play pile to search for runs, Hand object
-        :return: CribbageComboInfo object with information about the runs in the hand, CribbageComboInfo object
+        :return: CribbageComboInfo object with information about the runs in the play pile, CribbageComboInfo object
         """
 
         info = CribbageComboInfo()
@@ -453,6 +453,42 @@ class RunCombinationPlaying(CribbageCombination):
         else:
             is_run = False
         return is_run
+
+
+class FifteenCombinationPlaying(CribbageCombination):
+    """
+    Intended to search for, find, and score 15's in a cribbage play pile.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for fifteen scoring combination in cribbage play pile.
+        """
+        self._combo_name = 'fifteen'
+        self._score_per_combo = 2
+        
+    def score(self, pile = Hand()):
+        """
+        Test if the pile of most recently played cards qualifies as a fifteen, tally up the score, and return a CribbageComboInfo object.
+        Assumes that the pile contains only the played cards for the current go round so far, so that if the pile sums to fifteen, then, and only then
+        will a fifteen be scored.
+        :parameter hand: The play pile to test for a fifteen, Hand object
+        :return: CribbageComboInfo object with information about the fifteen in the pile, CribbageComboInfo object
+        """
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        pile_sum = 0
+        for c in pile:
+            pile_sum += c.count_card()
+
+        if pile_sum == 15:
+                info.number_instances = 1
+                info.score = info.number_instances * self._score_per_combo
+                info.instance_list.append(pile)
+
+        return info
 
 
 

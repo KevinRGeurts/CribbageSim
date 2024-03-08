@@ -42,7 +42,6 @@ def play_debug():
 
     exp_val = 'run: 1 for 3: 9H 10D JC , '
     act_val = str(info)
-    print(act_val)
  
     
     return None

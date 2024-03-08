@@ -5,7 +5,7 @@ from card import Card
 from deck import Deck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying
+from CribbageCombination import FifteenCombinationPlaying, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying
 
 
 class CribbageDeal:
@@ -36,7 +36,7 @@ class CribbageDeal:
         self._player_score = 0
         self._combined_pile = Hand()
         self._starter = Card()
-        self._play_combinations = [PairCombinationPlaying(), RunCombinationPlaying()]
+        self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
         self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
 
     def set_player_play_strategy(self, ps = CribbagePlayStrategy()):
@@ -171,25 +171,13 @@ class CribbageDeal:
             score += info.score
         return score
 
-    # TODO: Logic for scoring while playing needs to be more complex. Can't just iterate through the list of combinations.
-    # When looking for a pair, must only look at the last two cards in the combined pile
-    # When looking for a 15, can look back more than two cards, but can't include all cards previously used to score a 15. That is, don't score the same 15 twice.
-    # When looking for a run, can look back more than three cards, but can't include all cards previously used to score a run unless we've made a longer run
-    # by adding the last card. That is, don't score the same run twice.
-    # Might need to do this by scoring twice. Once with the current pile less last card, and then again with the current pile as is, and compare the two results.
-    # But honestly, I'm a bit at a loss on this.
-    def determine_score_playing(self, play_count = 0, combined_pile = Hand()):
+    def determine_score_playing(self, combined_pile = Hand()):
         """
         Determine the score during play.
-        :parameter play_count: The current count for the current go round, int
         :parameter hand: The combined, ordered pile of played cards to check for a score, Hand instance
         :return: Points scored based on play of last card, int
         """
         score = 0
-        # Check for 15 by looking only at the current play_count
-        if (play_count == 15):
-            score += 2
-        # Check for a double pair royal, pair royal, and pair
         for combo in self._play_combinations:
             info = combo.score(combined_pile)
             print(info)

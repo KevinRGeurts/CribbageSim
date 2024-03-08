@@ -30,7 +30,7 @@ class Test_CribbageDeal(unittest.TestCase):
         h.add_cards([Card('S','9'), Card('C','6')])
         
         exp_val = 2
-        act_val = deal.determine_score_playing(15, h)
+        act_val = deal.determine_score_playing(h)
         self.assertEqual(exp_val, act_val)
 
     def test_determine_score_play_pair(self):
@@ -41,7 +41,7 @@ class Test_CribbageDeal(unittest.TestCase):
         h.add_cards([Card('S','9'), Card('C','J'), Card('H','J')])
         
         exp_val = 2
-        act_val = deal.determine_score_playing(29, h)
+        act_val = deal.determine_score_playing(h)
         self.assertEqual(exp_val, act_val)
 
     def test_determine_score_play_run(self):
@@ -52,9 +52,20 @@ class Test_CribbageDeal(unittest.TestCase):
         h.add_cards([Card('S','9'), Card('C','J'), Card('H','10')])
         
         exp_val = 3
-        act_val = deal.determine_score_playing(29, h)
+        act_val = deal.determine_score_playing(h)
         self.assertEqual(exp_val, act_val)
 
+    def test_determine_score_play_run_15(self):
+        
+        deal = CribbageDeal()
 
+        h = Hand()
+        h.add_cards([Card('S','4'), Card('C','6'), Card('H','5')])
+        
+        exp_val = 5
+        act_val = deal.determine_score_playing(h)
+        self.assertEqual(exp_val, act_val)
+
+    
 if __name__ == '__main__':
     unittest.main()

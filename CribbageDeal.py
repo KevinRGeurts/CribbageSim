@@ -202,6 +202,16 @@ class CribbageDeal:
             score += info.score
         return score
 
+    def log_pegging_info(self):
+        """
+        Currently outputs to stdout current state of pegging for dealer and player cumulatively during the hand.
+        Eventually this will be converted to use logging.
+        :return: None
+        """
+        print('Dealer total score thus far for the dealt hand: ', str(self._dealer_score))
+        print('Player total score thus far for the dealt hand: ', str(self._player_score))
+        return None
+    
     def log_play_info(self, preface = '', go_round_count = 0):
         """
         Currently outputs to stdout current state of hands, play piles, play count, and scores. Eventually this will be converted to using logging.
@@ -253,114 +263,121 @@ class CribbageDeal:
         next_to_play = CribbageRole.PLAYER    
             
         # TODO: Create a loop at this level that plays multiple go rounds until the dealt cards for both players are exhausted 
-        # while len(self._dealer_hand) > 0 or len(self._player_hand) > 0:   
+        while len(self._dealer_hand) > 0 or len(self._player_hand) > 0:   
             
-        # Set the go round cumulative score to 0
-        go_round_count = 0
-        go_declared = False
+            # Set the go round cumulative score to 0
+            go_round_count = 0
+            go_declared = False
         
-        # Clear the combined pile of cards played during the go round
-        self._combined_pile = Hand()
+            # Clear the combined pile of cards played during the go round, as this pile is used for scoring during play
+            self._combined_pile = Hand()
 
-        # Whoever is next to play leads the "go" round. Use their play strategy to do so.
-        match next_to_play:
-            case CribbageRole.PLAYER:
-                count = self._player_play_strategy.lead(self.play_card_for_player, self.get_player_hand)
-                next_to_play = CribbageRole.DEALER
-            case CribbageRole.DEALER:
-                count = self._dealer_play_strategy.lead(self.play_card_for_dealer, self.get_dealer_hand)
-                next_to_play = CribbageRole.PLAYER
-        go_round_count += count
-        self.log_play_info('After lead')
+            # Whoever is next to play leads the "go" round. Use their play strategy to do so.
+            # Try commenting this out to see if it allows play through to the exhasution of cards. I think the only downside of this
+            # is that a player who runs out of cards in the previous go round may need to declare a go in the next round.
+            # match next_to_play:
+            #     case CribbageRole.PLAYER:
+            #         count = self._player_play_strategy.lead(self.play_card_for_player, self.get_player_hand)
+            #         next_to_play = CribbageRole.DEALER
+            #     case CribbageRole.DEALER:
+            #         count = self._dealer_play_strategy.lead(self.play_card_for_dealer, self.get_dealer_hand)
+            #         next_to_play = CribbageRole.PLAYER
+            # go_round_count += count
+            # self.log_play_info('After lead', go_round_count)
 
-        while not go_declared and go_round_count != 31:
+            # If go_declared, then it is a signal that the go round has finished inside this while loop by playing out a go, and it is
+            # time to return to the outside while and launch the next go round. if go_round_count == 31, then it is a signal that the 
+            # go round has finished inside this while loop by play count reaching exactly 31, and again, it is time to return to the outside
+            # while loop.
+            while not go_declared and go_round_count != 31:
 
-            # Whoever is next to play follows using their play strategy.
-            match next_to_play:
-                case CribbageRole.PLAYER:
-                    (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player, self.get_player_hand)
-                    # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
-                    score = self.determine_score_playing(self._combined_pile)
-                    print('Score: ', str(score))
-                    self.peg_for_player(score)
-                    # Rotate who will play next
-                    next_to_play = CribbageRole.DEALER
-                case CribbageRole.DEALER:
-                    (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer, self.get_dealer_hand)
-                    # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
-                    score = self.determine_score_playing(self._combined_pile)
-                    print('Score: ', str(score))
-                    self.peg_for_dealer(score)
-                    # Rotate who will play next
-                    next_to_play = CribbageRole.PLAYER
-            go_round_count += count
-
-            self.log_play_info('After follow')
-            print('Go Declared?: ', str(go_declared))
-
-            # Has count for the go round reached exactly 31?
-            if go_round_count == 31:
-                print('Go round ends with count of 31.')
+                # Whoever is next to play follows using their play strategy.
                 match next_to_play:
                     case CribbageRole.PLAYER:
-                        # Since we rotate who will play next above, this means that dealer played to reach 31
-                        self.peg_for_dealer(2)
-                    case CribbageRole.Dealer:
-                        # Since we rotate who will play next above, this means that player played to reach 31
-                        self.peg_for_player(2)
-                continue # Get us out of the while.
-
-            if (go_declared):
-                # Instruct the next_to_play to try to play out to 31
-                match next_to_play:
-                    case CribbageRole.PLAYER:
-                        count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
-                                                              self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player)
-                        # Score 1 or 2 for the player, or 1 for the dealer, depending on how they player played out the go
-                        if count > 0:
-                            # Player was able to play one or more cards, peg 2 for a 31 or 1 for the go
-                            go_round_count += count
-                            if (go_round_count) == 31:
-                                self.peg_for_player(2)
-                            else:
-                                self.peg_for_player(1)
-                            # Rotate who will play next
-                            next_to_play = CribbageRole.DEALER
-                        else:
-                            # Player was not able to play any cards, so peg one for the dealer, for the go
-                            self.peg_for_dealer(1)
-                            # Do NOT rotate who will play next, since the go declaration did not result in any cards being played
+                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player, self.get_player_hand)
+                        # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
+                        score = self.determine_score_playing(self._combined_pile)
+                        print('Score: ', str(score))
+                        self.peg_for_player(score)
+                        # Rotate who will play next
+                        next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
-                        count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
-                                                              self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer)
-                        # Score 1 or 2 for the dealer, or 1 for the player, depending on how they dealer played out the go
-                        if count > 0:
-                            # Dealer was able to play one or more cards, peg 2 for a 31 or 1 for the go
-                            go_round_count += count
-                            if (go_round_count) == 31:
-                                self.peg_for_dealer(2)
+                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer, self.get_dealer_hand)
+                        # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
+                        score = self.determine_score_playing(self._combined_pile)
+                        print('Score: ', str(score))
+                        self.peg_for_dealer(score)
+                        # Rotate who will play next
+                        next_to_play = CribbageRole.PLAYER
+                go_round_count += count
+
+                self.log_play_info('After follow', go_round_count)
+                print('Go Declared?: ', str(go_declared))
+
+                # Has count for the go round reached exactly 31?
+                if go_round_count == 31:
+                    print('Go round ends with count of 31.')
+                    match next_to_play:
+                        case CribbageRole.PLAYER:
+                            # Since we rotate who will play next above, this means that dealer played to reach 31
+                            self.peg_for_dealer(2)
+                        case CribbageRole.Dealer:
+                            # Since we rotate who will play next above, this means that player played to reach 31
+                            self.peg_for_player(2)
+                    continue # Get us out of the while.
+
+                if (go_declared):
+                    # Instruct the next_to_play to try to play out to 31
+                    match next_to_play:
+                        case CribbageRole.PLAYER:
+                            count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
+                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player)
+                            # Score 1 or 2 for the player, or 1 for the dealer, depending on how they player played out the go
+                            if count > 0:
+                                # Player was able to play one or more cards, peg 2 for a 31 or 1 for the go
+                                go_round_count += count
+                                if (go_round_count) == 31:
+                                    self.peg_for_player(2)
+                                else:
+                                    self.peg_for_player(1)
+                                # Rotate who will play next
+                                next_to_play = CribbageRole.DEALER
                             else:
+                                # Player was not able to play any cards, so peg one for the dealer, for the go
                                 self.peg_for_dealer(1)
-                            # Rotate who will play next
-                            next_to_play = CribbageRole.PLAYER
-                        else:
-                            # Dealer was not able to play any cards, so peg one for the player, for the go
-                            self.peg_for_player(1)
-                            # Do NOT rotate who will play next, since the go declaration did not result in any cards being played
-                self.log_play_info('After go')
-                continue # Get us out of the while.
+                                # Do NOT rotate who will play next, since the go declaration did not result in any cards being played
+                        case CribbageRole.DEALER:
+                            count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
+                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer)
+                            # Score 1 or 2 for the dealer, or 1 for the player, depending on how they dealer played out the go
+                            if count > 0:
+                                # Dealer was able to play one or more cards, peg 2 for a 31 or 1 for the go
+                                go_round_count += count
+                                if (go_round_count) == 31:
+                                    self.peg_for_dealer(2)
+                                else:
+                                    self.peg_for_dealer(1)
+                                # Rotate who will play next
+                                next_to_play = CribbageRole.PLAYER
+                            else:
+                                # Dealer was not able to play any cards, so peg one for the player, for the go
+                                self.peg_for_player(1)
+                                # Do NOT rotate who will play next, since the go declaration did not result in any cards being played
+                    self.log_play_info('After go', go_round_count)
+                    continue # Get us out of the while.
             
-            # If go has not been declared, then continuing alternating follows, until go is declared, or we run out of cards in both hands
-            # That is, the while should keep cycling
-            # end of while not go_declared:
+                # If go has not been declared, then continuing alternating follows, until go is declared, or we run out of cards in both hands
+                # That is, the while should keep cycling
+                # end of while not go_declared:
         
+        
+            # Time for "showing" that is scoring hands. Use the set of CribbageCombination's to score, in order, player's hand, dealer's hand, crib.
+            # Peg appropriately.
+            
+
         
         # Play continues until both dealer and player are out of cards.
-
-        # If at any time during play, player or dealer pegs to end of board, game is over.
-
-        # Time for "showing" that is scoring hands. Use the set of CribbageCombination's to score, in order, player's hand, dealer's hand, crib.
-        # Peg appropriately.
+        # end of while dealer or player have cards left in their hand
             
         # TODO: After determining score from showing hands, print out the scoring combinations
 
@@ -380,10 +397,11 @@ class CribbageDeal:
         score = self.determine_score_showing(self._crib_hand, starter)
         self.peg_for_dealer(score)
         print('Dealer score from showing crib: ', score)
-        
+
+        self.log_pegging_info()
+
+        # If at any time during play, player or dealer pegs to end of board, game is over.
 
         # If at any time during showing, player or dealer pegs to end of board, game is over.
-        
-
 
         return None

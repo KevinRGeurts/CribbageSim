@@ -73,7 +73,10 @@ class CribbageCombination(object):
             # So, list(perm) converts the tuple perm to a list.
             permutations.append(list(perm))
 
-        return permutations 
+        return permutations
+    
+    # TODO: Implement a score() method in this base class, that throws an exception that it isn't implemented, to formally show the expected
+    # method signature, and to force override in the child.
         
 
 class PairCombination(CribbageCombination):
@@ -343,6 +346,8 @@ class RunCombination(CribbageCombination):
         return info
 
     
+# TODO: Consider deriving the XCombinationPlaying from a different base class, since the signature of score() method is different.
+
 class PairCombinationPlaying(CribbageCombination):
     """
     Intended to search for, find, and score pairs in a cribbage play pile.

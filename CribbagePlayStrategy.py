@@ -78,9 +78,24 @@ class DummyCribbagePlayStrategy(CribbagePlayStrategy):
         count = play_card_callback(0)
         return (count, False)
 
-    def go(self, go_count, play_card_callback, get_hand_callback):
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
         """
+        Determine which card(s) if any to play in a go round after their opponent has declared go.
+        :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
+        :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
+        :return: The sum of pips count of any cards played, int
         """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        assert(callable(score_play_callback))
+        assert(callable(peg_callback))
+        
         # This isn't implemented, so assert
         assert(False)
         return count
@@ -209,21 +224,26 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         
         return (count, declare_go)
 
-    def go(self, go_count, play_card_callback, get_hand_callback):
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
         """
         Ask human player which card(s) if any to play in a go round after their opponent has declared go.
         :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
+        :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
         :return: The sum of pips count of any cards played, int
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        assert(callable(score_play_callback))
+        assert(callable(peg_callback))
         
         play_count = go_count
-
+        
         # Generate list of which if any cards can still be played
         playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
 
@@ -243,10 +263,12 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
 
             # Play card
-            count = play_card_callback(int(response))
+            play_card_callback(int(response))
             play_count += playable[int(response)].count_card()
 
-            # TODO: Score any pairs or runs do to the played card
+            # Score any pairs or runs due to the played card
+            score_count = score_play_callback(get_play_pile_callback())
+            peg_callback(score_count)
 
             # Generate list of which if any cards can still be played
             playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]

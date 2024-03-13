@@ -19,11 +19,8 @@ def play_interactive():
     Use CribbageSimulator to play an interactive game.
     """
 
-    pile = Hand()
-    pile.add_cards([Card('D','J'), Card('S','2'), Card('C','2'), Card('H','2'), Card('D','2')])
-    pcp = PairCombinationPlaying()
-    info = pcp.score(pile)
-
+    deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+    deal.play()
 
     return None
 
@@ -31,9 +28,6 @@ def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
-    
-    # deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
-    # deal.play()
 
     pile = Hand()
     pile.add_cards([Card('S','A'), Card('C','J'), Card('H','9'), Card('D','10')])
@@ -42,7 +36,6 @@ def play_debug():
 
     exp_val = 'run: 1 for 3: 9H 10D JC , '
     act_val = str(info)
- 
     
     return None
     

@@ -29,13 +29,20 @@ def play_debug():
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
 
-    pile = Hand()
-    pile.add_cards([Card('S','A'), Card('C','J'), Card('H','9'), Card('D','10')])
-    rcp = RunCombinationPlaying()
-    info = rcp.score(pile)
-
-    exp_val = 'run: 1 for 3: 9H 10D JC , '
-    act_val = str(info)
+    # Create a stacked deck
+    sd = StackedDeck()
+    # Player will be dealt cards 1 - 6
+    # Dealer will be dealt cards 7 - 12
+    # Starter will be card 13
+    card_list = [Card('D','J'), Card('S','10'), Card('S','8'), Card('C','7'), Card('H','5'), Card('C','3'),
+                    Card('S','K'), Card('D','9'), Card('C','9'), Card('D','8'), Card('S','7'), Card('H','A'),
+                    Card('S','6')]
+    sd.add_cards(card_list)
+        
+    deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+    deal._deck = sd
+        
+    deal.play()
     
     return None
     

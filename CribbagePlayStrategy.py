@@ -247,8 +247,6 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         # Generate list of which if any cards can still be played
         playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
 
-        # TODO: The while logic can probably be simplified. The non-zero length of playable, play_count < 31, and can_play == True are all reall
-        # duplicte information
         while (len(playable) > 0):
         
             # We're interactive here, so ask the user which card from playable they want to play

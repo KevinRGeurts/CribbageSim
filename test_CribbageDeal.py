@@ -88,7 +88,7 @@ class Test_CribbageDeal(unittest.TestCase):
     #      Player: run of 4 for 4, 2 15's for 4, for a total of 8
     # Total score with play and show is Dealer 5 + 16 = 21, Player 3 + 8 = 11
     @patch('sys.stdin', io.StringIO('5\n1\n5\n0\n1\n3\n1\n0\n0\n0\n0\ng\n0\ng\n'))
-    def test_play_interactive(self):
+    def test_play_interactive_1(self):
 
         # Create a stacked deck
         sd = StackedDeck()
@@ -114,7 +114,56 @@ class Test_CribbageDeal(unittest.TestCase):
         exp_val = 11
         act_val = deal._player_score
         self.assertEqual(exp_val, act_val)
+
+    # Apply a patch() decorator to replace keyboard input from user with a string.
+    # The patch should result in...
+    # Player places 7 and 3 in crib (patch: 3\n0\n)
+    # Dealer places 9 and 7 in crib (5\n4\n)
+    # Player leads 4 (0\n)
+    # Dealer follows with KC (14 total) (2\n)
+    # Player follows with KD (24 total), scoring 2 for a pair (2\n)
+    # Dealer declares go (g\n)
+    # Player plays A (25 total), scoring 1 for the go, and ending the go round (0\n)
+    # Dealer leads next go round with JS (0\n)
+    # Player follows with Q (20 total) (0\n)
+    # Dealer follows with KS (30 total), scoring 3 for run (1\n)
+    # Player has no cards left, so declares go (g\n)
+    # Dealer can't play and scores on for 30, ending the go round
+    # Player declares go on leading the next go round because has no remaining cards (g\n)
+    # Dealer plays (really leads) JH to start the next go round (10 total), and scores 1 for playing the last card (automatic player go?) (0\n)
+    # Score from play is Dealer 5, Player 3
+    # Score from show is:
+    #      Dealer: 2 pair for 4, 4 15's for 8, for a total of 12
+    #      Crib: 2 15's for 4, 1 pair for 2, for a total of 6
+    #      Player: 4 15's for 8, for a total of 8
+    # Total score with play and show is Dealer 5 + 12 + 6 = 23, Player 3 + 8 = 11
+    @patch('sys.stdin', io.StringIO('3\n0\n5\n4\n0\n2\n2\ng\n0\n0\n0\n1\ng\ng\n0\n'))
+    def test_play_interactive_2(self):
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Player will be dealt cards 1 - 6
+        # Dealer will be dealt cards 7 - 12
+        # Starter will be card 13
+        card_list = [Card('S','3'), Card('H','4'), Card('H','A'), Card('D','7'), Card('H','Q'), Card('D','K'),
+                     Card('S','J'), Card('H','J'), Card('C','K'), Card('S','K'), Card('C','7'), Card('D','9'),
+                     Card('C','5')]
+        sd.add_cards(card_list)
         
+        deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+        deal._deck = sd
+        
+        deal.play()
+        
+        # Did we get the expected dealer score from playing the deal?
+        exp_val = 23
+        act_val = deal._dealer_score
+        self.assertEqual(exp_val, act_val)
+
+        # Did we get the expected player score from playing the deal?
+        exp_val = 11
+        act_val = deal._player_score
+        self.assertEqual(exp_val, act_val)
     
 if __name__ == '__main__':
     unittest.main()

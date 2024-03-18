@@ -106,17 +106,19 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
     Implementation of CribbagePlayStrategy where a human player is asked to decide what to do.
     """
     
-    def form_crib(self, xfer_to_crib_callback, get_hand_callback):
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
         """
         Ask human player which cards from the hand to place in the crib.
         :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: None
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(xfer_to_crib_callback))
         assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
 
         # We're interactive here, so ask the user which cards from their hand they want in the crib
 
@@ -129,6 +131,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             position += 1
         response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
         xfer_to_crib_callback(int(response))
+        if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
         # Build a query for the user to obtain a decision on second card to put in the crib
         query_preface = 'What is the second card you wish to place in the crib?'
@@ -139,6 +142,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             position += 1
         response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
         xfer_to_crib_callback(int(response))
+        if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
         return None
 
@@ -168,18 +172,20 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         
         return count
 
-    def follow(self, go_count, play_card_callback, get_hand_callback):
+    def follow(self, go_count, play_card_callback, get_hand_callback, play_recorder_callback=None):
         """
         Ask human player which card to follow (play) in a go round.
         :parameter go_count: The current cumulative count of the go round before the follow, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: (The pips count of the card played as int, Go declared as boolean), tuple
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
         
         # We're interactive here, so ask the user which card from their hand they want to play
 
@@ -221,10 +227,13 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                         position += 1
                     query_dic['g'] = 'Go'
                     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+                    
+        if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
         return (count, declare_go)
 
-    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback,
+           play_recorder_callback=None):
         """
         Ask human player which card(s) if any to play in a go round after their opponent has declared go.
         :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
@@ -233,6 +242,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
         :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
         :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: The sum of pips count of any cards played, int
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
@@ -241,6 +251,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         assert(callable(get_hand_callback))
         assert(callable(score_play_callback))
         assert(callable(peg_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
         
         play_count = go_count
         
@@ -259,6 +270,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                 query_dic[str(position)] = str(card)
                 position += 1
             response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+            if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
             # Play card
             play_card_callback(int(response))

@@ -164,6 +164,86 @@ class Test_CribbageDeal(unittest.TestCase):
         exp_val = 11
         act_val = deal._player_score
         self.assertEqual(exp_val, act_val)
+
+    # Apply a patch() decorator to replace keyboard input from user with a string.
+    # The patch should result in...
+    # Player places 8 and 3 in crib (patch: 4\n3\n)
+    # Dealer places 6 and 7 in crib (2\n1\n)
+    # Player leads 10D (2\n)
+    # Dealer follows with 10 (20 total), scoring 2 for a pair (\2n)
+    # Player follows with 10S (30 total), scoring 6 for a pair royal (0\n)
+    # Dealer follows with A (31 total), scoring 2 for the 31 and ending the go round (1\n)
+    # Playerer leads next go round with K (1\n)
+    # Dealer follows with K (20 total), scoring 2 for pair (1\n)
+    # Player follows with 5 (25 total) (0\n)
+    # Dealer declares go (g\n)
+    # Player is out of cards and is awarded 1 for the go
+    # Dealer leads Q (0\n)
+    # Having no cards left, player declares go (g\n) {Should this happen automatically?}
+    # Havin no cards left, dealer is awarded 1 for playing last card
+    # Score from play is Dealer 7, Player 7
+    # Score from show is:
+    #      Dealer: 3 pair for 6, for a total of 6
+    #      Crib: 2 15's for 4, 1 run of 4 for 4, for a total of 8
+    #      Player: 6 15's for 12, 2 pairs for 4, for a total of 16
+    # Total score with play and show is Dealer 7 + 6 + 8 = 21, Player 7 + 16 = 23
+    @patch('sys.stdin', io.StringIO('4\n3\n2\n1\n2\n2\n0\n1\n1\n1\n0\ng\n0\ng\n'))
+    def test_play_interactive_3(self):
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Player will be dealt cards 1 - 6
+        # Dealer will be dealt cards 7 - 12
+        # Starter will be card 13
+        card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3'), Card('H','8'), Card('H','K'),
+                     Card('S','Q'), Card('H','7'), Card('C','6'), Card('D','A'), Card('H','10'), Card('S','K'),
+                     Card('H','5')]
+        sd.add_cards(card_list)
+        
+        deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+        deal._deck = sd
+        
+        deal.play()
+        
+        # Did we get the expected dealer score from playing the deal?
+        exp_val = 21
+        act_val = deal._dealer_score
+        self.assertEqual(exp_val, act_val)
+
+        # Did we get the expected player score from playing the deal?
+        exp_val = 23
+        act_val = deal._player_score
+        self.assertEqual(exp_val, act_val)
+        
+    # Apply a patch() decorator to replace keyboard input from user with a string.
+    @patch('sys.stdin', io.StringIO('4\n2\n3\n1\n0\n2\n0\n1\n0\n0\n0\n0\ng\n'))
+    def test_play_interactive_4(self):
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Player will be dealt cards 1 - 6
+        # Dealer will be dealt cards 7 - 12
+        # Starter will be card 13
+        card_list = [Card('H','3'), Card('S','3'), Card('C','8'), Card('S','4'), Card('C','10'), Card('S','2'),
+                     Card('S','6'), Card('C','7'), Card('C','4'), Card('D','A'), Card('H','9'), Card('C','2'),
+                     Card('D','2')]
+        sd.add_cards(card_list)
+        
+        deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+        deal._deck = sd
+        
+        deal.play()
+        
+        # Did we get the expected dealer score from playing the deal?
+        exp_val = 11
+        act_val = deal._dealer_score
+        self.assertEqual(exp_val, act_val)
+
+        # Did we get the expected player score from playing the deal?
+        exp_val = 22
+        act_val = deal._player_score
+        self.assertEqual(exp_val, act_val)
+
     
 if __name__ == '__main__':
     unittest.main()

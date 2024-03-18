@@ -34,9 +34,9 @@ def play_debug():
     # Player will be dealt cards 1 - 6
     # Dealer will be dealt cards 7 - 12
     # Starter will be card 13
-    card_list = [Card('D','J'), Card('S','10'), Card('S','8'), Card('C','7'), Card('H','5'), Card('C','3'),
-                    Card('S','K'), Card('D','9'), Card('C','9'), Card('D','8'), Card('S','7'), Card('H','A'),
-                    Card('S','6')]
+    card_list = [Card('H','3'), Card('S','3'), Card('C','8'), Card('S','4'), Card('C','10'), Card('S','2'),
+                    Card('S','6'), Card('C','7'), Card('C','4'), Card('D','A'), Card('H','9'), Card('C','2'),
+                    Card('D','2')]
     sd.add_cards(card_list)
         
     deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())

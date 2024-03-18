@@ -49,7 +49,20 @@ class CribbageDeal:
         self._starter = Card()
         self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
         self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
+        # A string that could be used to help build a unit test, by passing it to @patch('sys.stdin', io.StringIO(_recorded_play)
+        self._recorded_play = ''
 
+    def record_play(self, play_string = ''):
+        """
+        A utility function intended to help with creating unit tests. play_string argument is appended to self._recorded_play. The concept is that
+        if self._recorded_play were printed at the end of a deal, then it could be copy-pasted in as the argument to io.String in the
+        @patch('sys.stdin', io.StringIO(...) decorator of a unit test that would duplicate interactive play of the deal.
+        :parameter play_string: Append this string to self._recorded_play(), string
+        :return: None
+        """
+        self._recorded_play += play_string
+        return None
+        
     def set_player_play_strategy(self, ps = CribbagePlayStrategy()):
         """
         Set the player play strategy.
@@ -241,12 +254,16 @@ class CribbageDeal:
         # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
         self.draw_for_player(6)
         print('Dealt player hand: ', str(self._player_hand))
+        # To facilitate creating a unit test from the deal
+        print('Dealt player hand: ', repr(self._player_hand))
         self.draw_for_dealer(6)
         print('Dealt dealer hand: ', str(self._dealer_hand))
-       
+        # To facilitate creating a unit test from the deal
+        print('Dealt dealerer hand: ', repr(self._dealer_hand))
+        
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
-        self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand)
-        self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib, self.get_dealer_hand)
+        self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand, self.record_play)
+        self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib, self.get_dealer_hand, self.record_play)
         print('Player hand after crib formed: ', str(self._player_hand))
         print('Dealer hand after crib formed: ', str(self._dealer_hand))
         print('Crib hand: ', str(self._crib_hand))
@@ -254,6 +271,8 @@ class CribbageDeal:
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
         starter = self.draw_starter_card()
         print('Starter card: ', str(starter))
+        # To facilitate creating a unit test from the deal
+        print('Starter card: ', repr(starter))
         if starter.get_pips() == 'J':
             # Peg 2 for dealer
             self.peg_for_dealer(2)
@@ -262,7 +281,7 @@ class CribbageDeal:
         # For the first go round, the player always leads.    
         next_to_play = CribbageRole.PLAYER    
             
-        # TODO: Create a loop at this level that plays multiple go rounds until the dealt cards for both players are exhausted 
+        # Loop at this level to play multiple go rounds until the dealt cards for both players are exhausted 
         while len(self._dealer_hand) > 0 or len(self._player_hand) > 0:   
             
             # Set the go round cumulative score to 0
@@ -295,7 +314,8 @@ class CribbageDeal:
                 prefix  = 'After play by ' + str(next_to_play)
                 match next_to_play:
                     case CribbageRole.PLAYER:
-                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player, self.get_player_hand)
+                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player,
+                                                                                 self.get_player_hand, self.record_play)
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
@@ -304,7 +324,8 @@ class CribbageDeal:
                         # Rotate who will play next
                         next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
-                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer, self.get_dealer_hand)
+                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer,
+                                                                                 self.get_dealer_hand, self.record_play)
                         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
@@ -325,7 +346,7 @@ class CribbageDeal:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
                             self.peg_for_dealer(2)
                             print('Go round ends with count of 31 by Dealer.')
-                        case CribbageRole.Dealer:
+                        case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
                             self.peg_for_player(2)
                             print('Go round ends with count of 31 by Player.')
@@ -338,7 +359,8 @@ class CribbageDeal:
                         case CribbageRole.PLAYER:
                             prefix  = 'After go declared by Dealer'
                             count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
-                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player)
+                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player,
+                                                                  self.record_play)
                             # Score 1 or 2 for the player, depending on how the player played out the go
                             go_round_count += count
                             if (go_round_count) == 31:
@@ -350,7 +372,8 @@ class CribbageDeal:
                         case CribbageRole.DEALER:
                             prefix  = 'After go declared by Player'
                             count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
-                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer)
+                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer,
+                                                                  self.record_play)
                             # Score 1 or 2 for the dealer, depending on how the dealer played out the go
                             go_round_count += count
                             if (go_round_count) == 31:
@@ -388,6 +411,9 @@ class CribbageDeal:
         print('Dealer score from showing crib: ', score)
 
         self.log_pegging_info()
+        
+        # Output the play record to facilitate unit test creation
+        print('Play record: ', self._recorded_play)
 
         # TODO: If at any time during play, player or dealer pegs to end of board, game is over.
 

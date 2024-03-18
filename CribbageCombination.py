@@ -75,8 +75,15 @@ class CribbageCombination(object):
 
         return permutations
     
-    # TODO: Implement a score() method in this base class, that throws an exception that it isn't implemented, to formally show the expected
-    # method signature, and to force override in the child.
+    def score(self, hand = Hand(), starter = None):
+        """
+        This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
+        :parameter hand: The hand to search for a flush, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about the flush in the hand, CribbageComboInfo object
+        """
+        raise NotImplementedError
+        return None
         
 
 class PairCombination(CribbageCombination):

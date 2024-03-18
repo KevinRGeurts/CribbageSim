@@ -8,6 +8,11 @@ from CribbageCombination import CribbageCombination
 
 class Test_CribbageCombination(unittest.TestCase):
     
+    def test_score(self):
+       
+        cc = CribbageCombination()
+        self.assertRaises(NotImplementedError, cc.score) 
+    
     def test_permutations_size_2(self):
         
         h = Hand()

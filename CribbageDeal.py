@@ -22,7 +22,8 @@ class CribbageDeal:
     Class representing a single deal in cribbage, to be played out by a dealer and a player.
     """
     
-    def __init__(self, player_strategy = CribbagePlayStrategy(), dealer_strategy = CribbagePlayStrategy()):
+    def __init__(self, player_strategy = CribbagePlayStrategy(), dealer_strategy = CribbagePlayStrategy(),
+                 player_peg_callback = None, dealer_peg_callback = None):
         """
         Construct a finite deck of Cards, an empty dealer Hand, an empty player Hand, and, and empty crib Hand.
         Create a starter card, which is expected to be replaced with a dealt one.
@@ -32,26 +33,38 @@ class CribbageDeal:
             during play. Expect individual piles to be displayed such as during interactive play.
         :parameter player_strategy: CribbagePlayStrategy instance used to play player hand, CribbagePlayStrategy or child instance
         :parameter dealerer_strategy: CribbagePlayStrategy instance used to play dealer hand, CribbagePlayStrategy or child instance
+        :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
+        :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
+        """
+        self.reset_deal(player_peg_callback,dealer_peg_callback)
+        self.set_dealer_play_strategy(dealer_strategy)
+        self.set_player_play_strategy(player_strategy)
+        self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
+        self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
+
+    def reset_deal(self, player_peg_callback = None, dealer_peg_callback = None):
+        """
+        Reset everything as necessary to have a fresh deal.
+        :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
+        :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
         """
         self._deck = Deck(isInfinite = False)
         self._dealer_hand = Hand()
-        self.set_dealer_play_strategy(dealer_strategy)
-        # TODO: Determine if _dealer_pile is needed, YES, used to score during show, since hand has been depleted during play
         self._dealer_pile = Hand()
         self._dealer_score = 0
         self._player_hand = Hand()
         self._crib_hand = Hand()
-        self.set_player_play_strategy(player_strategy)
-        # TODO: Determine if _player_pile is needed,  YES, used to score during show, since hand has been depleted during play
         self._player_pile = Hand()
         self._player_score = 0
         self._combined_pile = Hand()
         self._starter = Card()
-        self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
-        self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
         # A string that could be used to help build a unit test, by passing it to @patch('sys.stdin', io.StringIO(_recorded_play)
         self._recorded_play = ''
-
+        if (player_peg_callback): assert(callable(player_peg_callback))
+        if (dealer_peg_callback): assert(callable(dealer_peg_callback))
+        self._player_peg_callback = player_peg_callback
+        self._dealer_peg_callback = dealer_peg_callback
+        
     def record_play(self, play_string = ''):
         """
         A utility function intended to help with creating unit tests. play_string argument is appended to self._recorded_play. The concept is that
@@ -156,7 +169,10 @@ class CribbageDeal:
         :parameter count: The number of pegs (points) to add to the player's score, int
         :return: The current player point score, int
         """
+        # Update score for the deal
         self._player_score += count
+        # Update score for the game
+        if (self._player_peg_callback): self._player_peg_callback(count)
         return self._player_score
 
     def peg_for_dealer(self, count = 1):
@@ -165,7 +181,10 @@ class CribbageDeal:
         :parameter count: The number of pegs (points) to add to the dealer's score, int
         :return: The current dealer point score, int
         """
+        # Update score for the deal
         self._dealer_score += count
+        # Update score for the game
+        if (self._dealer_peg_callback): self._dealer_peg_callback(count)
         return self._dealer_score
 
     def xfer_player_card_to_crib(self, index = 0):

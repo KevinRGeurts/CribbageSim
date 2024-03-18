@@ -14,7 +14,7 @@ class CribbageBoard(object):
         self._player2_current = 0
         self._player2_previous = 0
         
-    def peg_for_player1(self, points = 0):
+    def peg_for_player1(self, points = 1):
         """
         Peg the argument points for player 1, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int
@@ -25,7 +25,7 @@ class CribbageBoard(object):
         # TODO: May want to raise an exception if we reach 121, to indicate game over
         return self._player1_current
         
-    def peg_for_player2(self, points = 0):
+    def peg_for_player2(self, points = 1):
         """
         Peg the argument points for player 2, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int

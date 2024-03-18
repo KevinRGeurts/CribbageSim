@@ -12,9 +12,20 @@ from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombi
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
+from CribbageGame import CribbageGame
 
 
-def play_interactive():
+def play_interactive_game():
+    """
+    Use CribbageSimulator to play an interactive game.
+    """
+
+    game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+    game.play()
+
+    return None
+
+def play_interactive_deal():
     """
     Use CribbageSimulator to play an interactive game.
     """
@@ -64,15 +75,18 @@ if __name__ == '__main__':
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'
-    query_dic = {'q':'Quit', 'i':'Interactive Game', 'd':'Debug'}
+    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'd':'Debug'}
     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
     
     while response != 'q':
         
         match response:
             
+            case 'g':
+                play_interactive_game()
+            
             case 'i':
-                play_interactive()
+                play_interactive_deal()
 
             case 'd':
                 play_debug()

@@ -38,6 +38,7 @@
     <Compile Include="CribbageBoard.py" />
     <Compile Include="CribbageCombination.py" />
     <Compile Include="CribbageDeal.py" />
+    <Compile Include="CribbageGame.py" />
     <Compile Include="CribbagePlayStrategy.py" />
     <Compile Include="CribbageSimulator.py" />
     <Compile Include="main.py">

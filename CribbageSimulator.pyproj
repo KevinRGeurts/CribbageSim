@@ -35,11 +35,15 @@
     <Compile Include="..\BlackJackSim\UserResponseCollector.py">
       <Link>UserResponseCollector.py</Link>
     </Compile>
+    <Compile Include="CribbageBoard.py" />
     <Compile Include="CribbageCombination.py" />
     <Compile Include="CribbageDeal.py" />
     <Compile Include="CribbagePlayStrategy.py" />
     <Compile Include="CribbageSimulator.py" />
     <Compile Include="main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_CribbageBoard.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test_FifteenComboPlaying.py">

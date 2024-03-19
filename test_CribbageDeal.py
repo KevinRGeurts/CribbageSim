@@ -12,7 +12,47 @@ from CribbageDeal import CribbageDeal
 
 class Test_CribbageDeal(unittest.TestCase):
     
-    def test_determine_score_showing(self):
+    def test_determine_score_showing_crib(self):
+        
+        deal = CribbageDeal()
+
+        h = Hand()
+        h.add_cards([Card('S','9'), Card('S','6'), Card('S','7'), Card('S','8')])
+        s = Card('S','6')
+        
+        # 3 15's for 6, 2 runs of 4 for 8, 1 pair for 2, flush for 5, all total = 21
+        exp_val = 21
+        act_val = deal.determine_score_showing_crib(h, s)
+        self.assertEqual(exp_val, act_val)
+    
+    
+    def test_determine_score_showing_hand_flush4(self):
+        
+        deal = CribbageDeal()
+
+        h = Hand()
+        h.add_cards([Card('S','9'), Card('S','9'), Card('S','10'), Card('S','J')])
+        s = Card('C','6')
+        
+        # 2 15's for 4, 2 runs of 3 for 6, 1 pair for 2, flush for 4, all total = 16
+        exp_val = 16
+        act_val = deal.determine_score_showing_hand(h, s)
+        self.assertEqual(exp_val, act_val)
+
+    def test_determine_score_showing_hand_flush5(self):
+        
+        deal = CribbageDeal()
+
+        h = Hand()
+        h.add_cards([Card('S','9'), Card('S','9'), Card('S','10'), Card('S','J')])
+        s = Card('S','6')
+        
+        # 2 15's for 4, 2 runs of 3 for 6, 1 pair for 2, flush for 5, his nobs for 1, all total = 18
+        exp_val = 18
+        act_val = deal.determine_score_showing_hand(h, s)
+        self.assertEqual(exp_val, act_val)
+        
+    def test_determine_score_showing_hand(self):
         
         deal = CribbageDeal()
 
@@ -20,8 +60,9 @@ class Test_CribbageDeal(unittest.TestCase):
         h.add_cards([Card('S','9'), Card('C','6'), Card('H','2'), Card('D','K')])
         s = Card('S','6')
         
+        # 1 pair for 2, 2 15's for 4, all total = 6
         exp_val = 6
-        act_val = deal.determine_score_showing(h, s)
+        act_val = deal.determine_score_showing_hand(h, s)
         self.assertEqual(exp_val, act_val)
 
     def test_determine_score_play_fifteen(self):

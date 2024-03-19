@@ -6,7 +6,7 @@ from card import Card
 from deck import Deck, StackedDeck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import FifteenCombinationPlaying, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying
+from CribbageCombination import FifteenCombinationPlaying, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying, CribFlushCombination
 
 
 class CribbageRole(Enum):
@@ -41,7 +41,8 @@ class CribbageDeal:
         self.set_dealer_play_strategy(dealer_strategy)
         self.set_player_play_strategy(player_strategy)
         self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
-        self._show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
+        self._hand_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
+        self._crib_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), CribFlushCombination(), HisNobsCombination()]
 
     def reset_deal(self, player_peg_callback = None, dealer_peg_callback = None):
         """
@@ -209,7 +210,7 @@ class CribbageDeal:
         self._crib_hand.add_cards(card)
         return None
 
-    def determine_score_showing(self, hand = Hand(), starter = None):
+    def determine_score_showing_hand(self, hand = Hand(), starter = None):
         """
         Determine the score of hand during show.
         :parameter hand: The hand to score, Hand instance
@@ -217,7 +218,21 @@ class CribbageDeal:
         :return: The total score of all combinations in the hand, int
         """
         score = 0
-        for combo in self._show_combinations:
+        for combo in self._hand_show_combinations:
+            info = combo.score(hand, starter)
+            print(info)
+            score += info.score
+        return score
+
+    def determine_score_showing_crib(self, hand = Hand(), starter = None):
+        """
+        Determine the score of crib during show.
+        :parameter hand: The crib to score, Hand instance
+        :parameter starter: The starter card, Card instance
+        :return: The total score of all combinations in the crib, int
+        """
+        score = 0
+        for combo in self._crib_show_combinations:
             info = combo.score(hand, starter)
             print(info)
             score += info.score
@@ -418,17 +433,17 @@ class CribbageDeal:
         # It's time to show (that is, count the hands after playing). During play, the hands have been emptied into the play piles, so score the piles.
  
         # Score the player's hand
-        score = self.determine_score_showing(self._player_pile, starter)
+        score = self.determine_score_showing_hand(self._player_pile, starter)
         print('Player score from showing hand: ', score)
         self.peg_for_player(score)
         
         # Score the dealer's hand
-        score = self.determine_score_showing(self._dealer_pile, starter)
+        score = self.determine_score_showing_hand(self._dealer_pile, starter)
         print('Dealer score from showing hand: ', score)
         self.peg_for_dealer(score)
         
         # Score the dealer's crib
-        score = self.determine_score_showing(self._crib_hand, starter)
+        score = self.determine_score_showing_crib(self._crib_hand, starter)
         print('Dealer score from showing crib: ', score)
         self.peg_for_dealer(score)
         

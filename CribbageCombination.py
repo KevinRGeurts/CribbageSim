@@ -134,7 +134,8 @@ class PairCombination(CribbageCombination):
 
 class FlushCombination(CribbageCombination):
     """
-    Intended to search for, find, and score pairs in a cribbage hand.
+    Intended to search for, find, and score pairs in a cribbage hand, but not in the crib.
+    Because ... the rules for a flush are different in a hand than in the crib.
     """
     
     def __init__(self):
@@ -144,7 +145,6 @@ class FlushCombination(CribbageCombination):
         self._combo_name = 'flush'
         self._score_per_combo = 4
         
-    # TODO: Fix bug that if hand is the crib, then suit of flush MUST match starter, that is, cannot score 4 
     def score(self, hand = Hand(), starter = None):
         """
         Search hand for a flush, tally up the score, and return a CribbageComboInfo object.
@@ -179,6 +179,53 @@ class FlushCombination(CribbageCombination):
             if starter.get_suit() == suit:
                 info.instance_list[0].append(starter)
                 info.score = info.score + 1
+        
+        return info
+
+class CribFlushCombination(CribbageCombination):
+    """
+    Intended to search for, find, and score pairs in the cribbage crib, but not in a cribbage hand.
+    Because ... the rules for a flush are different in the crib than in a hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the class for pair scoring combination in cribbage crib.
+        """
+        self._combo_name = 'flush'
+        self._score_per_combo = 4
+        
+    def score(self, hand = Hand(), starter = None):
+        """
+        Search crib for a flush, tally up the score, and return a CribbageComboInfo object.
+        :parameter hand: The crib to search for a flush, Hand object
+        :parameter starter: The starter card, Card object
+        :return: CribbageComboInfo object with information about the flush in the crib, CribbageComboInfo object
+        """
+        
+        # This is a cribbage crib, so make sure it has 4 cards
+        # This is the correct assert to use, since flush is not a scoring combination during play, when we might not have 4 cards in the pile
+        assert(hand.get_num_cards() == 4)
+
+        info = CribbageComboInfo()
+        info.combo_name = self._combo_name
+        
+        cards = hand.get_cards()
+
+        # Do all cards in the hand have the same suit?
+        is_flush = True
+        suit = cards[0].get_suit()
+        for i in range(1, len(cards)):
+            if cards[i].get_suit() != suit:
+                is_flush = False
+                break;
+
+        if is_flush and starter.get_suit() == suit:
+            # In the crib, we only score a flush if all cards in the crib AND the starter card are of the same suit
+            info.number_instances = 1
+            info.instance_list = [cards]
+            info.instance_list[0].append(starter)
+            info.score = info.number_instances * self._score_per_combo +1
         
         return info
 

@@ -51,6 +51,9 @@
     <Compile Include="test_CribbageGame.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="test_CribFlushCombo.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="test_FifteenComboPlaying.py">
       <SubType>Code</SubType>
     </Compile>

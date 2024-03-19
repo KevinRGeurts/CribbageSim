@@ -39,21 +39,38 @@ def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
-
+    
     # Create a stacked deck
     sd = StackedDeck()
     # Player will be dealt cards 1 - 6
     # Dealer will be dealt cards 7 - 12
     # Starter will be card 13
-    card_list = [Card('H','3'), Card('S','3'), Card('C','8'), Card('S','4'), Card('C','10'), Card('S','2'),
-                    Card('S','6'), Card('C','7'), Card('C','4'), Card('D','A'), Card('H','9'), Card('C','2'),
-                    Card('D','2')]
+    card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3'), Card('H','8'), Card('H','K'),
+                    Card('S','Q'), Card('H','7'), Card('C','6'), Card('D','A'), Card('H','10'), Card('S','K'),
+                    Card('H','5')]
     sd.add_cards(card_list)
         
-    deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
-    deal._deck = sd
+    game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+    game._deal._deck = sd
         
-    deal.play()
+    # Player1 (The dealer) will be one point from winning when the game begins, so the first score for that player will win the game.
+    game._board.peg_for_player1(120)
+    return_val = game.play()
+    
+    # # Create a stacked deck
+    # sd = StackedDeck()
+    # # Player will be dealt cards 1 - 6
+    # # Dealer will be dealt cards 7 - 12
+    # # Starter will be card 13
+    # card_list = [Card('H','3'), Card('S','3'), Card('C','8'), Card('S','4'), Card('C','10'), Card('S','2'),
+    #                 Card('S','6'), Card('C','7'), Card('C','4'), Card('D','A'), Card('H','9'), Card('C','2'),
+    #                 Card('D','2')]
+    # sd.add_cards(card_list)
+        
+    # deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+    # deal._deck = sd
+        
+    # deal.play()
     
     return None
     

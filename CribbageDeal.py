@@ -3,7 +3,7 @@ from enum import Enum
 
 # Local imports
 from card import Card
-from deck import Deck
+from deck import Deck, StackedDeck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
 from CribbageCombination import FifteenCombinationPlaying, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying
@@ -36,6 +36,7 @@ class CribbageDeal:
         :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
         :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
         """
+        self._deck = Deck(isInfinite = False) # So that self has a valid _deck attribute when self.reset_deal() is called
         self.reset_deal(player_peg_callback,dealer_peg_callback)
         self.set_dealer_play_strategy(dealer_strategy)
         self.set_player_play_strategy(player_strategy)
@@ -48,7 +49,8 @@ class CribbageDeal:
         :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
         :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
         """
-        self._deck = Deck(isInfinite = False)
+        # If a StackDeck has been injected, for example as part of unit testing, then leave it in place
+        if not isinstance(self._deck, StackedDeck): self._deck = Deck(isInfinite = False)
         self._dealer_hand = Hand()
         self._dealer_pile = Hand()
         self._dealer_score = 0
@@ -294,6 +296,7 @@ class CribbageDeal:
         print('Starter card: ', repr(starter))
         if starter.get_pips() == 'J':
             # Peg 2 for dealer
+            print('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
             self.peg_for_dealer(2)
 
         # Set variable that tracks which player will play next.

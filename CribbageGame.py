@@ -5,6 +5,7 @@ from enum import Enum
 from CribbageBoard import CribbageBoard
 from CribbageDeal import CribbageDeal
 from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy
+from exceptions import CribbageGameOverError
 
 class CribbagePlayers(Enum):
     """
@@ -54,12 +55,15 @@ class CribbageGame:
     def play(self):
         """
         Play a game of cribbage.
+        :return: (Name of Winning Player, Winning Player Final Score, Losing Player Final Score, Number of Deals In Game), tuple (string, int, int, int)
         """
 
         game_over = False
         deal_count = 0
+        return_val = ('nobody', 0, 0, 0)
         
         # TODO: For now player1 will always deal first, but implement random selection, such as cutting for high card
+        # Consider that this predictability is beneficial to unit testing.
         next_to_deal = CribbagePlayers.PLAYER_1
         
         while not game_over:
@@ -78,13 +82,23 @@ class CribbageGame:
                     next_to_deal = CribbagePlayers.PLAYER_1
             
             # Play the current deal
-            self._deal.play()
+            try:
+                self._deal.play()
+            except CribbageGameOverError:
+                (p1_score, p2_score) = self._board.get_scores()
+                if p1_score == 121:
+                    return_val = (self._player1, p1_score, p2_score, deal_count)
+                    print(f"Player {self._player1} wins the game.")
+                else:
+                    print(f"Player {self._player2} wins the game.")
+                    return_val = (self._player2, p2_score, p1_score, deal_count)
+                break
 
             # Print out end of deal board
             print(f"After deal {str(deal_count)}:\n{str(self._board)}")
 
         # Print out end of game results
-        print(f"At game end:\n{str(self._board)}")
+        print(f"At game end, after {deal_count} deals:\n{str(self._board)}")
 
-        return None
+        return return_val
 

@@ -41,10 +41,14 @@
     <Compile Include="CribbageGame.py" />
     <Compile Include="CribbagePlayStrategy.py" />
     <Compile Include="CribbageSimulator.py" />
+    <Compile Include="exceptions.py" />
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test_CribbageBoard.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="test_CribbageGame.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="test_FifteenComboPlaying.py">

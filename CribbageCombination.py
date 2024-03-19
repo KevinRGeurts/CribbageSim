@@ -83,7 +83,7 @@ class CribbageCombination(object):
         :return: CribbageComboInfo object with information about the flush in the hand, CribbageComboInfo object
         """
         raise NotImplementedError
-        return None
+        return CribbageCombinInfo()
         
 
 class PairCombination(CribbageCombination):

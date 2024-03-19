@@ -1,3 +1,7 @@
+# Local
+from exceptions import CribbageGameOverError
+
+
 class CribbageBoard(object):
     """
     Represents a cribbage board, so that progress through the game can be kept for both players.
@@ -22,7 +26,9 @@ class CribbageBoard(object):
         """
         self._player1_previous = self._player1_current
         self._player1_current += points
-        # TODO: May want to raise an exception if we reach 121, to indicate game over
+        if self._player1_current >= 121:
+            self._player1_current = 121
+            raise CribbageGameOverError
         return self._player1_current
         
     def peg_for_player2(self, points = 1):
@@ -33,7 +39,9 @@ class CribbageBoard(object):
         """
         self._player2_previous = self._player2_current
         self._player2_current += points
-        # TODO: May want to raise an exception if we reach 121, to indicate game over
+        if self._player2_current >= 121:
+            self._player2_current = 121
+            raise CribbageGameOverError
         return self._player2_current
     
     def get_scores(self):

@@ -366,12 +366,12 @@ class CribbageDeal:
                     match next_to_play:
                         case CribbageRole.PLAYER:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
-                            self.peg_for_dealer(2)
                             print('Go round ends with count of 31 by Dealer.')
+                            self.peg_for_dealer(2)
                         case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
-                            self.peg_for_player(2)
                             print('Go round ends with count of 31 by Player.')
+                            self.peg_for_player(2)
                     self.log_pegging_info()
                     continue # Get us out of the while.
 
@@ -419,26 +419,22 @@ class CribbageDeal:
  
         # Score the player's hand
         score = self.determine_score_showing(self._player_pile, starter)
-        self.peg_for_player(score)
         print('Player score from showing hand: ', score)
+        self.peg_for_player(score)
         
         # Score the dealer's hand
         score = self.determine_score_showing(self._dealer_pile, starter)
-        self.peg_for_dealer(score)
         print('Dealer score from showing hand: ', score)
+        self.peg_for_dealer(score)
         
         # Score the dealer's crib
         score = self.determine_score_showing(self._crib_hand, starter)
-        self.peg_for_dealer(score)
         print('Dealer score from showing crib: ', score)
-
+        self.peg_for_dealer(score)
+        
         self.log_pegging_info()
         
         # Output the play record to facilitate unit test creation
         print('Play record: ', self._recorded_play)
-
-        # TODO: If at any time during play, player or dealer pegs to end of board, game is over.
-
-        # TODO: If at any time during showing, player or dealer pegs to end of board, game is over.
 
         return None

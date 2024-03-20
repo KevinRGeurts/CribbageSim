@@ -16,7 +16,7 @@ class Test_FlushCombination(unittest.TestCase):
         fc = FlushCombination()
         info = fc.score(h, s)
 
-        exp_val = 'flush: 1 for 4: 2S 6S JS KS , '
+        exp_val = 'flush: 1 for 4: 2S 6S JS KS'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
         
@@ -28,7 +28,7 @@ class Test_FlushCombination(unittest.TestCase):
         fc = FlushCombination()
         info = fc.score(h, s)
 
-        exp_val = 'flush: 1 for 5: 2S 6S JS KS 7S , '
+        exp_val = 'flush: 1 for 5: 2S 6S JS KS 7S'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)  
     

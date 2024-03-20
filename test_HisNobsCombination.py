@@ -16,7 +16,7 @@ class Test_HisNobsCombination(unittest.TestCase):
         hnc = HisNobsCombination()
         info = hnc.score(h, s)
 
-        exp_val = 'his nobs: 1 for 1: JH , '
+        exp_val = 'his nobs: 1 for 1: JH'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
     

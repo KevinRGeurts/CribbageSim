@@ -16,7 +16,7 @@ class Test_RunCombination(unittest.TestCase):
         rc = RunCombination()
         info = rc.score(h, s)
 
-        exp_val = 'run: 1 for 5: 9S 10C JS QH KD , '
+        exp_val = 'run: 1 for 5: 9S 10C JS QH KD'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -28,7 +28,7 @@ class Test_RunCombination(unittest.TestCase):
         rc = RunCombination()
         info = rc.score(h, s)
 
-        exp_val = 'run: 2 for 8: 9S 10C JS QH , 9S 10D JS QH , '
+        exp_val = 'run: 2 for 8: 9S 10C JS QH , 9S 10D JS QH'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -40,7 +40,7 @@ class Test_RunCombination(unittest.TestCase):
         rc = RunCombination()
         info = rc.score(h, s)
 
-        exp_val = 'run: 4 for 12: 9C 10S JS , 9H 10S JS , 9C 10D JS , 9H 10D JS , '
+        exp_val = 'run: 4 for 12: 9C 10S JS , 9H 10S JS , 9C 10D JS , 9H 10D JS'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 

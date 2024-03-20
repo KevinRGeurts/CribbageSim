@@ -29,6 +29,9 @@ class CribbageComboInfo(object):
             for card in combo:
                 s += str(card) + ' '
             s += ', '
+        if len(self.instance_list) > 0:
+            # Remove unneeded trailing space-comma-space
+            s = s[0:len(s)-3]
         return s
 
 

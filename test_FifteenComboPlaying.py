@@ -15,7 +15,7 @@ class Test_FifteenCombinationPlaying(unittest.TestCase):
         fcp = FifteenCombinationPlaying()
         info = fcp.score(pile)
 
-        exp_val = 'fifteen: 1 for 2: JD 2S 3C , '
+        exp_val = 'fifteen: 1 for 2: JD 2S 3C'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
            

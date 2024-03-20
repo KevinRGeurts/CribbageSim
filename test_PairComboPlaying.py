@@ -15,7 +15,7 @@ class Test_PairCombinationPlaying(unittest.TestCase):
         pcp = PairCombinationPlaying()
         info = pcp.score(pile)
 
-        exp_val = 'double pair royal: 1 for 12: 2S 2C 2H 2D , '
+        exp_val = 'double pair royal: 1 for 12: 2S 2C 2H 2D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
     
@@ -26,7 +26,7 @@ class Test_PairCombinationPlaying(unittest.TestCase):
         pcp = PairCombinationPlaying()
         info = pcp.score(pile)
 
-        exp_val = 'pair royal: 1 for 6: 2C 2H 2D , '
+        exp_val = 'pair royal: 1 for 6: 2C 2H 2D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -37,7 +37,7 @@ class Test_PairCombinationPlaying(unittest.TestCase):
         pcp = PairCombinationPlaying()
         info = pcp.score(pile)
 
-        exp_val = 'pair: 1 for 2: 2H 2D , '
+        exp_val = 'pair: 1 for 2: 2H 2D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
         

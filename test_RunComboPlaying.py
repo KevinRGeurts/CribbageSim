@@ -15,7 +15,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 1 for 3: 9H 10D JC , '
+        exp_val = 'run: 1 for 3: 9H 10D JC'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -26,7 +26,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 1 for 4: 3S 4H 5D 6C , '
+        exp_val = 'run: 1 for 4: 3S 4H 5D 6C'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -37,7 +37,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 1 for 5: 3S 4H 5D 6C 7D , '
+        exp_val = 'run: 1 for 5: 3S 4H 5D 6C 7D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -48,7 +48,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 1 for 6: 2H 3S 4H 5D 6C 7D , '
+        exp_val = 'run: 1 for 6: 2H 3S 4H 5D 6C 7D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -59,7 +59,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 1 for 7: AS 2H 3S 4H 5D 6C 7D , '
+        exp_val = 'run: 1 for 7: AS 2H 3S 4H 5D 6C 7D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
             

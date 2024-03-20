@@ -16,7 +16,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 2 for 4: 9S 6C , 9S 6S , '
+        exp_val = 'fifteen: 2 for 4: 9S 6C , 9S 6S'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -28,7 +28,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 2 for 4: KS 2C 3H , 2C 3H QD , '
+        exp_val = 'fifteen: 2 for 4: KS 2C 3H , 2C 3H QD'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
         
@@ -40,7 +40,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 2 for 4: KS 2C 2H AD , 2C 2H AD 10S , '
+        exp_val = 'fifteen: 2 for 4: KS 2C 2H AD , 2C 2H AD 10S'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
             
@@ -52,7 +52,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 1 for 2: KS 2C AH AD AS , '
+        exp_val = 'fifteen: 1 for 2: KS 2C AH AD AS'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 
@@ -64,7 +64,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 2 for 4: KS 5C , KS 2H 3D , '
+        exp_val = 'fifteen: 2 for 4: KS 5C , KS 2H 3D'
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 

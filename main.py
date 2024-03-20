@@ -13,6 +13,7 @@ from UserResponseCollector import UserResponseCollector_query_user, BlackJackQue
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
+from CribbageSimulator import CribbageSimulator
 
 
 def play_interactive_game():
@@ -84,11 +85,11 @@ if __name__ == '__main__':
     """
     
     # Set up logging
-    # BlackJackSim().setup_logging()
+    CribbageSimulator().setup_logging()
     
-    print('--------------------')
-    print('*** Python Criggage Simulator ***')
-    print('--------------------')
+    print('---------------------------------')
+    print('*** Python Cribbage Simulator ***')
+    print('---------------------------------')
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'

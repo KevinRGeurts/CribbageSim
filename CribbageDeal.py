@@ -1,4 +1,5 @@
 # Standard imports
+import logging
 from enum import Enum
 
 # Local imports
@@ -222,11 +223,14 @@ class CribbageDeal:
         :parameter starter: The starter card, Card instance
         :return: The total score of all combinations in the hand, int
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         score = 0
         for combo in self._hand_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            print(info)
+            logger.info(str(info))
             score += info.score
         return score
 
@@ -237,11 +241,14 @@ class CribbageDeal:
         :parameter starter: The starter card, Card instance
         :return: The total score of all combinations in the crib, int
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         score = 0
         for combo in self._crib_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            print(info)
+            logger.info(str(info))
             score += info.score
         return score
 
@@ -251,11 +258,14 @@ class CribbageDeal:
         :parameter hand: The combined, ordered pile of played cards to check for a score, Hand instance
         :return: Points scored based on play of last card, int
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         score = 0
         for combo in self._play_combinations:
             assert(isinstance(combo, CribbageCombinationPlaying))
             info = combo.score(combined_pile)
-            print(info)
+            logger.info(str(info))
             score += info.score
         return score
 
@@ -265,8 +275,11 @@ class CribbageDeal:
         Eventually this will be converted to use logging.
         :return: None
         """
-        print('Dealer total score thus far for the dealt hand: ', str(self._dealer_score))
-        print('Player total score thus far for the dealt hand: ', str(self._player_score))
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        logger.info(f"Dealer total score thus far for the dealt hand: {self._dealer_score}")
+        logger.info(f"Player total score thus far for the dealt hand: {self._player_score}")
         return None
     
     def log_play_info(self, preface = '', go_round_count = 0):
@@ -276,50 +289,54 @@ class CribbageDeal:
         :parameter go_round_count: The current play count during the go round, int
         :return: None
         """
-        header = preface
-        header += ':'
-        print(header)
-        print('     Dealer hand after lead: ', str(self._dealer_hand))
-        print('     Dealer pile after lead: ', str(self._dealer_pile))
-        print('     Player hand after lead: ', str(self._player_hand))
-        print('     Player pile after lead: ', str(self._player_pile))
-        print('     Combined pile after lead: ', str(self._combined_pile))
-        print('     Play count after lead: ', str(go_round_count))
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        logger.info(f"{preface}:")
+        logger.info(f"     Dealer hand after lead: {self._dealer_hand}")
+        logger.info(f"     Dealer pile after lead: {self._dealer_pile}")
+        logger.info(f"     Player hand after lead: {self._player_hand}")
+        logger.info(f"     Player pile after lead: {self._player_pile}")
+        logger.info(f"     Combined pile after lead: {self._combined_pile}")
+        logger.info(f"     Play count after lead: {go_round_count}")
         return None
 
     def play(self):
         """
         Play the cribbage deal.
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         # Shuffle, that is, rebuild the deck
         self._deck.create_deck()
         
         # Deal player and dealer hands from the deck. In a normal game, this would be one card at a time alternating.
         # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
         self.draw_for_player(6)
-        print('Dealt player hand: ', str(self._player_hand))
+        logger.info(f"Dealt player hand: {self._player_hand}")
         # To facilitate creating a unit test from the deal
-        print('Dealt player hand: ', repr(self._player_hand))
+        logger.info(f"Dealt player hand: {repr(self._player_hand)}")
         self.draw_for_dealer(6)
-        print('Dealt dealer hand: ', str(self._dealer_hand))
+        logger.info(f"Dealt dealer hand: {self._dealer_hand}")
         # To facilitate creating a unit test from the deal
-        print('Dealt dealerer hand: ', repr(self._dealer_hand))
+        logger.info(f"Dealt dealerer hand: {repr(self._dealer_hand)}")
         
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
         self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand, self.record_play)
         self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib, self.get_dealer_hand, self.record_play)
-        print('Player hand after crib formed: ', str(self._player_hand))
-        print('Dealer hand after crib formed: ', str(self._dealer_hand))
-        print('Crib hand: ', str(self._crib_hand))
+        logger.info(f"Player hand after crib formed: {self._player_hand}")
+        logger.info(f"Dealer hand after crib formed: {self._dealer_hand}")
+        logger.info(f"Crib hand: {self._crib_hand}")
 
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
         starter = self.draw_starter_card()
-        print('Starter card: ', str(starter))
+        logger.info(f"Starter card: {starter}")
         # To facilitate creating a unit test from the deal
-        print('Starter card: ', repr(starter))
+        logger.info(f"Starter card: {repr(starter)}")
         if starter.get_pips() == 'J':
             # Peg 2 for dealer
-            print('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
+            logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
             self.peg_for_dealer(2)
 
         # Set variable that tracks which player will play next.
@@ -364,7 +381,7 @@ class CribbageDeal:
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
-                            print('Score: ', str(score))
+                            logger.info(f"Score: {score}")
                             self.peg_for_player(score)
                         # Rotate who will play next
                         next_to_play = CribbageRole.DEALER
@@ -374,14 +391,14 @@ class CribbageDeal:
                         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
-                            print('Score: ', str(score))
+                            logger.info(f"Score: {score}")
                             self.peg_for_dealer(score)
                         # Rotate who will play next
                         next_to_play = CribbageRole.PLAYER
                 go_round_count += count
                 
                 self.log_play_info(prefix, go_round_count)
-                print('Go Declared?: ', str(go_declared))
+                logger.info(f"Go Declared?: {go_declared}")
                 self.log_pegging_info()
                 
                 # Has count for the go round reached exactly 31?
@@ -389,11 +406,11 @@ class CribbageDeal:
                     match next_to_play:
                         case CribbageRole.PLAYER:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
-                            print('Go round ends with count of 31 by Dealer.')
+                            logger.info('Go round ends with count of 31 by Dealer.')
                             self.peg_for_dealer(2)
                         case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
-                            print('Go round ends with count of 31 by Player.')
+                            logger.info('Go round ends with count of 31 by Player.')
                             self.peg_for_player(2)
                     self.log_pegging_info()
                     continue # Get us out of the while.
@@ -442,22 +459,22 @@ class CribbageDeal:
  
         # Score the player's hand
         score = self.determine_score_showing_hand(self._player_pile, starter)
-        print('Player score from showing hand: ', score)
+        logger.info(f"Player score from showing hand: {score}")
         self.peg_for_player(score)
         
         # Score the dealer's hand
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
-        print('Dealer score from showing hand: ', score)
+        logger.info(f"Dealer score from showing hand: {score}")
         self.peg_for_dealer(score)
         
         # Score the dealer's crib
         score = self.determine_score_showing_crib(self._crib_hand, starter)
-        print('Dealer score from showing crib: ', score)
+        logger.info(f"Dealer score from showing crib: {score}")
         self.peg_for_dealer(score)
         
         self.log_pegging_info()
         
         # Output the play record to facilitate unit test creation
-        print('Play record: ', self._recorded_play)
+        logger.info(f"Play record: {self._recorded_play}")
 
         return None

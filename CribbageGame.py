@@ -1,4 +1,5 @@
 # Standard imports
+import logging
 from enum import Enum
 
 # Local imports
@@ -58,6 +59,9 @@ class CribbageGame:
         :return: (Name of Winning Player, Winning Player Final Score, Losing Player Final Score, Number of Deals In Game), tuple (string, int, int, int)
         """
 
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         game_over = False
         deal_count = 0
         return_val = ('nobody', 0, 0, 0)
@@ -73,11 +77,11 @@ class CribbageGame:
             # Reset deal so we are ready for a new deal
             match next_to_deal:
                 case CribbagePlayers.PLAYER_1:
-                    print(f"Player {self._player1} will deal.")
+                    logger.info(f"Player {self._player1} will deal.")
                     self._deal.reset_deal(self.peg_for_player2, self.peg_for_player1)
                     next_to_deal = CribbagePlayers.PLAYER_2
                 case CribbagePlayers.PLAYER_2:
-                    print(f"Player {self._player2} will deal.")
+                    logger.info(f"Player {self._player2} will deal.")
                     self._deal.reset_deal(self.peg_for_player1, self.peg_for_player2)
                     next_to_deal = CribbagePlayers.PLAYER_1
             
@@ -88,17 +92,17 @@ class CribbageGame:
                 (p1_score, p2_score) = self._board.get_scores()
                 if p1_score == 121:
                     return_val = (self._player1, p1_score, p2_score, deal_count)
-                    print(f"Player {self._player1} wins the game.")
+                    logger.info(f"Player {self._player1} wins the game.")
                 else:
-                    print(f"Player {self._player2} wins the game.")
+                    logger.info(f"Player {self._player2} wins the game.")
                     return_val = (self._player2, p2_score, p1_score, deal_count)
                 break
 
-            # Print out end of deal board
-            print(f"After deal {str(deal_count)}:\n{str(self._board)}")
-
-        # Print out end of game results
-        print(f"At game end, after {deal_count} deals:\n{str(self._board)}")
+            # Log end of deal board
+            logger.info(f"After deal {str(deal_count)}:\n{str(self._board)}")
+ 
+        # Log end of game results
+        logger.info(f"At game end, after {deal_count} deals:\n{str(self._board)}")
 
         return return_val
 

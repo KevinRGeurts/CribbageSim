@@ -280,7 +280,6 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         while not valid_choice:
 
             if response == 'g':
-                # TODO: Add code to check that user really has no valid play
                 valid_choice = True
                 declare_go = True
                 count = 0

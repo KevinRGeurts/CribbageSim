@@ -4,6 +4,8 @@
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 
 
+# TODO: If decide to convert lead(...) to utility called by follow(...), then lead(...) may not belong in the list of functions that
+# children MUST implement, meaning that the doc string should be updated.
 class CribbagePlayStrategy:
     """
     Following a Strategy design pattern, this is the interface class for all cribbage hand playing strategies.
@@ -15,6 +17,66 @@ class CribbagePlayStrategy:
             pegs from winning and the game is close, scoring during play may be more valualbe than getting a high count during show.
         go(...) - For playing out as many cards as possible AFTER opponent has declared "go".
     """
+    
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
+        """
+        This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
+        Called to decide which cards from the hand to place in the crib.
+        :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: None
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(xfer_to_crib_callback))
+        assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+        raise NotImplementedError
+        return None
+
+    def follow(self, go_count, play_card_callback, get_hand_callback, play_recorder_callback=None):
+        """
+        This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
+        Called to decide which card to follow (play) in a go round.
+        :parameter go_count: The current cumulative count of the go round before the follow, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: (The pips count of the card played as int, Go declared as boolean), tuple
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+        raise NotImplementedError
+        return ('10', False)
+
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback,
+           play_recorder_callback=None):
+        """
+        This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
+        Deter,ome which card(s) if any to play in a go round after opponent has declared go.
+        :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
+        :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: The sum of pips count of any cards played, int
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        assert(callable(score_play_callback))
+        assert(callable(peg_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+        raise NotImplementedError
+        return 0
+
 
     # Note: Will need separate strategies for dealer and player, since, for example, form_crib(...) logic will depend heavily on who dealt
 
@@ -42,7 +104,10 @@ class DummyCribbagePlayStrategy(CribbagePlayStrategy):
         xfer_to_crib_callback(0)
 
         return None
-
+    
+    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
+    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
+    # get played in the context of the follow(...) logic.
     def lead(self, play_card_callback, get_hand_callback):
         """
         Leads (plays) the first remaining card in the hand, regardless of what it is.
@@ -146,6 +211,9 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
 
         return None
 
+    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
+    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
+    # get played in the context of the follow(...) logic.
     def lead(self, play_card_callback, get_hand_callback):
         """
         Ask human player which card to Lead (play) in a go round.

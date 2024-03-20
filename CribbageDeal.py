@@ -323,7 +323,7 @@ class CribbageDeal:
             self.peg_for_dealer(2)
 
         # Set variable that tracks which player will play next.
-        # For the first go round, the player always leads.    
+        # For the first go round of the deal, the player always leads.    
         next_to_play = CribbageRole.PLAYER    
             
         # Loop at this level to play multiple go rounds until the dealt cards for both players are exhausted 

@@ -257,6 +257,11 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         
         # We're interactive here, so ask the user which card from their hand they want to play
 
+        # Generate list of which if any cards can still be played, which will use "lightly" later.
+        # "Lightly" meaning that we will not restrict the list of cards available to choose from, though we will validate that any
+        # choice by the user is a valid play.
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - go_count)]
+
         declare_go = False
         valid_choice = False
         
@@ -267,7 +272,9 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         for card in get_hand_callback():
             query_dic[str(position)] = str(card)
             position += 1
-        query_dic['g'] = 'Go'
+        if len(playable) == 0:
+            # User has no playable cards, so add 'Go' to the list of choices
+            query_dic['g'] = 'Go'
         response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
         
         while not valid_choice:
@@ -293,7 +300,9 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                     for card in get_hand_callback():
                         query_dic[str(position)] = str(card)
                         position += 1
-                    query_dic['g'] = 'Go'
+                    if len(playable) == 0:
+                        # User has no playable cards, so add 'Go' to the list of choices
+                        query_dic['g'] = 'Go'
                     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
                     
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")

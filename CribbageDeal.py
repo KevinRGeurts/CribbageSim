@@ -6,7 +6,9 @@ from card import Card
 from deck import Deck, StackedDeck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import FifteenCombinationPlaying, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination, PairCombinationPlaying, RunCombinationPlaying, CribFlushCombination
+from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
+from CribbageCombination import CribFlushCombination
+from CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
 
 
 class CribbageRole(Enum):
@@ -40,8 +42,11 @@ class CribbageDeal:
         self.reset_deal(player_peg_callback,dealer_peg_callback)
         self.set_dealer_play_strategy(dealer_strategy)
         self.set_player_play_strategy(player_strategy)
+        # All elements of the _play_combinations list must be children of CribbageCombinationPlaying class.
         self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
+        # All elements of the _hand_show_combinations list must be children of CribbageCombinationShowing class.
         self._hand_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
+        # All elements of the _crib_show_combinations list must be children of CribbageCombinationShowing class.
         self._crib_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), CribFlushCombination(), HisNobsCombination()]
 
     def reset_deal(self, player_peg_callback = None, dealer_peg_callback = None):
@@ -219,6 +224,7 @@ class CribbageDeal:
         """
         score = 0
         for combo in self._hand_show_combinations:
+            assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
             print(info)
             score += info.score
@@ -233,6 +239,7 @@ class CribbageDeal:
         """
         score = 0
         for combo in self._crib_show_combinations:
+            assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
             print(info)
             score += info.score
@@ -246,6 +253,7 @@ class CribbageDeal:
         """
         score = 0
         for combo in self._play_combinations:
+            assert(isinstance(combo, CribbageCombinationPlaying))
             info = combo.score(combined_pile)
             print(info)
             score += info.score

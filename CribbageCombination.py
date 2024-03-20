@@ -32,16 +32,14 @@ class CribbageComboInfo(object):
         return s
 
 
+
 class CribbageCombination(object):
     """
-    Following a Strategy design pattern, this is the interface class for all cribbage card scoring combinations.
-    Each child must by convention and necessity implement these methods:
-        score(...) - Searches a Hand and for the existence of one or more instances of the combination in the Hand.
-            Returns information on the istances found and the score resulting from those instances.
-    The concept for using this class is that a client could hold a list of instances of children of this class, one for each scoring combination,
-    and the client would iterate through that list, calling score(...) method for each one, to tally up the score of a hand.
+    This is the base class for cribbage card scoring combinations of types playing and showing.  It's immediate children follow strategy design
+    patter and our interface classes for all cribbage card scoring combinations, either when playing or when showing a hand. It's grand children
+    are the individual scoring combinations, and must implement the score(...) method of their parent. This base class provides some common attributes
+    and methods for all.
     """
-    
     def __init__(self):
         """
         Construct the base class for a cribbage scoring combination.
@@ -53,6 +51,49 @@ class CribbageCombination(object):
     def get_name(self):
         return self._combo_name
 
+
+class CribbageCombinationPlaying(CribbageCombination):
+    """
+    Following a Strategy design pattern, this is the interface class for all cribbage card scoring combinations when playing a hand.
+    Each child must by convention and necessity implement these methods:
+        score(...) - Searches a play pile for the existence of one or more instances of the combination in the pile.
+            Returns information on the istances found and the score resulting from those instances.
+    The concept for using this class is that a client could hold a list of instances of children of this class, one for each scoring combination,
+    and the client would iterate through that list, calling score(...) method for each one, to tally up the score after playing a card to the play pile.
+    """
+    
+    def __init__(self):
+        """
+        Construct the base class for a cribbage scoring combination.
+        """
+        super().__init__()
+   
+    def score(self, pile = Hand()):
+        """
+        This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
+        :parameter pile: The play pile to search for a scoring combination, Hand object
+        :return: CribbageComboInfo object with information about the scoring combination in the hand, CribbageComboInfo object
+        """
+        raise NotImplementedError
+        return CribbageCombinInfo()
+
+
+class CribbageCombinationShowing(CribbageCombination):
+    """
+    Following a Strategy design pattern, this is the interface class for all cribbage card scoring combinations when showing a hand.
+    Each child must by convention and necessity implement these methods:
+        score(...) - Searches a Hand and for the existence of one or more instances of the combination in the Hand.
+            Returns information on the istances found and the score resulting from those instances.
+    The concept for using this class is that a client could hold a list of instances of children of this class, one for each scoring combination,
+    and the client would iterate through that list, calling score(...) method for each one, to tally up the score when showing a hand.
+    """
+    
+    def __init__(self):
+        """
+        Construct the base class for a cribbage scoring combination.
+        """
+        super().__init__()
+
     def permutations(self, size, cards = []):
         """
         Utility function to generate all permutations of number of cards size in list cards. This utility is a critical step in searching for
@@ -60,11 +101,9 @@ class CribbageCombination(object):
         :parameter size: The number of cards to include in each permutation, e.g., if size = 2, then permutations are all possible pairs, int
         :parameter cards: The list of cards to permutate, list
         """
-        # This if for a cribbage hand, so assert that size is between 2 and 5 inclusive
-        # NO during play the size will be greater than 2, but it might not be limited to 5
-        # assert (size >= 2 and size <= 5)
-        assert (size >= 2)
-
+        # This if for a cribbage hand, so assert that size is 5 (hand or crib, plus starter)
+        assert (size >= 2 and size <= 5)
+        
         permutations = []
         
         perm_iter = combinations(cards, size)
@@ -78,15 +117,15 @@ class CribbageCombination(object):
     def score(self, hand = Hand(), starter = None):
         """
         This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
-        :parameter hand: The hand to search for a flush, Hand object
+        :parameter hand: The hand to search for a scoring combination, Hand object
         :parameter starter: The starter card, Card object
-        :return: CribbageComboInfo object with information about the flush in the hand, CribbageComboInfo object
+        :return: CribbageComboInfo object with information about the scoring combination in the hand, CribbageComboInfo object
         """
         raise NotImplementedError
         return CribbageCombinInfo()
         
 
-class PairCombination(CribbageCombination):
+class PairCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score pairs in a cribbage hand.
     """
@@ -132,7 +171,7 @@ class PairCombination(CribbageCombination):
         return info
 
 
-class FlushCombination(CribbageCombination):
+class FlushCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score pairs in a cribbage hand, but not in the crib.
     Because ... the rules for a flush are different in a hand than in the crib.
@@ -182,7 +221,7 @@ class FlushCombination(CribbageCombination):
         
         return info
 
-class CribFlushCombination(CribbageCombination):
+class CribFlushCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score pairs in the cribbage crib, but not in a cribbage hand.
     Because ... the rules for a flush are different in the crib than in a hand.
@@ -230,7 +269,7 @@ class CribFlushCombination(CribbageCombination):
         return info
 
 
-class HisNobsCombination(CribbageCombination):
+class HisNobsCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score "his nobs" (Jack same suit as starter) in a cribbage hand.
     """
@@ -279,7 +318,7 @@ class HisNobsCombination(CribbageCombination):
         return info
 
 
-class FifteenCombination(CribbageCombination):
+class FifteenCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score 15's in a cribbage hand.
     """
@@ -330,7 +369,7 @@ class FifteenCombination(CribbageCombination):
         
         return info
 
-class RunCombination(CribbageCombination):
+class RunCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score runs in a cribbage hand.
     """
@@ -400,9 +439,7 @@ class RunCombination(CribbageCombination):
         return info
 
     
-# TODO: Consider deriving the XCombinationPlaying from a different base class, since the signature of score() method is different.
-
-class PairCombinationPlaying(CribbageCombination):
+class PairCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score pairs in a cribbage play pile.
     """
@@ -447,7 +484,7 @@ class PairCombinationPlaying(CribbageCombination):
         return info
 
 
-class RunCombinationPlaying(CribbageCombination):
+class RunCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score runs in a cribbage play pile.
     """
@@ -514,7 +551,7 @@ class RunCombinationPlaying(CribbageCombination):
         return is_run
 
 
-class FifteenCombinationPlaying(CribbageCombination):
+class FifteenCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score 15's in a cribbage play pile.
     """

@@ -10,7 +10,7 @@ from card import Card
 from hand import Hand
 from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination, PairCombinationPlaying, RunCombinationPlaying
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
+from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
@@ -51,27 +51,10 @@ def play_debug():
                     Card('H','5')]
     sd.add_cards(card_list)
         
-    game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
-    game._deal._deck = sd
+    deal = CribbageDeal(HoyleishDealerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+    deal._deck = sd
         
-    # Player1 (The dealer) will be one point from winning when the game begins, so the first score for that player will win the game.
-    game._board.peg_for_player1(120)
-    return_val = game.play()
-    
-    # # Create a stacked deck
-    # sd = StackedDeck()
-    # # Player will be dealt cards 1 - 6
-    # # Dealer will be dealt cards 7 - 12
-    # # Starter will be card 13
-    # card_list = [Card('H','3'), Card('S','3'), Card('C','8'), Card('S','4'), Card('C','10'), Card('S','2'),
-    #                 Card('S','6'), Card('C','7'), Card('C','4'), Card('D','A'), Card('H','9'), Card('C','2'),
-    #                 Card('D','2')]
-    # sd.add_cards(card_list)
-        
-    # deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
-    # deal._deck = sd
-        
-    # deal.play()
+    deal.play()
     
     return None
     

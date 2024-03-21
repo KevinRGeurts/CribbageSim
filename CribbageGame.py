@@ -35,6 +35,8 @@ class CribbageGame:
         self._board = CribbageBoard()
         self._player1 = name1
         self._player2 = name2
+        # TODO: When strategy1 != strategy2, it will be required to save these strategies, and swap them around for each new deal
+        # TODO: Think strategy1 and strategy2 might neec to be reversed below, since player1 always deals first
         self._deal = CribbageDeal(strategy1, strategy2)
 
     def peg_for_player1(self, count = 1):
@@ -73,6 +75,8 @@ class CribbageGame:
         while not game_over:
         
             deal_count += 1
+
+            # TODO: When strategy1 != strategy2, it will be required to save these strategies, and swap them around for each new deal
             
             # Reset deal so we are ready for a new deal
             match next_to_deal:

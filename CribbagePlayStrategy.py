@@ -2,6 +2,9 @@
 
 # Local imports
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
+from CribbageCombination import CribbageComboInfo
+from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
+from hand import Hand
 
 
 # TODO: If decide to convert lead(...) to utility called by follow(...), then lead(...) may not belong in the list of functions that
@@ -81,48 +84,19 @@ class CribbagePlayStrategy:
     # Note: Will need separate strategies for dealer and player, since, for example, form_crib(...) logic will depend heavily on who dealt
 
 
-class DummyCribbagePlayStrategy(CribbagePlayStrategy):
+class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
     """
-    An very simple and very dumb implementation of CribbagePlayStrategy, intended only to be used during initial development of the simulator,
-    so that overall algorithmic flow of playing can be worked out before working about playing well.
+    Base class for dealer and player play strategies based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish"
+    implies that not all recommendations from Hoyle may be implemented, and other strategy components may be implemented alternatively or
+    in addition too.
     """
-    
-    def form_crib(self, xfer_to_crib_callback, get_hand_callback):
+    def __init__(self):
         """
-        Forms the crib by providing the first two cards in the hand, regardless of what they are.
-        :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
-        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
-        :return: None
+        Construct an object of this class.
         """
-        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
-        # for construction. But it is better than nothing.
-        assert(callable(xfer_to_crib_callback))
-        assert(callable(get_hand_callback))
-
-        # This is a dumb former of the crib, so just dump the first two cards in the hand
-        xfer_to_crib_callback(0)
-        xfer_to_crib_callback(0)
-
-        return None
-    
-    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
-    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
-    # get played in the context of the follow(...) logic.
-    def lead(self, play_card_callback, get_hand_callback):
-        """
-        Leads (plays) the first remaining card in the hand, regardless of what it is.
-        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
-        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
-        :return: The pips count of the card played, int 
-        """
-        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
-        # for construction. But it is better than nothing.
-        assert(callable(play_card_callback))
-        assert(callable(get_hand_callback))
+        # All elements of the _guaranteed_combinations list must be children of CribbageCombinationShowing class.
+        self._guaranteed_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination()]
         
-        # This is a dumb player, always playing the first card left in the hand
-        count = play_card_callback(0)
-        return count
 
     def follow(self, go_count, play_card_callback, get_hand_callback):
         """
@@ -164,6 +138,107 @@ class DummyCribbagePlayStrategy(CribbagePlayStrategy):
         # This isn't implemented, so assert
         assert(False)
         return count
+
+    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
+    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
+    # get played in the context of the follow(...) logic.
+    def lead(self, play_card_callback, get_hand_callback):
+        """
+        Leads (plays) the first remaining card in the hand, regardless of what it is.
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :return: The pips count of the card played, int 
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        
+        # This is a dumb player, always playing the first card left in the hand
+        count = play_card_callback(0)
+        return count
+
+    def guaranteed_hand_score(self, hand = Hand()):
+        """
+        Utility function that determines the show points with 100% expectation in a cribbage hand. For example, a pair is counted, but a His Nobs
+        is NOT counted, because it depends on the suit of the starter, and thus would be considered to have an
+        expected value of 1 pnt X 0.25 prob = 0.25 points.
+        :parameter hand: The cards to score, Hand object
+        :return: Total points in the hand that have 100% expectation of being counted, int
+        """
+        score = 0
+        for combo in self._guaranteed_combinations:
+            assert(isinstance(combo, CribbageCombinationShowing))
+            info = combo.score(hand)
+            score += info.score
+        return score
+
+    # TODO: Create another member that returns expected values for a hand. Like a 0.25 points expected value for a jack in the hand.
+    # or a (16/52)*2 EV for a 5 in the hand, based on a ten or face card being drawn as starter. What is the EV for a 2 card sequence?
+    # What is the EV for a 2 card sequence with gap of one inbetween? Etc. If this is implemented, the concept is it is a secondary prioritization
+    # for crib forming, over guaranteed points available in the hand. It might also be used to help determine what card to follow or go.
+
+class HoyleishDealerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
+    """
+    Dealer play strategy based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations
+    from Hoyle may be implemented, and other strategy components may be implemented alternatively or in addition too. Dealer and player require
+    different form_crib(...) implementations because it's okay for the dealer to place points in the crib, whereas the player should almost
+    always avoid doing so.
+    """
+    
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
+        """
+        Forms the crib based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations
+        from Hoyle may be implemented, and other strategy components may be implemented alternatively or in addition too.
+        :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: None
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(xfer_to_crib_callback))
+        assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+
+        # First crib lay away strategy from Hoyle is to count up all the show points in the hand and lay away the two cards that
+        # leave the maximum possible score for the four that will remain in the hand
+         
+        # Get the cards in the hand, twice, so we have two lists that (for the moment) are duplicates
+        cards_1 = get_hand_callback()
+        cards_2 = get_hand_callback()
+        
+        # Need a CribbageCombinationShowing() object, to access it's permutations utility method
+        permutations = CribbageCombinationShowing().permutations(4, cards_1)
+
+        # Score each permutation and make a list of tuples (list of cards, score)
+        priority_list = []
+        for p in permutations:
+            h = Hand()
+            h.add_cards(p)
+            p_score = self.guaranteed_hand_score(h)
+            priority_list.append((p, p_score))
+
+        # Sort priority_list by descending guaranteed_hand_score
+        sorted_list = sorted(priority_list, key = lambda scored_hand: scored_hand[1], reverse = True)
+
+        # TODO: Need more logic here, but for now, just ...
+
+        # Keep for a hand the list of cards that is first in the sorted_list. Meaning...we need to first remove these cards from cards_1 list
+        # TODO: Simplify by combining lines, but be careful, simpler failed before
+        keep_list = sorted_list[0][0]
+        for c in keep_list:
+            cards_1.remove(c)
+
+        # Now transfer to the crib the remaining cards in cards_1, using cards_2 to look up their index
+        # TODO: Simplify by combining lines
+        for c in cards_1:
+            i = cards_2.index(c)
+            xfer_to_crib_callback(i)
+            # Refresh cards_2, since we've pulled a card out of the hand, and thus changed the indexing
+            cards_2 = get_hand_callback()
+ 
+        return None
 
 
 class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):

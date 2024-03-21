@@ -103,6 +103,7 @@ class CribbageCombinationShowing(CribbageCombination):
         different combinations.
         :parameter size: The number of cards to include in each permutation, e.g., if size = 2, then permutations are all possible pairs, int
         :parameter cards: The list of cards to permutate, list
+        :return: A list of permutations, where each permutation is a list of cards, so, a list of lists
         """
         # This if for a cribbage hand, so assert that size is 5 (hand or crib, plus starter)
         assert (size >= 2 and size <= 5)
@@ -218,7 +219,7 @@ class FlushCombination(CribbageCombinationShowing):
             info.score = info.number_instances * self._score_per_combo
             
             # Check if the starter is also the same suit as the flush
-            if starter.get_suit() == suit:
+            if starter and starter.get_suit() == suit:
                 info.instance_list[0].append(starter)
                 info.score = info.score + 1
         

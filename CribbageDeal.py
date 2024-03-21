@@ -199,6 +199,8 @@ class CribbageDeal:
     def xfer_player_card_to_crib(self, index = 0):
         """
         Transfer the card at index location in the player's hand to the crib. Remove it from the player's hand.
+        NOTE: Be very careful about calling this twice in a row without calling get_player_hand(...) and determing the index you want to transfer
+        from that returned list of Cards, since removing Cards from Hand will change indexing if not moving exclusively from higher to lower indices.
         :parameter index: The index location in the player's hand of the card to play, int [0...number of cards in hand - 1]
         :return None:
         """
@@ -209,6 +211,8 @@ class CribbageDeal:
     def xfer_dealer_card_to_crib(self, index = 0):
         """
         Transfer the card at index location in the dealer's hand to the crib. Remove it from the dealer's hand.
+        NOTE: Be very careful about calling this twice in a row without calling get_dealer_hand(...) and determing the index you want to transfer
+        from that returned list of Cards, since removing Cards from Hand will change indexing if not moving exclusively from higher to lower indices.
         :parameter index: The index location in the dealer's hand of the card to play, int [0...number of cards in hand - 1]
         :return None:
         """
@@ -311,6 +315,10 @@ class CribbageDeal:
         # Shuffle, that is, rebuild the deck
         self._deck.create_deck()
         
+        # TODO: Move to DEBUG level any logging that is not appropriate to be seen by all. For example, once an automatic play strategy
+        # has been created for one of the players, that player's hand info should not be logged at the INFO level where it will be visible to all.
+        # Crib should not be logged at INFO level until it is shown.
+
         # Deal player and dealer hands from the deck. In a normal game, this would be one card at a time alternating.
         # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
         self.draw_for_player(6)

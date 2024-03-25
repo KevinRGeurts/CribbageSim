@@ -2,10 +2,21 @@
 import unittest
 
 # Local
-from CribbagePlayStrategy import CribbagePlayStrategy
+from CribbagePlayStrategy import CribbagePlayStrategy, CribbageCribOption
 from CribbageDeal import CribbageDeal
+from card import Card
 
 class Test_CribbagePlayStrategy(unittest.TestCase):
+    
+    def test_CribbageCribOption_dunder_str(self):
+        option = CribbageCribOption()
+        option.hand = [Card('S','10'), Card('C','5'), Card('D','10'), Card('H','K')]
+        option.hand_score = 8
+        option.crib = [Card('H','8'), Card('C','8')]
+        option.crib_score = 2
+        exp_val = '10S 5C 10D KH,8,8H 8C,2'
+        act_val = str(option)
+        self.assertEqual(exp_val, act_val)
     
     def test_form_crib(self):
 

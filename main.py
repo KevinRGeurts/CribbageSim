@@ -10,7 +10,7 @@ from card import Card
 from hand import Hand
 from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination, PairCombinationPlaying, RunCombinationPlaying
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
+from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
@@ -40,21 +40,37 @@ def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
-    
+
     # Create a stacked deck
     sd = StackedDeck()
     # Player will be dealt cards 1 - 6
-    # Dealer will be dealt cards 7 - 12
-    # Starter will be card 13
-    card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3'), Card('H','8'), Card('H','K'),
-                    Card('S','Q'), Card('H','7'), Card('C','6'), Card('D','A'), Card('H','10'), Card('S','K'),
-                    Card('H','5')]
+    card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','8'), Card('H','8'), Card('H','K')]
     sd.add_cards(card_list)
         
-    deal = CribbageDeal(HoyleishDealerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+    deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
     deal._deck = sd
+    deal.draw_for_player(6)
         
-    deal.play()
+    hcp = HoyleishPlayerCribbagePlayStrategy()
+    hcp.form_crib(deal.xfer_player_card_to_crib, deal.get_player_hand)
+
+    crib = deal._crib_hand.get_cards()
+
+    
+    # # Create a stacked deck
+    # sd = StackedDeck()
+    # # Player will be dealt cards 1 - 6
+    # # Dealer will be dealt cards 7 - 12
+    # # Starter will be card 13
+    # card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3'), Card('H','8'), Card('H','K'),
+    #                 Card('S','Q'), Card('H','7'), Card('C','6'), Card('D','A'), Card('H','10'), Card('S','K'),
+    #                 Card('H','5')]
+    # sd.add_cards(card_list)
+        
+    # deal = CribbageDeal(HoyleishDealerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+    # deal._deck = sd
+        
+    # deal.play()
     
     return None
     

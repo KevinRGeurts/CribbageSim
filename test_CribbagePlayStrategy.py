@@ -30,7 +30,7 @@ class Test_CribbagePlayStrategy(unittest.TestCase):
         cd = CribbageDeal()
 
         cps = CribbagePlayStrategy()
-        self.assertRaises(NotImplementedError, cps.follow, 0, cd.play_card_for_player, cd.get_player_hand)
+        self.assertRaises(NotImplementedError, cps.follow, 0, cd.play_card_for_player, cd.get_player_hand, cd.get_combined_play_pile)
 
     def test_go(self):
 

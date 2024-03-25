@@ -361,19 +361,6 @@ class CribbageDeal:
             # Clear the combined pile of cards played during the go round, as this pile is used for scoring during play
             self._combined_pile = Hand()
 
-            # Whoever is next to play leads the "go" round. Use their play strategy to do so.
-            # Try commenting this out to see if it allows play through to the exhasution of cards. I think the only downside of this
-            # is that a player who runs out of cards in the previous go round may need to declare a go in the next round.
-            # match next_to_play:
-            #     case CribbageRole.PLAYER:
-            #         count = self._player_play_strategy.lead(self.play_card_for_player, self.get_player_hand)
-            #         next_to_play = CribbageRole.DEALER
-            #     case CribbageRole.DEALER:
-            #         count = self._dealer_play_strategy.lead(self.play_card_for_dealer, self.get_dealer_hand)
-            #         next_to_play = CribbageRole.PLAYER
-            # go_round_count += count
-            # self.log_play_info('After lead', go_round_count)
-
             # If go_declared, then it is a signal that the go round has finished inside this while loop by playing out a go, and it is
             # time to return to the outside while and launch the next go round. if go_round_count == 31, then it is a signal that the 
             # go round has finished inside this while loop by play count reaching exactly 31, and again, it is time to return to the outside
@@ -385,7 +372,8 @@ class CribbageDeal:
                 match next_to_play:
                     case CribbageRole.PLAYER:
                         (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player,
-                                                                                 self.get_player_hand, self.record_play)
+                                                                                 self.get_player_hand, self.get_combined_play_pile,
+                                                                                 self.record_play)
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
@@ -395,7 +383,8 @@ class CribbageDeal:
                         next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
                         (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_dealer,
-                                                                                 self.get_dealer_hand, self.record_play)
+                                                                                 self.get_dealer_hand, self.get_combined_play_pile,
+                                                                                 self.record_play)
                         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)

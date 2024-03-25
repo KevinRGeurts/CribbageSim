@@ -94,6 +94,30 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         act_val = options_list[0].crib
         self.assertEqual(exp_val, act_val)
 
+    def test_follow_no_playable_card(self):
+        exp_val = 1
+        act_val = 0
+        self.assertEqual(exp_val, act_val)
+
+    def test_follow_lead(self):
+        exp_val = 1
+        act_val = 0
+        self.assertEqual(exp_val, act_val)
+
+    def test_lead_1(self):
+        exp_val = 1
+        act_val = 0
+        self.assertEqual(exp_val, act_val)
+
+    def test_follow_1(self):
+        exp_val = 1
+        act_val = 0
+        self.assertEqual(exp_val, act_val)
+
+    def test_go_1(self):
+        exp_val = 1
+        act_val = 0
+        self.assertEqual(exp_val, act_val)
 
     def test_dealer_form_crib_max_hand(self):
 

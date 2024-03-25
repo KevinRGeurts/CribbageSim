@@ -35,14 +35,11 @@ class CribbageCribOption:
         return f"{hand},{self.hand_score},{crib},{self.crib_score}"
 
 
-# TODO: If decide to convert lead(...) to utility called by follow(...), then lead(...) may not belong in the list of functions that
-# children MUST implement, meaning that the doc string should be updated.
 class CribbagePlayStrategy:
     """
     Following a Strategy design pattern, this is the interface class for all cribbage hand playing strategies.
     Each child must by convention and necessity implement these methods:
         form_crib(...) - For selecting two cards from the dealt six to be placed in the crib 
-        lead(...) - For selecting the first card to play after a round of play has finished after a "go"
         follow(...) - For selecting subsequent cards to play seeking finally a "go". This logic will depend on all cards played so far during
             the current "go" round by both dealer and player. Could also depend on how close to done the game is, since when a player is a few
             pegs from winning and the game is close, scoring during play may be more valualbe than getting a high count during show.
@@ -66,13 +63,14 @@ class CribbagePlayStrategy:
         raise NotImplementedError
         return None
 
-    def follow(self, go_count, play_card_callback, get_hand_callback, play_recorder_callback=None):
+    def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
         """
         This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
         Called to decide which card to follow (play) in a go round.
         :parameter go_count: The current cumulative count of the go round before the follow, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
         :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: (The pips count of the card played as int, Go declared as boolean), tuple
         """
@@ -80,6 +78,7 @@ class CribbagePlayStrategy:
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
         if play_recorder_callback: assert(callable(play_recorder_callback))
         raise NotImplementedError
         return ('10', False)
@@ -122,29 +121,50 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         """
         Construct an object of this class.
         """
-        # All elements of the _guaranteed_combinations list must be children of CribbageCombinationShowing class.
+        # All elements of the _guaranteed_4card_combinations and _guaranteed_2card_combinations lists must be children of
+        # CribbageCombinationShowing class.
         self._guaranteed_4card_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination()]
         self._guaranteed_2card_combinations = [PairCombination(), FifteenCombination()]
         
 
-    def follow(self, go_count, play_card_callback, get_hand_callback):
+    def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
         """
-        Follows (plays) by playing the first remaining card in the hand, regardless of what it is.
+        Follows (plays) a card based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations
+        from Hoyle may be implemented, and other strategy components may be implemented alternatively or in addition too.
         :parameter go_count: The current cumulative count of the go round before the follow, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: (The pips count of the card played as int, Go declared as boolean), tuple
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
         
-        # Deteremine if any card can be played without go_count exceeding 31. If not, then return (0, True)
+        # Default tuple to return, arbitrarily here a GO tuple, but expected to be set in all branches below
+        return_val = (0, True)
         
-        # This is a dumb player, always playing the first card left in the hand
-        count = play_card_callback(0)
-        return (count, False)
+        # Deteremine list of cards in the hand that can be played without go_count exceeding 31.
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - go_count)]
+
+        if len(playable) > 0:
+            if len(get_play_pile_callback()) == 0:
+                # The play pile has no cards in it, so this is a lead, so call lead(...) method
+                count = self.lead(play_card_callback, get_hand_callback)
+                return_val = (count, False)
+            else:
+                # Apply logic for following
+                pass
+                
+        else:
+            # If no cards in the hand can be played, then return (0, True), in other words, declare GO.
+            return (0, True) 
+
+        return return_val
 
     def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
         """
@@ -173,7 +193,9 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
     # get played in the context of the follow(...) logic.
     def lead(self, play_card_callback, get_hand_callback):
         """
-        Leads (plays) the first remaining card in the hand, regardless of what it is.
+        Leads (plays) a first card in a go round based initially/roughly on "Strategy for Cribbage" described in Hoyle.
+        The "ish" implies that not all recommendations from Hoyle may be implemented, and other strategy components may be implemented
+        alternatively or in addition too. This is a utility method intended to be called by follow(...) method, not by outsiders.
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
         :return: The pips count of the card played, int 
@@ -297,6 +319,11 @@ class HoyleishDealerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
         # Sort priority_list by descending (guaranteed_hand_score + guaranteed_crib_score)
         sorted_list = sorted(priority_list, key = lambda option: (option.hand_score + option.crib_score), reverse = True)
 
+        # TODO: Could now filter sorted_list for all options that have the same hand_score + crib_score as the first item on the sorted list,
+        # and output a debug message, probably including str(sorted_list[i] for each such option), to start to build statistics on how
+        # often this prioritization scheme is ambiguous. This would be evidence of potential value in further work on prioritization, such as
+        # incorporating expected probability scores.
+
         # Now transfer to the crib the crib cards for the highest priority option
         for c in sorted_list[0].crib:
             i = cards.index(c)
@@ -344,6 +371,11 @@ class HoyleishPlayerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
         
         # Sort priority_list by descending (guaranteed_hand_score + guaranteed_crib_score)
         sorted_list = sorted(priority_list, key = lambda option: (option.hand_score - option.crib_score), reverse = True)
+
+        # TODO: Could now filter sorted_list for all options that have the same (hand_score - crib_score) as the first item on the sorted list,
+        # and output a debug message, probably including str(sorted_list[i] for each such option), to start to build statistics on how
+        # often this prioritization scheme is ambiguous. This would be evidence of potential value in further work on prioritization, such as
+        # incorporating expected probability scores.
 
         # Now transfer to the crib the crib cards for the highest priority option
         for c in sorted_list[0].crib:
@@ -428,12 +460,13 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         
         return count
 
-    def follow(self, go_count, play_card_callback, get_hand_callback, play_recorder_callback=None):
+    def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
         """
         Ask human player which card to follow (play) in a go round.
         :parameter go_count: The current cumulative count of the go round before the follow, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
         :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
         :return: (The pips count of the card played as int, Go declared as boolean), tuple
         """
@@ -441,6 +474,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
         if play_recorder_callback: assert(callable(play_recorder_callback))
         
         # We're interactive here, so ask the user which card from their hand they want to play

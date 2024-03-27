@@ -5,6 +5,7 @@ from enum import Enum
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 from CribbageCombination import CribbageComboInfo
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
+from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
 from hand import Hand
 
 
@@ -125,8 +126,9 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         # CribbageCombinationShowing class.
         self._guaranteed_4card_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination()]
         self._guaranteed_2card_combinations = [PairCombination(), FifteenCombination()]
-        
-
+        # All elements of the _play_combinations list must be children of CribbageCombinationPlaying class.
+        self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
+ 
     def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
         """
         Follows (plays) a card based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations
@@ -148,20 +150,30 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         # Default tuple to return, arbitrarily here a GO tuple, but expected to be set in all branches below
         return_val = (0, True)
         
-        # Deteremine list of cards in the hand that can be played without go_count exceeding 31.
+        # Determine list of cards in the hand that can be played without go_count exceeding 31.
         playable = [c for c in get_hand_callback() if c.count_card() <= (31 - go_count)]
 
         if len(playable) > 0:
             if len(get_play_pile_callback()) == 0:
                 # The play pile has no cards in it, so this is a lead, so call lead(...) method
                 h = Hand()
-                h.add_cards(get_hand_callback())
+                h.add_cards(playable)
                 (count, card) = self.lead(h)
-                return_val = (count, False)
                 play_card_callback(get_hand_callback().index(card))
+                return_val = (count, False)
             else:
                 # Apply logic for following
-                pass
+                hand = Hand()
+                hand.add_cards(playable)
+                pile = Hand()
+                pile.add_cards(get_play_pile_callback())
+                priority_list = self.rate_follows_in_hand(hand, pile)
+                # Sort priority_list by descending rating
+                sorted_list = sorted(priority_list, key = lambda rating: rating[1], reverse = True)
+                card = sorted_list[0][0]
+                count = card.count_card()
+                play_card_callback(get_hand_callback().index(card))
+                return_val = (count, False)
                 
         else:
             # If no cards in the hand can be played, then return (0, True), in other words, declare GO.
@@ -197,7 +209,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         The "ish" implies that not all recommendations from Hoyle may be implemented, and other strategy components may be implemented
         alternatively or in addition too. This is a utility method intended to be called by follow(...) method, not by outsiders.
         :parameter hand: The hand from which to lead a card, Hand object
-        :return: Tuple of (The pips count of the card to be lead, The card to be lead) (int, Card object) 
+        :return: Tuple of (The pips count of the card to be led, The card to be led) (int, Card object) 
         """
 
         priority_list = self.rate_leads_in_hand(hand)
@@ -393,6 +405,51 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
             ratings_list.append((c, singleton_ratings_map[c.get_pips()]))
         
         return ratings_list
+
+    def rate_follows_in_hand(self, hand = Hand(), pile = Hand()):
+        """
+        Utility function that provides a "score" or (later) an arbitrary "rating" for each card in the hand. The rating is chosen such that
+        the card with the highest rating is the card that is considered a better follow, meaning that it is more likely to generate more play
+        points for the leader and generate less play points for the opponent. Initial implementation is to play a card that will lead immediately
+        to the highest play score. Possibly in the future incorporate playing on or off a potential sequence, etc.
+        :parameter hand: The hand of cards for which to generate scores/ratings, Hand object
+        :parameter pile: The play pile to use to test for play scores. Includes all previously played cards in the go round., Hand object
+        :return: List of tuples (Card, Score/Rating), [(Card object, int)]
+        """
+        return_val = []
+
+        # Highest priority is to play a card in the hand which generates play points.
+        # So, iterate through the playable cards one at a time, creating a play pile with that card as the last, test that play pile for
+        # play scoring combinations, and score the card accordingly.
+
+        for card in hand:
+            # Add card to pile
+            pile.add_cards(card)
+
+            # Score the pile using play scoring combinations
+            score = 0
+            for combo in self._play_combinations:
+                assert(isinstance(combo, CribbageCombinationPlaying))
+                info = combo.score(pile)
+                score += info.score
+            # If card score is 0, and if card  would make the go round count 31, then score the card as 2
+            if score == 0:
+                if sum([c.count_card() for c in pile]) == 31:
+                    score = 2
+            # Use the pile score or the score for reaching 31 as the score/rating for card
+            return_val.append((card, score))
+
+            # TODO: What other logic if card has 0 score?
+            # Implement this either in such a way that guaranteed scores above always rate higher than any of these choices, or
+            # implement such that this kind of rating is done only if no cards receive a score. Basically the implementation is
+            # inside or outsde the current loop for card in hand.
+            # Play card that makes go round count exceed 15, so opponent can't score a 15?
+            # Play cared that brings score as close to 31 as possible to attempt to force opponent to declare go?
+
+            # Remove card from pile
+            pile.remove_card()
+        
+        return return_val
 
     # TODO: Create another member that returns expected values for a hand. Like a 0.25 points expected value for a jack in the hand.
     # or a (16/52)*2 EV for a 5 in the hand, based on a ten or face card being drawn as starter. What is the EV for a 2 card sequence?

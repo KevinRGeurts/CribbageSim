@@ -288,6 +288,75 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
         self.assertEqual(3, ratings_list[0][1]) # '8':3
 
+    def test_rate_follows_in_hand_31(self):
+        hcp = HoyleishCribbagePlayStrategy()
+
+        hand = Hand()
+        hand.add_cards([Card('C','A'), Card('H','2'), Card('D','3'), Card('S','3')])
+        
+        pile = Hand()
+        pile.add_cards([Card('C','K'), Card('H','10'), Card('S','8')])
+        
+        ratings_list = hcp.rate_follows_in_hand(hand, pile)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 4
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # card:rating (why)
+        self.assertEqual(0, ratings_list[0][1]) # AC:0
+        self.assertEqual(0, ratings_list[1][1]) # 2H:0
+        self.assertEqual(2, ratings_list[2][1]) # 3D:2 (31)
+        self.assertEqual(2, ratings_list[3][1]) # 3S:2 (31)
+
+    def test_rate_follows_in_hand_15_triplet(self):
+        hcp = HoyleishCribbagePlayStrategy()
+
+        hand = Hand()
+        hand.add_cards([Card('C','A'), Card('H','9'), Card('D','3'), Card('S','6')])
+        
+        pile = Hand()
+        pile.add_cards([Card('C','3'), Card('S','3')])
+        
+        ratings_list = hcp.rate_follows_in_hand(hand, pile)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 4
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # card:rating (why)
+        self.assertEqual(0, ratings_list[0][1]) # AC:0
+        self.assertEqual(2, ratings_list[1][1]) # 9H:2 (15)
+        self.assertEqual(6, ratings_list[2][1]) # 3D:6 (triplet)
+        self.assertEqual(0, ratings_list[3][1]) # 6S:0
+
+    def test_rate_follows_in_hand_run_15_pair(self):
+        hcp = HoyleishCribbagePlayStrategy()
+
+        hand = Hand()
+        hand.add_cards([Card('C','A'), Card('H','K'), Card('D','3'), Card('S','6')])
+        
+        pile = Hand()
+        pile.add_cards([Card('C','2'), Card('S','3')])
+        
+        ratings_list = hcp.rate_follows_in_hand(hand, pile)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 4
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # card:rating (why)
+        self.assertEqual(3, ratings_list[0][1]) # AC:3 (run of 3)
+        self.assertEqual(2, ratings_list[1][1]) # KH:2 (15)
+        self.assertEqual(2, ratings_list[2][1]) # 3D:2 (pair)
+        self.assertEqual(0, ratings_list[3][1]) # 6S:0
+
         
     def test_follow_no_playable_card(self):
 
@@ -344,9 +413,28 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         self.assertTupleEqual(exp_val, act_val)
 
     def test_follow_1(self):
-        exp_val = 1
-        act_val = 0
-        self.assertEqual(exp_val, act_val)
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','A'), Card('H','9'), Card('D','3'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.follow(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','3'), Card('S','3')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 6, consistent with current play pile
+        act_val = hcp.follow(6, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile)        
+        
+        # Did we get the return value tuple (pip played = 3, go_declared = False)
+        exp_val = (3, False)
+        self.assertTupleEqual(exp_val, act_val)
 
     def test_go_1(self):
         exp_val = 1

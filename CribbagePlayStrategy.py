@@ -181,7 +181,8 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
         return return_val
 
-    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback,
+           play_recorder_callback=None):
         """
         Determines which card(s) if any to play in a go round after opponent has declared go. Determination based initially/roughly on
         "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations from Hoyle may be implemented,
@@ -192,6 +193,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
         :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
         :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to play during the go
         :return: The sum of pips count of any cards played, int
         """
         # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
@@ -201,6 +203,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         assert(callable(get_play_pile_callback))
         assert(callable(score_play_callback))
         assert(callable(peg_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
 
         # The overall process flow in this function is the same as for 
 

@@ -28,13 +28,20 @@ def play_interactive_game():
 
 def play_interactive_deal():
     """
-    Use CribbageSimulator to play an interactive game.
+    Use CribbageSimulator to play an interactive deal.
     """
 
     deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
     deal.play()
 
     return None
+
+def play_auto_deal():
+    """
+    Use CribbageSimulator to play a completely automatic deal. 
+    """
+    deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+    deal.play()
 
 def play_debug():
     """
@@ -100,7 +107,7 @@ if __name__ == '__main__':
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'
-    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'd':'Debug'}
+    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Deal', 'd':'Debug'}
     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
     
     while response != 'q':
@@ -112,6 +119,9 @@ if __name__ == '__main__':
             
             case 'i':
                 play_interactive_deal()
+
+            case 'a':
+                play_auto_deal()
 
             case 'd':
                 play_debug()

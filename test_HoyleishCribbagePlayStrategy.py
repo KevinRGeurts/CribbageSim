@@ -290,14 +290,46 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
 
         
     def test_follow_no_playable_card(self):
-        exp_val = 1
-        act_val = 0
-        self.assertEqual(exp_val, act_val)
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.follow(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 29 so that no cards are playable, and GO is declared
+        act_val = hcp.follow(29, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile)        
+        
+        # Did we get the return value tuple (pip played = 0, go_declared = True)
+        exp_val = (0, True)
+        self.assertTupleEqual(exp_val, act_val)
 
     def test_follow_lead(self):
-        exp_val = 1
-        act_val = 0
-        self.assertEqual(exp_val, act_val)
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('S','10'), Card('C','5'), Card('D','A'), Card('C','3')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.follow(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 0, consistent with leading, but the lead will happen because combined play pile is empty
+        act_val = hcp.follow(0, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile)        
+        
+        # Did we get the return value tuple (pip played = 10, go_declared = False)
+        exp_val = (10, False)
+        self.assertTupleEqual(exp_val, act_val)
 
     def test_lead_1(self):
 
@@ -323,7 +355,7 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
 
     def test_dealer_form_crib_max_hand(self):
 
-         # Create a stacked deck
+        # Create a stacked deck
         sd = StackedDeck()
         # Dealer will be dealt cards 1 - 6
         card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','3'), Card('H','8'), Card('H','K')]

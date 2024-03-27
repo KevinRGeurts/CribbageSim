@@ -154,7 +154,9 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         if len(playable) > 0:
             if len(get_play_pile_callback()) == 0:
                 # The play pile has no cards in it, so this is a lead, so call lead(...) method
-                (count, card) = self.lead(get_hand_callback())
+                h = Hand()
+                h.add_cards(get_hand_callback())
+                (count, card) = self.lead(h)
                 return_val = (count, False)
                 play_card_callback(get_hand_callback().index(card))
             else:

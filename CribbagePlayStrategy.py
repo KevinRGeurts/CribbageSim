@@ -183,7 +183,9 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
     def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
         """
-        Determine which card(s) if any to play in a go round after their opponent has declared go.
+        Determines which card(s) if any to play in a go round after opponent has declared go. Determination based initially/roughly on
+        "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations from Hoyle may be implemented,
+        and other strategy components may be implemented alternatively or in addition too.
         :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
@@ -196,12 +198,53 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         # for construction. But it is better than nothing.
         assert(callable(play_card_callback))
         assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
         assert(callable(score_play_callback))
         assert(callable(peg_callback))
+
+        # The overall process flow in this function is the same as for 
+
+        play_count = go_count
         
-        # This isn't implemented, so assert
-        assert(False)
-        return count
+        # Generate list of which if any cards can still be played
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+
+        while (len(playable) > 0):
+
+            # Determine which card to play
+
+            # TODO: Logic here optimally would be conceptually that we would permute (including different orderings) all possible play sequences
+            # of playable cards that together make the play pile sum to <= 31. Each of these play sequences would be scored one card in the
+            # sequence at a time, and the total over the play sequence would be a priority weight for choosing that play sequence
+
+            # For now though, we'll consider it close enough to optimize each individual choice of playable cards, one at a time,
+            # and we will use rate_follows_in_hand() method to do so
+            hand = Hand()
+            hand.add_cards(playable)
+            pile = Hand()
+            pile.add_cards(get_play_pile_callback())
+            priority_list = self.rate_follows_in_hand(hand, pile)
+            # Sort priority_list by descending rating
+            sorted_list = sorted(priority_list, key = lambda rating: rating[1], reverse = True)
+            card = sorted_list[0][0]
+            count = card.count_card()
+
+            # TODO: Fix issue that if a card can be played during go that would make a pair, and a different card can be played that would make 31,
+            # that which of those gets played depends on the order of the cards in the hand. Optimally, the pair should be played to collect the 2
+            # for the pair plus 1 for the go.
+
+            # Play card
+            play_card_callback(get_hand_callback().index(card))
+            play_count += count
+
+            # Score any pairs or runs due to the played card
+            score_count = score_play_callback(get_play_pile_callback())
+            peg_callback(score_count)
+
+            # Generate list of which if any cards can still be played
+            playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+        
+        return (play_count - go_count)
 
     def lead(self, hand = Hand()):
         """
@@ -611,35 +654,6 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
         return None
-
-    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
-    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
-    # get played in the context of the follow(...) logic.
-    def lead(self, play_card_callback, get_hand_callback):
-        """
-        Ask human player which card to Lead (play) in a go round.
-        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
-        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
-        :return: The pips count of the card played, int 
-        """
-        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
-        # for construction. But it is better than nothing.
-        assert(callable(play_card_callback))
-        assert(callable(get_hand_callback))
-        
-        # We're interactive here, so ask the user which card from their hand they want to lead
-
-        # Build a query for the user to obtain a decision on card to lead
-        query_preface = 'What card do you wish to lead?'
-        query_dic = {}
-        position = 0
-        for card in get_hand_callback():
-            query_dic[str(position)] = str(card)
-            position += 1
-        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
-        count = play_card_callback(int(response))
-        
-        return count
 
     def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
         """

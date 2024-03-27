@@ -483,9 +483,134 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         exp_val = (4, False)
         self.assertTupleEqual(exp_val, act_val)
 
-    def test_go_1(self):
-        exp_val = 1
-        act_val = 0
+    def test_go_to_30(self):
+        # go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','A'), Card('H','3'), Card('D','10'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.go(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','K'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 26, consistent with current play pile
+        act_val = hcp.go(26, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile,
+                         deal.determine_score_playing, deal.peg_for_player)        
+        
+        # Did we get the return play count expected of A+3=4?
+        exp_val = 4
+        self.assertEqual(exp_val, act_val)
+
+    def test_go_to_31(self):
+        # go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','2'), Card('H','3'), Card('D','10'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.go(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','K'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 26, consistent with current play pile
+        act_val = hcp.go(26, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile,
+                         deal.determine_score_playing, deal.peg_for_player)        
+        
+        # Did we get the return play count expected of 2+3=5?
+        exp_val = 5
+        self.assertEqual(exp_val, act_val)
+
+    def test_go_pair_bug(self):
+        # go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','2'), Card('H','3'), Card('D','7'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.go(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','8'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 24, consistent with current play pile
+        act_val = hcp.go(24, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile,
+                         deal.determine_score_playing, deal.peg_for_player)        
+        
+        # Did we get the return play count expected of 6?
+        exp_val = 6
+        self.assertEqual(exp_val, act_val)
+
+    def test_go_pair(self):
+        # go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','2'), Card('H','3'), Card('D','8'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.go(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','8'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 24, consistent with current play pile
+        act_val = hcp.go(24, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile,
+                         deal.determine_score_playing, deal.peg_for_player)        
+        
+        # Did we get the return play count expected of 6?
+        exp_val = 6
+        self.assertEqual(exp_val, act_val)
+
+    def test_go_no_play(self):
+        # go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback):
+        
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','8'), Card('H','9'), Card('D','10'), Card('S','8')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.go(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','8'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 24, consistent with current play pile
+        act_val = hcp.go(24, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile,
+                         deal.determine_score_playing, deal.peg_for_player)        
+        
+        # Did we get the return play count expected of 0?
+        exp_val = 0
         self.assertEqual(exp_val, act_val)
 
     def test_dealer_form_crib_max_hand(self):

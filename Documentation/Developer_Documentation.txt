@@ -2,57 +2,140 @@ Cribbage Simulator Project Developer Documentation
  
 *** Algorithm steps for playing one deal of cribbage, implemented in CribbageDeal.play(...)
 
+        # Shuffle, that is, rebuild the deck
+        
+   
         # Deal player and dealer hands from the deck. In a normal game, this would be one card at a time alternating.
         # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
-
+        self.draw_for_player(6)lerer hand: {repr(self._dealer_hand)}")
+        
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
 
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
 
-        # Non-dealer, i.e., the player, leads the first "go" round. Use the player play strategy to do so.
-
-        # Dealer follows using the dealer play strategy.
-
-        # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer. Use the CribbageCombination's with
-        # hand constructed from the cards played by both player and dealer so far in the current go round to determine if any scoring has happened.
-
-    # TODO: Logic for scoring while playing needs to be more complex. Can't just iterate through the list of combinations created for scoreing while showing.
-    # When looking for a pair (triple, quadruple), must only look at the last sequential two, three, or four cards in the combined pile
-    # When looking for a 15, this must follow the card play count in the current go round.
-    # When looking for a run, can look back more than three cards, but can't include all cards previously used to score a run unless we've made a longer run
-    # by adding the last card. That is, don't score the same run twice.
-    # Might need to do this by scoring twice. Once with the current pile less last card, and then again with the current pile as is, and compare the two results.
-    # But honestly, I'm a bit at a loss on this.
-
-        # Player follows using their play strategy, which could include not playing a card but instead declaring go.
-        # Have they scored, then peg? Have they finished the round by reaching 31, then peg, and end round.
-
-        # If go has not been declared, then continuing alternating follows, until the follower makes the play count 31, or their partner declares go.
+        # Set variable that tracks which player will play next.
+        # For the first go round of the deal, the player always leads.    
+            
+        # Loop at this level to play multiple go rounds until the dealt cards for both player and dealer are exhausted 
+            
+            # Set the go round cumulative score to 0
         
-        # If go has been declared, then other player/dealer must play as close to 31 as possible, even if that means playing multiple cards in a row.
-        # Have they scored while doing so, like playing a pair of 2's? If so peg. If they don't reach 31, peg 1 for them. If they do reach 31, peg 2
-        # for them.
+            # Clear the combined pile of cards played during the go round, as this pile is used for scoring during play
+
+            # If go_declared, then it is a signal that the go round has finished inside this while loop by playing out a go, and it is
+            # time to return to the outside while and launch the next go round. if go_round_count == 31, then it is a signal that the 
+            # go round has finished inside this while loop by play count reaching exactly 31, and again, it is time to return to the outside
+            # while loop.
+
+                # Whoever is next to play follows using their play strategy.
+                        # Assess if any score in play has occured based on the player's or dealer's follow. If so, peg it for the player or dealer.
+                        # Rotate who will play next
+
+                # Has count for the go round reached exactly 31? Then peg 2 for player or dealer who played to reach 31.
+                    continue # Get us out of the while.
+
+                # if (go_declared):
+                    # Instruct the next_to_play to try to play out to 31, by calling go() method of their play strategy
+                            # Score 1 or 2 for the player or dealer, depending on how the player or dealer played out the go
+                    continue # Get us out of the while.
+            
+                # If go has not been declared, then continuing alternating follows, until go is declared, or we run out of cards in both hands
+                # That is, the while should keep cycling
+                # end of while not go_declared:
         
         # Play continues until both dealer and player are out of cards.
+        # end of while dealer or player have cards left in their hand
+            
+        # It's time to show (that is, count the hands after playing). During play, the hands have been emptied into the play piles, so score the piles.
+ 
+        # Score the player's hand
+        
+        # Score the dealer's hand
+        
+        # Score the dealer's crib
 
-        # If at any time during play, player or dealer pegs to end of board, game is over.
+*** Concept development for deciding which card from hand to lead when playing automatically, implemented in HoyleishCribbagePlayStrategy.lead(...) method
 
-        # Time for "showing" that is scoring hands. Use the set of CribbageCombination's to score, in order, player's hand, dealer's hand, crib.
-        # Peg appropriately.
+    Any card from hand that is lead as the potential to produce a score for the opponent (quantified as an expected value or EV = probability * point value),
+    and also a potential score for the leader when they play again after their opponent (quantified as an expected value). If we treat the EV for the
+    opponent as a negative number, and the EV for the leader as a positive number, then we can sum them together to get a net value. A net EV value
+    could be generated for each playable card in the hand, and the card to lead would be the one with the most positive net EV. This should
+    incorporate both offensive and defensive thinking into the lead decision. Lets run through some examples:
 
-        # If at any time during showing, player or dealer pegs to end of board, game is over.
+        Warning: It is likely that a lot of the below is pretty non-rigorous statistical calculations. Just as one example, I give the opponent
+        6 chances at any given card at a constant probability of drawing the needed card. But the numerator keeps assuming they have (52-7) cards to
+        draw from, when in reality that number changes with each draw. So it might be more like:
 
-        How might this look in a loop?
+        (1/(52-7))+(1/(52-8))+(1/(52-9))+(1/(52-10))+(1/(52-11))+(1/(52-12)) = 0.1414
 
-            While there are still any cards left in any hand to play, and 
-            While cumulative score for the go round has not produced a go, and then resolved the go
+        instead of
 
-                Play cards back and forth, adding to the cumulative score, and pegging for any pairs, 15's, runs
+        6/(52-7) = 0.13
 
-                One player issues a GO
+        But, look, probably close enough for relative prioritization.
 
-                Other player plays out to 31 if possible
+        Also, it could be better not to have 6 chances, but rather 4 chances, since two cards were layed off in the crib. But, since all the
+        probability factors are the same for the + and the -, in a relative prioritization maybe it doesn't matter.
 
-                Go round is over
+        (1) Leader leads one card of a pair they have in their hand. Let's say they have a 3C and a 3D in their hand, and we are calculating net
+        EV for the 3C. We will first assume that they have not layed another 3 off in the crib and that another 3 has not been drawn as the starter,
+        so that, from their knowledge, two 3's remain possible in their opponents hand. The opponent could score 2 for a pair if they had either the
+        3H or 3S in their hand, so the opponent EV is -1 * {probability} * {point value = 2}. Probability is estimated as (6*2)/(52-7). The 7 is the cards
+        the leader has seen from their dealt hand plus the starter card. The 6 in the numerator is the number of cards in the opponents hand, or
+        thus the number of "chances they have" to have been dealt one of the 2 remaining 3's. We are making an assumption here that they didn't lay
+        a 3 off into the crib, just to keep this of reasonable complexity. The scoring opportunity for the leader is that the opponent does have and play
+        one of the other 3's and thus scores a pair. This allows the leader to then follow with the 3D and score 6 for the triplet. The probability for
+        this is the same as for the opponent scoring a pair, since the 2nd 3 in the leader's hand is known. So the net EV of leading one from a pair is:
+        -1 * {12/(52-7)} * 2 + {12/(52-7)} * 6 = 4 * {12/(52-7)} = 1.0667. Note that if this was not the first lead in a go round, then the 7 value in the
+        denominator might be adjusted because more cards have been seen (how ever many cards the opponent has played), but this might not really make
+        a difference in relative prioritization.
 
-            Deal will nearly always end due to both hands running out of cards, as a go or 31 will rarely be the final event of a deal
+        (2) Leader leads one card of a two-card 15 that they have in their had, excluding a 5 paired with a 10 or face card, which will be a separate case.
+        This could be a 7-8 or a 9-6. Let's imagine leading the 7. In this case the opponent could score a 15 for 2 if they played any of the 3 assumed to be
+        unseen 8's. So the opponents EV is -1 * {(6*3)/(52-7)} * 2. The leader's opportunity is to then play their 8 to form a pair. If this happens it is a
+        wash in terms of net points scored, but, it does advance the leader by 2 pegs. So the net EV for this situation is:
+        -1 * {(6*3)/(52-7)} * 2 + {(6*3)/(52-7)} * 2 = 18/(52-7) = 0.0
+
+        (3) Leader has a two-card 15 consisting of a 5 and a 10 or face card. They play the 10 or face card, hoping the opponent plays a 5 for a 15. Then
+        the leader's response is to play their 5 for a pair. Again, net pegging is zero, but, leader advances 2 pegs. The the next EV is:
+        -1 * {(6*3)/(52-7)} * 2 + {(6*3)/(52-7)} * 2 = {(6*3)/(52-7)} = 0.0
+
+        (4) How might we quantify leading to try to induce a run? This is highly speculative, since there might be little to induce the opponent to cooperate
+        by playing on into the run. The exception would be with 6,7,8,9 containing runs, where the opportunity to score a 15 would induce the playing on by
+        the opponent. So, this could be incorporated into scenario 3. Imagine the leader's hand has a 6 and an 8. They lead the 8, and induce a 7 from the
+        the opponent, and then follow up with the 6 for a run of 3 for 3. net EV in this case looks like:
+        -1 * {(6*4)/(52-7)} * 2 + {(6*4)/(52-7)} * 3 = (6*4)/(52-7) = 0.5333
+        There is an equivalent scenario where leader has 7 and 9 in thier hand. They lead the 7 to induce the 8, and then play the 9 to complete the run.
+
+        (5) How might we quantify having a hand with a 2-3-10/face, leading the 3, hoping a 10 or face will be played simply as a high card, and following
+        with the 2 for the 15? Or a A-4-10/face is a same scenario. In this case the opponent inducement is entirely speculative. Their is a very high
+        likelihood of them having a 10 or face to play in the 4 cards in their hand, but no particular reason they should play it, and they might even
+        suspect the low card lead as intended to induce just that mistake on their part. Since a low card lead would not be typical.
+        
+        What do we make of the net EV of 0 for scenarios (2) and (3). These are both recommended as good play strategies by Hoyle. I guess what we make
+        of it is that any typical lead scenario probably has a negative EV. Let's imagine the leader has a hand with no pairs, no 15's, and no potential
+        run generators. Then this opponents opportunity is to generate a pair off whatever the lead is, with EV:
+        -1 * {(6*3)/(52-7)} * 2 = - 0.8
+
+        And what if we take a horrible lead decision of leading a 5, when one does not have another 5? In this case the EV of the opponent getting
+        a 15 by playing a 10 or a face could be as high as:
+        -1 * {(6*16)/(52-7)} * 2 = - 2.133 (okay, that clearly has the problem of being greater than 2, but maybe this is roughly due to assuming the crib
+        lay also provides chances)
+
+        So what might we make of this entire mess. Could we prioritize as follows?
+        (1) If you have any pair but 5's in your hand, lead one of them, hoping to capture a triplet for 6. If you lead from a pair of 5's
+        most likely the opponent will capture a 15 by plaing a 10/face, and you will capture nothing.
+        (2) If you have a 6 and an 8 in your hand, lead the 8, hoping to capture a run of 3 with the 6.
+        (3) If you have a 7 and 9 in your hand, lead the 7, hoping to capture a run of 3 with the 9.
+        (4) If you have a 5 and a 10/face in your hand, lead the 10/face, hoping to capture a pair with the 5.
+        (5) If you have a 6-9 or a 7-8 in your hand, lead one of them, hoping to capture a pair with the other.
+        (6) Lead any card in your hand less than 5, to defend against a 15. With preference running 4 > 3 > 2 > 1
+        (7) Lead any card greater than 5 in your hand. With preference running Face/10 > 9 > 8 > 7 > 6.
+        (8) Very last option would be to lead a 5.
+
+
+
+
+
+        
+

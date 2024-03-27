@@ -41,20 +41,28 @@ def play_debug():
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
 
-    # Create a stacked deck
-    sd = StackedDeck()
-    # Player will be dealt cards 1 - 6
-    card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','8'), Card('H','8'), Card('H','K')]
-    sd.add_cards(card_list)
+    hcp = HoyleishCribbagePlayStrategy()
         
-    deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
-    deal._deck = sd
-    deal.draw_for_player(6)
-        
-    hcp = HoyleishPlayerCribbagePlayStrategy()
-    hcp.form_crib(deal.xfer_player_card_to_crib, deal.get_player_hand)
+    h = Hand()
+    h.add_cards([Card('C','6'), Card('D','7'), Card('H','8'), Card('S','9')])
 
-    crib = deal._crib_hand.get_cards()
+    ratings_list = hcp.rate_leads_in_hand(h)
+
+
+    # # Create a stacked deck
+    # sd = StackedDeck()
+    # # Player will be dealt cards 1 - 6
+    # card_list = [Card('S','10'), Card('C','5'), Card('D','10'), Card('C','8'), Card('H','8'), Card('H','K')]
+    # sd.add_cards(card_list)
+        
+    # deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+    # deal._deck = sd
+    # deal.draw_for_player(6)
+        
+    # hcp = HoyleishPlayerCribbagePlayStrategy()
+    # hcp.form_crib(deal.xfer_player_card_to_crib, deal.get_player_hand)
+
+    # crib = deal._crib_hand.get_cards()
 
     
     # # Create a stacked deck

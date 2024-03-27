@@ -94,6 +94,201 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         act_val = options_list[0].crib
         self.assertEqual(exp_val, act_val)
 
+    # Name of test based on leading to potentially capture a triplet
+    def test_rate_leads_in_hand_triplets(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','A'), Card('S','A'), Card('H','2'), Card('D','2'), Card('S','3'), Card('C','3'), Card('D','4'), Card('H','4'),
+                     Card('C','5'), Card('S','5'), Card('H','6'), Card('D','6'), Card('S','7'), Card('C','7'), Card('D','8'), Card('H','8'),
+                     Card('C','9'), Card('S','9'), Card('H','10'), Card('D','10'), Card('S','J'), Card('C','J'), Card('D','Q'), Card('H','Q'),
+                     Card('C','K'), Card('S','K')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 26
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(22, ratings_list[0][1]) # 'A':22
+        self.assertEqual(22, ratings_list[1][1]) # 'A':22
+        self.assertEqual(23, ratings_list[2][1]) # '2':23
+        self.assertEqual(23, ratings_list[3][1]) # '2':23
+        self.assertEqual(24, ratings_list[4][1]) # '3':24
+        self.assertEqual(24, ratings_list[5][1]) # '3':24
+        self.assertEqual(25, ratings_list[6][1]) # '4':25
+        self.assertEqual(25, ratings_list[7][1]) # '4':25
+        self.assertEqual(0, ratings_list[8][1]) # '5':0
+        self.assertEqual(0, ratings_list[9][1]) # '5':0
+        self.assertEqual(17, ratings_list[10][1]) # '6':17
+        self.assertEqual(17, ratings_list[11][1]) # '6':17
+        self.assertEqual(18, ratings_list[12][1]) # '7':18
+        self.assertEqual(18, ratings_list[13][1]) # '7':18
+        self.assertEqual(19, ratings_list[14][1]) # '8':19
+        self.assertEqual(19, ratings_list[15][1]) # '8':19
+        self.assertEqual(20, ratings_list[16][1]) # '9':10
+        self.assertEqual(20, ratings_list[17][1]) # '9':10
+        self.assertEqual(21, ratings_list[18][1]) # '10':21
+        self.assertEqual(21, ratings_list[19][1]) # '10':21
+        self.assertEqual(21, ratings_list[20][1]) # 'J':21
+        self.assertEqual(21, ratings_list[21][1]) # 'J':21
+        self.assertEqual(21, ratings_list[22][1]) # 'Q':21
+        self.assertEqual(21, ratings_list[23][1]) # 'Q':21
+        self.assertEqual(21, ratings_list[24][1]) # 'K':21
+        self.assertEqual(21, ratings_list[25][1]) # 'K':21
+
+    # Name of test based on leading to potentially capture a run (6-7-8 or 7-8-9) or a pair (9s or 6s)
+    def test_rate_leads_in_hand_runspairs(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','6'), Card('S','7'), Card('H','8'), Card('D','9')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 4
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(10, ratings_list[0][1]) # '6':10
+        self.assertEqual(15, ratings_list[1][1]) # '7':15
+        self.assertEqual(16, ratings_list[2][1]) # '8':16
+        self.assertEqual(13, ratings_list[3][1]) # '9':13
+    
+    # Name of test based on leading to potentially capture a pair (7s or 8s)
+    def test_rate_leads_in_hand_pairs(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('S','7'), Card('H','8')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 2
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(11, ratings_list[0][1]) # '7':11
+        self.assertEqual(12, ratings_list[1][1]) # '8':12
+
+    # Name of test based on leading to potentially capture a pair of 5s
+    def test_rate_leads_in_hand_pair5s(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','5'), Card('H','10'), Card('S','J'), Card('H','Q'), Card('C','K')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 5
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(0, ratings_list[0][1]) # '5':0
+        self.assertEqual(14, ratings_list[1][1]) # '10':0
+        self.assertEqual(14, ratings_list[2][1]) # 'J':14
+        self.assertEqual(14, ratings_list[3][1]) # 'Q':14
+        self.assertEqual(14, ratings_list[4][1]) # 'K':14
+
+
+    def test_rate_leads_in_hand_singletons_A123456(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','A'), Card('S','2'), Card('S','3'), Card('S','4'), Card('H','5'), Card('D','6')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 6
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(6, ratings_list[0][1]) # 'A':6
+        self.assertEqual(7, ratings_list[1][1]) # '2':7
+        self.assertEqual(8, ratings_list[2][1]) # '3':8
+        self.assertEqual(9, ratings_list[3][1]) # '4':9
+        self.assertEqual(0, ratings_list[4][1]) # '5':0
+        self.assertEqual(1, ratings_list[5][1]) # '6':1
+
+    def test_rate_leads_in_hand_singletons_910JQK(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','9'), Card('S','10'), Card('H','J'), Card('D','Q'), Card('C','K')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 5
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(4, ratings_list[0][1]) # '9':4
+        self.assertEqual(5, ratings_list[1][1]) # '10':5
+        self.assertEqual(5, ratings_list[2][1]) # '7':5
+        self.assertEqual(5, ratings_list[3][1]) # 'Q':5
+        self.assertEqual(5, ratings_list[4][1]) # 'K':5
+
+    def test_rate_leads_in_hand_singletons_7(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','7')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 1
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(2, ratings_list[0][1]) # '7':2
+
+    def test_rate_leads_in_hand_singletons_8(self):
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','8')])
+
+        ratings_list = hcp.rate_leads_in_hand(h)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 1
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # 'pips':rating
+        self.assertEqual(3, ratings_list[0][1]) # '8':3
+
+        
     def test_follow_no_playable_card(self):
         exp_val = 1
         act_val = 0
@@ -105,9 +300,16 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         self.assertEqual(exp_val, act_val)
 
     def test_lead_1(self):
-        exp_val = 1
-        act_val = 0
-        self.assertEqual(exp_val, act_val)
+
+        hcp = HoyleishCribbagePlayStrategy()
+        
+        h = Hand()
+        h.add_cards([Card('C','6'), Card('D','7'), Card('H','8'), Card('S','9')])
+
+        # Does the 8H get lead as expected?
+        exp_val = (8, h[2])
+        act_val = hcp.lead(h)
+        self.assertTupleEqual(exp_val, act_val)
 
     def test_follow_1(self):
         exp_val = 1

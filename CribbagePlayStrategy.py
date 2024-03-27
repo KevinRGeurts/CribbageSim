@@ -154,8 +154,9 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         if len(playable) > 0:
             if len(get_play_pile_callback()) == 0:
                 # The play pile has no cards in it, so this is a lead, so call lead(...) method
-                count = self.lead(play_card_callback, get_hand_callback)
+                (count, card) = self.lead(get_hand_callback())
                 return_val = (count, False)
+                play_card_callback(get_hand_callback().index(card))
             else:
                 # Apply logic for following
                 pass
@@ -188,26 +189,25 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
         assert(False)
         return count
 
-    # TODO: This isn't currently being used for anything. Rather than remove it entirely, keep it for now, but consider repurposing it
-    # as a utility called from follow(...) when the play pile is empty. That would encapsulate a strategy specific to leading, but the card would
-    # get played in the context of the follow(...) logic.
-    def lead(self, play_card_callback, get_hand_callback):
+    def lead(self, hand = Hand()):
         """
         Leads (plays) a first card in a go round based initially/roughly on "Strategy for Cribbage" described in Hoyle.
         The "ish" implies that not all recommendations from Hoyle may be implemented, and other strategy components may be implemented
         alternatively or in addition too. This is a utility method intended to be called by follow(...) method, not by outsiders.
-        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
-        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
-        :return: The pips count of the card played, int 
+        :parameter hand: The hand from which to lead a card, Hand object
+        :return: Tuple of (The pips count of the card to be lead, The card to be lead) (int, Card object) 
         """
-        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
-        # for construction. But it is better than nothing.
-        assert(callable(play_card_callback))
-        assert(callable(get_hand_callback))
+
+        priority_list = self.rate_leads_in_hand(hand)
+
+        # Sort priority_list by descending rating
+        sorted_list = sorted(priority_list, key = lambda rating: rating[1], reverse = True)
+
+        # Return the top-rated card as the lead
+        lead_card = sorted_list[0][0]
+        lead_count = lead_card.count_card()
         
-        # This is a dumb player, always playing the first card left in the hand
-        count = play_card_callback(0)
-        return count
+        return (lead_count, lead_card)
 
     def guaranteed_hand_score(self, hand = Hand()):
         """
@@ -276,6 +276,122 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
         return priority_list
 
+    def rate_leads_in_hand(self, hand = Hand()):
+        """
+        Utility function that provides a "rating" or arbitrary "score" for each card in the hand. The rating is chosen such that
+        the card with the highest rating is the card that is considered a better lead, meaning that it is more likely to generate more play
+        points for the leader and generate less play points for the opponent.
+        :parameter hand: The hand of cards fro which to generate ratings, Hand object
+        :return: List of tuples (Card, Rating), [(Card object, int)]
+        """
+        # Basis for ratings: Apply this list in a "greedy" fashion from top to bottom. That is, if a card recives a rating from a scenario
+        # higher in the list, do not apply a lower scenario to it. See also Developer_Documentation.txt for though process that led to this list.
+        # (1) If you have any pair but 5's in your hand, lead one of them, hoping to capture a triplet for 6. If you lead from a pair of 5's
+        # most likely the opponent will capture a 15 by plaing a 10/face, and you will capture nothing.
+        #   {Rate both cards of a pair as follows 6X:17,7X:18,8X:19,9X:20,10X/Face:21,A:22,2X23,3X24,4X:25}
+        # (2) If you have a 6 and an 8 in your hand, lead the 8, hoping to capture a run of 3 with the 6.
+        #   {Rate an 8 in this situation as a 16}
+        # (3) If you have a 7 and 9 in your hand, lead the 7, hoping to capture a run of 3 with the 9.
+        #   {Rate a 7 in this situation as a 15}
+        # (4) If you have a 5 and a 10/face in your hand, lead the 10/face, hoping to capture a pair with the 5.
+        #   {Rate each 10/Face in this situation as 14}
+        # (5) If you have a 6-9 or a 7-8 in your hand, lead one of them, hoping to capture a pair with the other.
+        #   {Rate a 6, 7, 8, or 9 in this situation as 10, 11, 12, 13 respectively, so that also take advantage of (7)}
+        # (6) Lead any card in your hand less than 5, to defend against a 15. With preference running 4 > 3 > 2 > A
+        #   {Rate A as 6, 2 as 7, 3 as 8, 4 as 9}
+        # (7) Lead any card greater than 5 in your hand. With preference running Face/10 > 9 > 8 > 7 > 6.
+        #   {Rate: 6 as 1, 7 as 2, 8 as 3, 9 as 4, 10/Face as 5}
+        # (8) Very last option would be to lead a 5. {rate a 5 as 0}
+
+        pair_ratings_map = {'5':0, '6':17, '7':18, '8':19, '9':20, '10':21, 'J':21, 'Q':21, 'K':21, 'A':22, '2':23, '3':24, '4':25}
+        singleton_ratings_map = {'5':0, '6':1, '7':2, '8':3, '9':4, '10':5, 'J':5, 'Q':5, 'K':5, 'A':6, '2':7, '3':8, '4':9}
+        
+        ratings_list = []
+       
+        # Get information about all pairs in the hand
+        pair_info = PairCombination().score(hand)
+        
+        # Iterate through each card in the hand and determine its rating, greedily applying the rules commented above
+
+        for c in hand:
+
+            have_pair_of_c = False
+            for pair in pair_info.instance_list:
+                if c.get_pips() == pair[0].get_pips():
+                    # We have a pair of c's in the hand
+                    have_pair_of_c = True
+                    ratings_list.append((c, pair_ratings_map[c.get_pips()]))
+                    break # Don't need to look at any more pairs in pair_info
+            if have_pair_of_c: continue # Greedy algorith, so done rating the card
+
+            # If card c is an 8, do we also have a 6? {scenario (2)}
+            if c.get_pips() == '8':
+                # Card c is an 8
+                list_of_6s = [c6 for c6 in hand if c6.get_pips()=='6']
+                if len(list_of_6s) > 0:
+                    # We also have one or more 6's in the hand
+                    ratings_list.append((c, 16))
+                    continue # Greedy algorith, so done rating the card
+
+            # If card c is a 7, do we also have a 9? {scenario (3)}
+            if c.get_pips() == '7':
+                # Card c is an 7
+                list_of_9s = [c9 for c9 in hand if c9.get_pips()=='9']
+                if len(list_of_9s) > 0:
+                    # We also have one or more 9's in the hand
+                    ratings_list.append((c, 15))
+                    continue # Greedy algorith, so done rating the card
+
+            # If card c is a 10, J, Q, or K, do we also have a 5? {scenario (4)}
+            if c.get_pips() == '10' or c.get_pips() == 'J' or c.get_pips() == 'Q' or c.get_pips() == 'K':
+                # Card c is an 10 or Face
+                list_of_5s = [c5 for c5 in hand if c5.get_pips()=='5']
+                if len(list_of_5s) > 0:
+                    # We also have one or more 5's in the hand
+                    ratings_list.append((c, 14))
+                    continue # Greedy algorith, so done rating the card
+
+            # If card c is a 9, do we also have a 6? {scenario (5a)}
+            if c.get_pips() == '9':
+                # Card c is an 9
+                list_of_6s = [c6 for c6 in hand if c6.get_pips()=='6']
+                if len(list_of_6s) > 0:
+                    # We also have one or more 6's in the hand
+                    ratings_list.append((c, 13))
+                    continue # Greedy algorith, so done rating the card
+
+            # If card c is an 8, do we also have a 7? {scenario (5b)}
+            if c.get_pips() == '8':
+                # Card c is an 8
+                list_of_7s = [c7 for c7 in hand if c7.get_pips()=='7']
+                if len(list_of_7s) > 0:
+                    # We also have one or more 7's in the hand
+                    ratings_list.append((c, 12))
+                    continue # Greedy algorith, so done rating the card
+            
+            # If card c is a 7, do we also have a 8? {scenario (5c)}
+            if c.get_pips() == '7':
+                # Card c is a 7
+                list_of_8s = [c8 for c8 in hand if c8.get_pips()=='8']
+                if len(list_of_8s) > 0:
+                    # We also have one or more 8's in the hand
+                    ratings_list.append((c, 11))
+                    continue # Greedy algorith, so done rating the card
+
+            # If card c is a 6, do we also have a 9? {scenario (5d)}
+            if c.get_pips() == '6':
+                # Card c is a 6
+                list_of_9s = [c9 for c9 in hand if c9.get_pips()=='9']
+                if len(list_of_9s) > 0:
+                    # We also have one or more 9's in the hand
+                    ratings_list.append((c, 10))
+                    continue # Greedy algorith, so done rating the card
+
+            # Lastly, rate the card as a singleton {scenario (6) and (7)}
+            ratings_list.append((c, singleton_ratings_map[c.get_pips()]))
+        
+        return ratings_list
+
     # TODO: Create another member that returns expected values for a hand. Like a 0.25 points expected value for a jack in the hand.
     # or a (16/52)*2 EV for a 5 in the hand, based on a ten or face card being drawn as starter. What is the EV for a 2 card sequence?
     # What is the EV for a 2 card sequence with gap of one inbetween? Etc. If this is implemented, the concept is it is a secondary prioritization
@@ -311,7 +427,7 @@ class HoyleishDealerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
          
         # Get the cards in the hand
         cards = get_hand_callback()
-        
+       
         # Generate permutations of 4-card hands / 2-card crib contributions, and score them
         h = Hand().add_cards(cards)
         priority_list = self.permute_and_score_dealt_hand(h)

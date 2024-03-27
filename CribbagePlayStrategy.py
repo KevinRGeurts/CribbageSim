@@ -420,7 +420,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
         # Highest priority is to play a card in the hand which generates play points.
         # So, iterate through the playable cards one at a time, creating a play pile with that card as the last, test that play pile for
-        # play scoring combinations, and score the card accordingly.
+        # play scoring combinations, or for increasing the go round count to 31, and score the card accordingly.
 
         for card in hand:
             # Add card to pile
@@ -439,15 +439,21 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
             # Use the pile score or the score for reaching 31 as the score/rating for card
             return_val.append((card, score))
 
-            # TODO: What other logic if card has 0 score?
-            # Implement this either in such a way that guaranteed scores above always rate higher than any of these choices, or
-            # implement such that this kind of rating is done only if no cards receive a score. Basically the implementation is
-            # inside or outsde the current loop for card in hand.
-            # Play card that makes go round count exceed 15, so opponent can't score a 15?
-            # Play cared that brings score as close to 31 as possible to attempt to force opponent to declare go?
-
             # Remove card from pile
             pile.remove_card()
+
+        # If no card has received a non-zero score above, then provide an arbitrary "ranking" based on pips, where higher pip value
+        # provides a higher ranking for the card. This should lean in the direction of both defensively pushing the go round count past
+        # 15 and pushing the go round count as close to 31 as possible to try to force a declaration of GO from oponent.
+
+        if sum([rv[1] for rv in return_val]) == 0:
+            # No card received a non-zero score above, thus there are no cards that can be played for play points
+            # Clear return_val and start over, since we can't modify the tuples in the list
+            return_val = []
+            for card in hand:
+                return_val.append((card, card.count_card()))
+
+        # TODO: Consider adding logic to value playing on (offensive) or playing off (defensive) an emerging potential run on the play pile
         
         return return_val
 

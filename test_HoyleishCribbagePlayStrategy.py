@@ -357,6 +357,29 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         self.assertEqual(2, ratings_list[2][1]) # 3D:2 (pair)
         self.assertEqual(0, ratings_list[3][1]) # 6S:0
 
+    def test_rate_follows_in_hand_no_play_score(self):
+        hcp = HoyleishCribbagePlayStrategy()
+
+        hand = Hand()
+        hand.add_cards([Card('C','9'), Card('H','K'), Card('D','3'), Card('S','6')])
+        
+        pile = Hand()
+        pile.add_cards([Card('C','A'), Card('S','A')])
+        
+        ratings_list = hcp.rate_follows_in_hand(hand, pile)
+
+        # Did we get one rating for each card in the hand?
+        exp_val = 4
+        act_val = len(ratings_list)
+        self.assertEqual(exp_val, act_val)
+
+        # Did the cards get rated as expected?
+        # Format: self.assertEqual(exp_val, act_val) # card:rating (why)
+        self.assertEqual(9, ratings_list[0][1]) # 9C:9 (pip)
+        self.assertEqual(10, ratings_list[1][1]) # KH:10 (pip)
+        self.assertEqual(3, ratings_list[2][1]) # 3D:3 (pip)
+        self.assertEqual(6, ratings_list[3][1]) # 6S:6 (pip)
+
         
     def test_follow_no_playable_card(self):
 
@@ -412,7 +435,7 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         act_val = hcp.lead(h)
         self.assertTupleEqual(exp_val, act_val)
 
-    def test_follow_1(self):
+    def test_follow_play_score(self):
 
         # Create a stacked deck
         sd = StackedDeck()
@@ -434,6 +457,30 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         
         # Did we get the return value tuple (pip played = 3, go_declared = False)
         exp_val = (3, False)
+        self.assertTupleEqual(exp_val, act_val)
+
+    def test_follow_play_highest_playable(self):
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Cards 1 - 4 will be drawn into player's hand
+        card_list = [Card('C','3'), Card('H','2'), Card('D','4'), Card('S','6')]
+        sd.add_cards(card_list)
+        
+        # Create a CribbageDeal, which for this test, will provide the callback functions for calling HoyleishCribbagePlayStrategy.follow(...)
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal._deck = sd
+        deal.draw_for_player(4)
+
+        # Create a combined play pile for the deal
+        deal._combined_pile.add_cards([Card('C','K'), Card('S','J'), Card('H','6')])
+        
+        hcp = HoyleishCribbagePlayStrategy()
+        # Set go_count to 26, consistent with current play pile
+        act_val = hcp.follow(26, deal.play_card_for_player, deal.get_player_hand, deal.get_combined_play_pile)        
+        
+        # Did we get the return value tuple (pip played = 4, go_declared = False)
+        exp_val = (4, False)
         self.assertTupleEqual(exp_val, act_val)
 
     def test_go_1(self):

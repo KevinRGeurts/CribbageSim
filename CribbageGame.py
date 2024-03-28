@@ -5,7 +5,7 @@ from enum import Enum
 # Local imports
 from CribbageBoard import CribbageBoard
 from CribbageDeal import CribbageDeal
-from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy
+from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
 
 class CribbagePlayers(Enum):
@@ -21,23 +21,36 @@ class CribbageGame:
     Class representing a cribbage game, to be played out by two players, player1 and player2.
     """
     
-    def __init__(self, name1 = 'player 1', name2 = 'player 2',
-                 strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy()):
+    def __init__(self, name1 = 'human_player', name2 = 'machine_player',
+                 player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                 dealer_strategy1 = None, dealer_strategy2 = None):
         """
         Construct a cribbage game with a CribbageBoard, two player names, and a CribbageDeal.
         :parameter name1: Name of player1, string
         :parameter name2: Name of player2, string
-        :parameter strategy1: Playing strategy for player1, Instance of CribbagePlayStrategy
-        :parameter strategy2: Playing strategy for player2, Instance of CribbagePlayStrategy
+        :parameter player_strategy1: Player strategy for player1, Instance of CribbagePlayStrategy
+        :parameter player_strategy2: Player strategy for player2, Instance of CribbagePlayStrategy
+        :parameter dealer_strategy1: Dealer strategy for player1 (defaults to player_strategy1 if None), Instance of CribbagePlayStrategy
+        :parameter dealer_strategy2: Dealer strategy for player2 (defaults to player_strategy2 if None), Instance of CribbagePlayStrategy
         """
-        assert(isinstance(strategy1, CribbagePlayStrategy))
-        assert(isinstance(strategy2, CribbagePlayStrategy))
+        assert(isinstance(player_strategy1, CribbagePlayStrategy))
+        assert(isinstance(player_strategy2, CribbagePlayStrategy))
+        if dealer_strategy1: assert(isinstance(dealer_strategy1, CribbagePlayStrategy))
+        if dealer_strategy2: assert(isinstance(dealer_strategy2, CribbagePlayStrategy))
         self._board = CribbageBoard()
         self._player1 = name1
         self._player2 = name2
-        # TODO: When strategy1 != strategy2, it will be required to save these strategies, and swap them around for each new deal
-        # TODO: Think strategy1 and strategy2 might neec to be reversed below, since player1 always deals first
-        self._deal = CribbageDeal(strategy1, strategy2)
+        self._player1_player_strategy = player_strategy1
+        if dealer_strategy1: 
+            self._player1_dealer_strategy = dealer_strategy1
+        else:
+            self._player1_dealer_strategy = player_strategy1
+        self._player2_player_strategy = player_strategy2
+        if dealer_strategy2: 
+            self._player2_dealer_strategy = dealer_strategy2
+        else:
+            self._player2_dealer_strategy = player_strategy2
+        self._deal = CribbageDeal(self._player2_player_strategy, self._player1_dealer_strategy)
 
     def peg_for_player1(self, count = 1):
         """
@@ -83,10 +96,16 @@ class CribbageGame:
                 case CribbagePlayers.PLAYER_1:
                     logger.info(f"Player {self._player1} will deal.")
                     self._deal.reset_deal(self.peg_for_player2, self.peg_for_player1)
+                    # Set the correct strategies for player and dealer
+                    self._deal.set_player_play_strategy(self._player2_player_strategy)
+                    self._deal.set_dealer_play_strategy(self._player1_dealer_strategy)
                     next_to_deal = CribbagePlayers.PLAYER_2
                 case CribbagePlayers.PLAYER_2:
                     logger.info(f"Player {self._player2} will deal.")
                     self._deal.reset_deal(self.peg_for_player1, self.peg_for_player2)
+                    # Set the correct strategies for player and dealer
+                    self._deal.set_player_play_strategy(self._player1_player_strategy)
+                    self._deal.set_dealer_play_strategy(self._player2_dealer_strategy)
                     next_to_deal = CribbagePlayers.PLAYER_1
             
             # Play the current deal

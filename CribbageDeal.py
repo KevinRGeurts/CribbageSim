@@ -371,7 +371,7 @@ class CribbageDeal:
                 prefix  = 'After play by ' + str(next_to_play)
                 match next_to_play:
                     case CribbageRole.PLAYER:
-                        (count, go_declared) = self._dealer_play_strategy.follow(go_round_count, self.play_card_for_player,
+                        (count, go_declared) = self._player_play_strategy.follow(go_round_count, self.play_card_for_player,
                                                                                  self.get_player_hand, self.get_combined_play_pile,
                                                                                  self.record_play)
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.

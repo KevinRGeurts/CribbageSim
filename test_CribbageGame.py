@@ -25,7 +25,7 @@ class Test_CribbageGame(unittest.TestCase):
                      Card('H','5')]
         sd.add_cards(card_list)
         
-        game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
         game._deal._deck = sd
         
         # Player1 will be one point from winning when the game begins, so the first score for that player will win the game.
@@ -64,7 +64,7 @@ class Test_CribbageGame(unittest.TestCase):
                      Card('D','10')]
         sd.add_cards(card_list)
         
-        game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
         game._deal._deck = sd
         
         # Player2 will win after dealing the second deal, and showing the crib 

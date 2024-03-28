@@ -22,7 +22,7 @@ class Test_CribbageSimulator(unittest.TestCase):
         sim.setup_logging()
 
         # Create an interactive cribbage game
-        game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
 
         # Create a stacked deck
         sd = StackedDeck()
@@ -44,7 +44,7 @@ class Test_CribbageSimulator(unittest.TestCase):
             game.play()
         
         # Test that the info messages sent to the logger are as expected
-        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player player 1 will deal.')    
+        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player human_player will deal.')    
         self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Dealt player hand: 10S 5C 10D 3C 8H KH')
         
     # Patch results in dealer scoring a pair with their first card played, and winning the game.

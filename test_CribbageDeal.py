@@ -7,7 +7,7 @@ from unittest.mock import patch
 from card import Card
 from hand import Hand
 from deck import StackedDeck
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
+from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 
 class Test_CribbageDeal(unittest.TestCase):
@@ -282,6 +282,25 @@ class Test_CribbageDeal(unittest.TestCase):
 
         # Did we get the expected player score from playing the deal?
         exp_val = 22
+        act_val = deal._player_score
+        self.assertEqual(exp_val, act_val)
+
+    def test_play_automatic_1(self):
+
+        # Seed the random number generator
+        from random import seed
+        seed(1234567890)
+
+        deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
+        deal.play()
+        
+        # Did we get the expected dealer score from playing the deal?
+        exp_val = 21
+        act_val = deal._dealer_score
+        self.assertEqual(exp_val, act_val)
+
+        # Did we get the expected player score from playing the deal?
+        exp_val = 13
         act_val = deal._player_score
         self.assertEqual(exp_val, act_val)
 

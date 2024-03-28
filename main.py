@@ -21,25 +21,41 @@ def play_interactive_game():
     Use CribbageSimulator to play an interactive game.
     """
 
-    game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+    game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                        dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
     game.play()
 
     return None
 
 def play_interactive_deal():
     """
-    Use CribbageSimulator to play an interactive deal.
+    Use CribbageSimulator to play an interactive deal, as the dealer.
     """
 
-    deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
+    deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
     deal.play()
 
     return None
+
+def play_auto_game():
+        """
+        Use CribbageSimulator to plan an interactive game, as player1.
+        """
+        
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        game.play()
+        
+        return None
 
 def play_auto_deal():
     """
     Use CribbageSimulator to play a completely automatic deal. 
     """
+    # Seed the random number generator
+    from random import seed
+    seed(1234567890)
+
     deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
     deal.play()
 
@@ -107,7 +123,7 @@ if __name__ == '__main__':
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'
-    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Deal', 'd':'Debug'}
+    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal',  'd':'Debug'}
     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
     
     while response != 'q':
@@ -119,8 +135,11 @@ if __name__ == '__main__':
             
             case 'i':
                 play_interactive_deal()
-
+            
             case 'a':
+                play_auto_game()
+
+            case 'b':
                 play_auto_deal()
 
             case 'd':

@@ -56,7 +56,7 @@ class Test_CribbageSimulator(unittest.TestCase):
         sim.setup_logging()
 
         # Create an interactive cribbage game
-        game = CribbageGame(strategy1 = InteractiveCribbagePlayStrategy(), strategy2 = InteractiveCribbagePlayStrategy())
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
 
         # Create a stacked deck
         sd = StackedDeck()

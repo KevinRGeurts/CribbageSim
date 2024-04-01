@@ -89,8 +89,6 @@ class CribbageGame:
         
             deal_count += 1
 
-            # TODO: When strategy1 != strategy2, it will be required to save these strategies, and swap them around for each new deal
-            
             # Reset deal so we are ready for a new deal
             match next_to_deal:
                 case CribbagePlayers.PLAYER_1:

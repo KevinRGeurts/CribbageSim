@@ -20,6 +20,23 @@ class CribbageRole(Enum):
     PLAYER = 2
 
 
+class CribbageDealInfo:
+    """
+    A class with all members/attributes considered public. Used to return information about the results of a cribbage deal,
+    from CribbageDeal.play(...).
+    """
+    def __init__(self):
+        """
+        Create and initialize attributes.
+        """
+        self.player_play_score = 0
+        self.player_show_score = 0
+        self.dealer_play_score = 0
+        self.dealer_his_heals_score = 0 # Starter card was a J
+        self.dealer_show_score = 0
+        self.dealer_crib_score = 0
+
+
 class CribbageDeal:
     """
     Class representing a single deal in cribbage, to be played out by a dealer and a player.
@@ -308,9 +325,13 @@ class CribbageDeal:
     def play(self):
         """
         Play the cribbage deal.
+        :return: Information about the results of the deal, CribbageDealInfo object
         """
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
+
+        # Initialize the return object
+        deal_info = CribbageDealInfo()
 
         # Shuffle, that is, rebuild the deck
         self._deck.create_deck()
@@ -328,7 +349,7 @@ class CribbageDeal:
         self.draw_for_dealer(6)
         logger.info(f"Dealt dealer hand: {self._dealer_hand}")
         # To facilitate creating a unit test from the deal
-        logger.info(f"Dealt dealerer hand: {repr(self._dealer_hand)}")
+        logger.info(f"Dealt dealer hand: {repr(self._dealer_hand)}")
         
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
         self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand, self.record_play)
@@ -346,6 +367,7 @@ class CribbageDeal:
             # Peg 2 for dealer
             logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
             self.peg_for_dealer(2)
+            deal_info.dealer_his_heals_score += 2
 
         # Set variable that tracks which player will play next.
         # For the first go round of the deal, the player always leads.    
@@ -379,6 +401,7 @@ class CribbageDeal:
                             score = self.determine_score_playing(self._combined_pile)
                             logger.info(f"Score: {score}")
                             self.peg_for_player(score)
+                            deal_info.player_play_score += score
                         # Rotate who will play next
                         next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
@@ -390,6 +413,7 @@ class CribbageDeal:
                             score = self.determine_score_playing(self._combined_pile)
                             logger.info(f"Score: {score}")
                             self.peg_for_dealer(score)
+                            deal_info.dealer_play_score += score
                         # Rotate who will play next
                         next_to_play = CribbageRole.PLAYER
                 go_round_count += count
@@ -405,10 +429,12 @@ class CribbageDeal:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
                             logger.info('Go round ends with count of 31 by Dealer.')
                             self.peg_for_dealer(2)
+                            deal_info.dealer_play_score += 2
                         case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
                             logger.info('Go round ends with count of 31 by Player.')
                             self.peg_for_player(2)
+                            deal_info.player_play_score += 2
                     self.log_pegging_info()
                     continue # Get us out of the while.
 
@@ -424,8 +450,10 @@ class CribbageDeal:
                             go_round_count += count
                             if (go_round_count) == 31:
                                 self.peg_for_player(2)
+                                deal_info.player_play_score += 2
                             else:
                                 self.peg_for_player(1)
+                                deal_info.player_play_score += 1
                             # Rotate who will play next
                             next_to_play = CribbageRole.DEALER
                         case CribbageRole.DEALER:
@@ -437,8 +465,10 @@ class CribbageDeal:
                             go_round_count += count
                             if (go_round_count) == 31:
                                 self.peg_for_dealer(2)
+                                deal_info.dealer_play_score += 2
                             else:
                                 self.peg_for_dealer(1)
+                                deal_info.dealer_play_score += 1
                             # Rotate who will play next
                             next_to_play = CribbageRole.PLAYER
                     self.log_play_info(prefix, go_round_count)
@@ -458,20 +488,23 @@ class CribbageDeal:
         score = self.determine_score_showing_hand(self._player_pile, starter)
         logger.info(f"Player score from showing hand: {score}")
         self.peg_for_player(score)
+        deal_info.player_show_score += score
         
         # Score the dealer's hand
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
         logger.info(f"Dealer score from showing hand: {score}")
         self.peg_for_dealer(score)
+        deal_info.dealer_show_score += score
         
         # Score the dealer's crib
         score = self.determine_score_showing_crib(self._crib_hand, starter)
         logger.info(f"Dealer score from showing crib: {score}")
         self.peg_for_dealer(score)
+        deal_info.dealer_crib_score += score
         
         self.log_pegging_info()
         
         # Output the play record to facilitate unit test creation
         logger.info(f"Play record: {self._recorded_play}")
 
-        return None
+        return deal_info

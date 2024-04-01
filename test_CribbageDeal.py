@@ -8,7 +8,7 @@ from card import Card
 from hand import Hand
 from deck import StackedDeck
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
-from CribbageDeal import CribbageDeal
+from CribbageDeal import CribbageDeal, CribbageDealInfo
 
 class Test_CribbageDeal(unittest.TestCase):
     
@@ -144,16 +144,16 @@ class Test_CribbageDeal(unittest.TestCase):
         deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
         deal._deck = sd
         
-        deal.play()
+        info = deal.play()
         
         # Did we get the expected dealer score from playing the deal?
         exp_val = 21
-        act_val = deal._dealer_score
+        act_val = info.dealer_his_heals_score + info.dealer_play_score + info.dealer_show_score + info.dealer_crib_score
         self.assertEqual(exp_val, act_val)
 
         # Did we get the expected player score from playing the deal?
         exp_val = 11
-        act_val = deal._player_score
+        act_val = info.player_play_score + info.player_show_score
         self.assertEqual(exp_val, act_val)
 
     # Apply a patch() decorator to replace keyboard input from user with a string.
@@ -194,16 +194,16 @@ class Test_CribbageDeal(unittest.TestCase):
         deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
         deal._deck = sd
         
-        deal.play()
+        info = deal.play()
         
         # Did we get the expected dealer score from playing the deal?
         exp_val = 23
-        act_val = deal._dealer_score
+        act_val = info.dealer_his_heals_score + info.dealer_play_score + info.dealer_show_score + info.dealer_crib_score
         self.assertEqual(exp_val, act_val)
 
         # Did we get the expected player score from playing the deal?
         exp_val = 11
-        act_val = deal._player_score
+        act_val = info.player_play_score + info.player_show_score
         self.assertEqual(exp_val, act_val)
 
     # Apply a patch() decorator to replace keyboard input from user with a string.
@@ -244,16 +244,16 @@ class Test_CribbageDeal(unittest.TestCase):
         deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
         deal._deck = sd
         
-        deal.play()
+        info = deal.play()
         
         # Did we get the expected dealer score from playing the deal?
         exp_val = 21
-        act_val = deal._dealer_score
+        act_val = info.dealer_his_heals_score + info.dealer_play_score + info.dealer_show_score + info.dealer_crib_score
         self.assertEqual(exp_val, act_val)
 
         # Did we get the expected player score from playing the deal?
         exp_val = 23
-        act_val = deal._player_score
+        act_val = info.player_play_score + info.player_show_score
         self.assertEqual(exp_val, act_val)
         
     # Apply a patch() decorator to replace keyboard input from user with a string.
@@ -273,16 +273,16 @@ class Test_CribbageDeal(unittest.TestCase):
         deal = CribbageDeal(InteractiveCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
         deal._deck = sd
         
-        deal.play()
+        info = deal.play()
         
         # Did we get the expected dealer score from playing the deal?
         exp_val = 11
-        act_val = deal._dealer_score
+        act_val = info.dealer_his_heals_score + info.dealer_play_score + info.dealer_show_score + info.dealer_crib_score
         self.assertEqual(exp_val, act_val)
 
         # Did we get the expected player score from playing the deal?
         exp_val = 22
-        act_val = deal._player_score
+        act_val = info.player_play_score + info.player_show_score
         self.assertEqual(exp_val, act_val)
 
     def test_play_automatic_1(self):
@@ -292,16 +292,16 @@ class Test_CribbageDeal(unittest.TestCase):
         seed(1234567890)
 
         deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
-        deal.play()
+        info = deal.play()
         
         # Did we get the expected dealer score from playing the deal?
         exp_val = 21
-        act_val = deal._dealer_score
+        act_val = info.dealer_his_heals_score + info.dealer_play_score + info.dealer_show_score + info.dealer_crib_score
         self.assertEqual(exp_val, act_val)
 
         # Did we get the expected player score from playing the deal?
         exp_val = 13
-        act_val = deal._player_score
+        act_val = info.player_play_score + info.player_show_score
         self.assertEqual(exp_val, act_val)
 
     

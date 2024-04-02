@@ -635,7 +635,9 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         # We're interactive here, so ask the user which cards from their hand they want in the crib
 
         # Build a query for the user to obtain a decision on first card to put in the crib
-        query_preface = 'What is the first card you wish to place in the crib?'
+        h = Hand()
+        h.add_cards(get_hand_callback())
+        query_preface = f"Your hand: {str(h)}\nWhat is the first card you wish to place in the crib?"
         query_dic = {}
         position = 0
         for card in get_hand_callback():
@@ -646,7 +648,9 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
         # Build a query for the user to obtain a decision on second card to put in the crib
-        query_preface = 'What is the second card you wish to place in the crib?'
+        h = Hand()
+        h.add_cards(get_hand_callback())
+        query_preface = f"Your hand: {str(h)}\nWhat is the second card you wish to place in the crib?"
         query_dic = {}
         position = 0
         for card in get_hand_callback():

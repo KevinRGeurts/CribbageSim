@@ -314,9 +314,9 @@ class CribbageDeal:
         logger = logging.getLogger('cribbage_logger')
 
         logger.info(f"{preface}:")
-        logger.info(f"     Dealer hand after lead: {self._dealer_hand}")
+        logger.debug(f"     Dealer hand after lead: {self._dealer_hand}")
         logger.info(f"     Dealer pile after lead: {self._dealer_pile}")
-        logger.info(f"     Player hand after lead: {self._player_hand}")
+        logger.debug(f"     Player hand after lead: {self._player_hand}")
         logger.info(f"     Player pile after lead: {self._player_pile}")
         logger.info(f"     Combined pile after lead: {self._combined_pile}")
         logger.info(f"     Play count after lead: {go_round_count}")
@@ -336,33 +336,29 @@ class CribbageDeal:
         # Shuffle, that is, rebuild the deck
         self._deck.create_deck()
         
-        # TODO: Move to DEBUG level any logging that is not appropriate to be seen by all. For example, once an automatic play strategy
-        # has been created for one of the players, that player's hand info should not be logged at the INFO level where it will be visible to all.
-        # Crib should not be logged at INFO level until it is shown.
-
         # Deal player and dealer hands from the deck. In a normal game, this would be one card at a time alternating.
         # However, in this case it is advantageous to deal all six cards to each hand at once, to facilitate using a stacked deck for testing.
         self.draw_for_player(6)
-        logger.info(f"Dealt player hand: {self._player_hand}")
+        logger.debug(f"Dealt player hand: {self._player_hand}")
         # To facilitate creating a unit test from the deal
-        logger.info(f"Dealt player hand: {repr(self._player_hand)}")
+        logger.debug(f"Dealt player hand: {repr(self._player_hand)}")
         self.draw_for_dealer(6)
-        logger.info(f"Dealt dealer hand: {self._dealer_hand}")
+        logger.debug(f"Dealt dealer hand: {self._dealer_hand}")
         # To facilitate creating a unit test from the deal
-        logger.info(f"Dealt dealer hand: {repr(self._dealer_hand)}")
+        logger.debug(f"Dealt dealer hand: {repr(self._dealer_hand)}")
         
         # Apply the player and dealer strategies to have player and dealer select two cards each from their hands to form the crib.
         self._player_play_strategy.form_crib(self.xfer_player_card_to_crib, self.get_player_hand, self.record_play)
         self._dealer_play_strategy.form_crib(self.xfer_dealer_card_to_crib, self.get_dealer_hand, self.record_play)
-        logger.info(f"Player hand after crib formed: {self._player_hand}")
-        logger.info(f"Dealer hand after crib formed: {self._dealer_hand}")
-        logger.info(f"Crib hand: {self._crib_hand}")
+        logger.debug(f"Player hand after crib formed: {self._player_hand}")
+        logger.debug(f"Dealer hand after crib formed: {self._dealer_hand}")
+        logger.debug(f"Crib hand: {self._crib_hand}")
 
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
         starter = self.draw_starter_card()
         logger.info(f"Starter card: {starter}")
         # To facilitate creating a unit test from the deal
-        logger.info(f"Starter card: {repr(starter)}")
+        logger.debug(f"Starter card: {repr(starter)}")
         if starter.get_pips() == 'J':
             # Peg 2 for dealer
             logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
@@ -486,25 +482,25 @@ class CribbageDeal:
  
         # Score the player's hand
         score = self.determine_score_showing_hand(self._player_pile, starter)
-        logger.info(f"Player score from showing hand: {score}")
+        logger.info(f"Player score from showing hand {str(self._player_pile)}: {score}")
         self.peg_for_player(score)
         deal_info.player_show_score += score
         
         # Score the dealer's hand
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
-        logger.info(f"Dealer score from showing hand: {score}")
+        logger.info(f"Dealer score from showing hand {str(self._dealer_pile)}: {score}")
         self.peg_for_dealer(score)
         deal_info.dealer_show_score += score
         
         # Score the dealer's crib
         score = self.determine_score_showing_crib(self._crib_hand, starter)
-        logger.info(f"Dealer score from showing crib: {score}")
+        logger.info(f"Dealer score from showing crib {str(self._crib_hand)}: {score}")
         self.peg_for_dealer(score)
         deal_info.dealer_crib_score += score
         
         self.log_pegging_info()
         
         # Output the play record to facilitate unit test creation
-        logger.info(f"Play record: {self._recorded_play}")
+        logger.debug(f"Play record: {self._recorded_play}")
 
         return deal_info

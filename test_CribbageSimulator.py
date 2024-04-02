@@ -45,7 +45,7 @@ class Test_CribbageSimulator(unittest.TestCase):
         
         # Test that the info messages sent to the logger are as expected
         self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player human_player will deal.')    
-        self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Dealt player hand: 10S 5C 10D 3C 8H KH')
+        self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Starter card: 5H')
         
     # Patch results in dealer scoring a pair with their first card played, and winning the game.
     @patch('sys.stdin', io.StringIO('4\n3\n2\n1\n0\n2\n'))
@@ -78,8 +78,9 @@ class Test_CribbageSimulator(unittest.TestCase):
             game.play()
         
         # Test that the debug messages sent to the logger are as expected
-        self.assertEqual(cm.output[0], 'DEBUG:cribbage_logger:Player has a pair and could split: 8H 8S Dealer shows: 2')    
-        self.assertEqual(cm.output[1], 'DEBUG:cribbage_logger:Player chose to split.')
+        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player human_player will deal.')    
+        self.assertEqual(cm.output[1], 'DEBUG:cribbage_logger:Dealt player hand: 10S 5C 10D 3C 8H KH')
+        self.assertEqual(cm.output[2], 'DEBUG:cribbage_logger:Dealt player hand: [Card(\'S\',\'10\'), Card(\'C\',\'5\'), Card(\'D\',\'10\'), Card(\'C\',\'3\'), Card(\'H\',\'8\'), Card(\'H\',\'K\')]')
 
 
 if __name__ == '__main__':

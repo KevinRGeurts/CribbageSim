@@ -25,9 +25,10 @@ class CribbageSimulator:
         # This is the threshold level for the logger itself, before it will pass to any handlers, which can have their own threshold.
         # Should be able to control here what the stream handler receives and thus what ends up going to stderr.
         # Use this key for now:
-        #   DEBUG = debug messages sent to this logger will end up on stderr (e.g., ???)
-        #   INFO = info messages sent to this logger will end up on stderr (e.g., all the scattered output to screen an interactive user needs
-        #       to understand what is happening)
+        #   DEBUG = debug messages sent to this logger would end up on stderr, but see below where this is changed (e.g., hidden information like
+        #           an automatic player's dealt hand)
+        #   INFO = info messages sent to this logger would end up on stderr, but see below where this is changed
+        #           (e.g., all the scattered output to screen an interactive user needs to understand what is happening)
         logger.setLevel(logging.INFO)
         # Set up this highest level below root logger with a stream handler
         # The stream handler logs to sys.stdout, not the default of sys.stderr, so that, I hope, interlaces appropriately withs prints

@@ -16,6 +16,29 @@ class CribbagePlayers(Enum):
     PLAYER_2 = 2
 
 
+class CribbageGameInfo:
+    """
+    A class with all members/attributes considered public. Used to return information about the results of a cribbage game,
+    from CribbageGame.play(...).
+    """
+    def __init__(self):
+        """
+        Create and initialize attributes.
+        """
+        self.player1_total_play_score = 0
+        self.player1_total_his_heals_score = 0 # Starter card was a J
+        self.player1_total_show_score = 0
+        self.player1_total_crib_score = 0
+        self.player2_total_play_score = 0
+        self.player2_total_his_heals_score = 0 # Starter card was a J
+        self.player2_total_show_score = 0
+        self.player2_total_crib_score = 0
+        self.winning_player = ''
+        self.winning_player_final_score = 0
+        self.losing_player_final_score = 0
+        self.deals_in_game = 0
+
+
 class CribbageGame:
     """
     Class representing a cribbage game, to be played out by two players, player1 and player2.
@@ -71,6 +94,7 @@ class CribbageGame:
     def play(self):
         """
         Play a game of cribbage.
+        :return: Information about the results of the game, CribbageGameInfo object
         :return: (Name of Winning Player, Winning Player Final Score, Losing Player Final Score, Number of Deals In Game), tuple (string, int, int, int)
         """
 
@@ -79,7 +103,8 @@ class CribbageGame:
 
         game_over = False
         deal_count = 0
-        return_val = ('nobody', 0, 0, 0)
+        return_val = CribbageGameInfo()
+        # return_val = ('nobody', 0, 0, 0)
         
         # TODO: For now player1 will always deal first, but implement random selection, such as cutting for high card
         # Consider that this predictability is beneficial to unit testing.
@@ -108,15 +133,43 @@ class CribbageGame:
             
             # Play the current deal
             try:
-                self._deal.play()
+                deal_info = self._deal.play()
+                # Accumulate deal results info into game results info
+                match next_to_deal:
+                    case CribbagePlayers.PLAYER_1:
+                        # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
+                        return_val.player1_total_play_score += deal_info.player_play_score
+                        return_val.player1_total_show_score += deal_info.player_show_score
+                        return_val.player2_total_play_score += deal_info.dealer_play_score
+                        return_val.player2_total_his_heals_score += deal_info.dealer_his_heals_score
+                        return_val.player2_total_show_score += deal_info.dealer_show_score
+                        return_val.player2_total_crib_score += deal_info.dealer_crib_score
+                    case CribbagePlayers.PLAYER_2:
+                        # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
+                        return_val.player2_total_play_score += deal_info.player_play_score
+                        return_val.player2_total_show_score += deal_info.player_show_score
+                        return_val.player1_total_play_score += deal_info.dealer_play_score
+                        return_val.player1_total_his_heals_score += deal_info.dealer_his_heals_score
+                        return_val.player1_total_show_score += deal_info.dealer_show_score
+                        return_val.player1_total_crib_score += deal_info.dealer_crib_score
             except CribbageGameOverError:
+                # TODO: Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception
+                # Not sure how to do this. Perhaps a CribbageDealInfo object with the info can be returned with the exception? That returned object
+                # would be "dynamic' having only the already pegged information in it. Not sure if this means handling and then reraising the exception
+                # at the deal level, where the deal info could be packaged in?
                 (p1_score, p2_score) = self._board.get_scores()
                 if p1_score == 121:
-                    return_val = (self._player1, p1_score, p2_score, deal_count)
+                    return_val.winning_player = self._player1
+                    return_val.winning_player_final_score = p1_score
+                    return_val.losing_player_final_score = p2_score
+                    return_val.deals_in_game = deal_count
                     logger.info(f"Player {self._player1} wins the game.")
                 else:
+                    return_val.winning_player = self._player2
+                    return_val.winning_player_final_score = p2_score
+                    return_val.losing_player_final_score = p1_score
+                    return_val.deals_in_game = deal_count
                     logger.info(f"Player {self._player2} wins the game.")
-                    return_val = (self._player2, p2_score, p1_score, deal_count)
                 break
 
             # Log end of deal board

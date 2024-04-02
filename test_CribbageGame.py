@@ -7,7 +7,7 @@ from unittest.mock import patch
 from card import Card
 from deck import StackedDeck
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
-from CribbageGame import CribbageGame
+from CribbageGame import CribbageGame, CribbageGameInfo
 
 class Test_CribbageGame(unittest.TestCase):
     
@@ -34,17 +34,17 @@ class Test_CribbageGame(unittest.TestCase):
 
         # Did Player1 win?
         exp_val = game._player1
-        act_val = return_val[0]
+        act_val = return_val.winning_player
         self.assertEqual(exp_val, act_val)
 
         # Is Player1 score 121?
         exp_val = 121
-        act_val = return_val[1]
+        act_val = return_val.winning_player_final_score
         self.assertEqual(exp_val, act_val)
 
         # Has there been only 1 deal?
         exp_val = 1
-        act_val = return_val[3]
+        act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
     @patch('sys.stdin', io.StringIO('3\n0\n3\n2\n1\n0\n2\n0\ng\n1\n0\n0\ng\n0\ng\n1\n0\n2\n0\n1\n0\n1\n2\n0\n0\n0\n0\ng\n'))
@@ -72,22 +72,22 @@ class Test_CribbageGame(unittest.TestCase):
 
         # Did Player2 win?
         exp_val = game._player2
-        act_val = return_val[0]
+        act_val = return_val.winning_player
         self.assertEqual(exp_val, act_val)
 
         # Is Player2 score 121?
         exp_val = 121
-        act_val = return_val[1]
+        act_val = return_val.winning_player_final_score
         self.assertEqual(exp_val, act_val)
 
         # is Player1 score as expected?
         exp_val = 18
-        act_val = return_val[2]
+        act_val = return_val.losing_player_final_score
         self.assertEqual(exp_val, act_val)
 
         # Has there been 2 deals?
         exp_val = 2
-        act_val = return_val[3]
+        act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
     @patch('sys.stdin', io.StringIO('3\n2\n0\n0\n1\ng\n0\n1\n0\n2\n1\n1\n0\ng\n'))
@@ -116,22 +116,22 @@ class Test_CribbageGame(unittest.TestCase):
 
         # Did Player2 win?
         exp_val = game._player2
-        act_val = return_val[0]
+        act_val = return_val.winning_player
         self.assertEqual(exp_val, act_val)
 
         # Is Player2 score 121?
         exp_val = 121
-        act_val = return_val[1]
+        act_val = return_val.winning_player_final_score
         self.assertEqual(exp_val, act_val)
 
         # is Player1 score as expected?
         exp_val = 17
-        act_val = return_val[2]
+        act_val = return_val.losing_player_final_score
         self.assertEqual(exp_val, act_val)
 
         # Has there been 2 deals?
         exp_val = 2
-        act_val = return_val[3]
+        act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
        

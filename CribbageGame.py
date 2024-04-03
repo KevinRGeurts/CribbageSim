@@ -37,7 +37,7 @@ class CribbageGameInfo:
         self.winning_player_final_score = 0
         self.losing_player_final_score = 0
         self.deals_in_game = 0
-
+ 
 
 class CribbageGame:
     """
@@ -152,7 +152,7 @@ class CribbageGame:
                         return_val.player1_total_his_heals_score += deal_info.dealer_his_heals_score
                         return_val.player1_total_show_score += deal_info.dealer_show_score
                         return_val.player1_total_crib_score += deal_info.dealer_crib_score
-            except CribbageGameOverError:
+            except CribbageGameOverError as e:
                 # TODO: Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception
                 # Not sure how to do this. Perhaps a CribbageDealInfo object with the info can be returned with the exception? That returned object
                 # would be "dynamic' having only the already pegged information in it. Not sure if this means handling and then reraising the exception
@@ -170,6 +170,24 @@ class CribbageGame:
                     return_val.losing_player_final_score = p1_score
                     return_val.deals_in_game = deal_count
                     logger.info(f"Player {self._player2} wins the game.")
+                # Handle accumulating deal info that arrived in CribbageGameOverError into game info
+                match next_to_deal:
+                    case CribbagePlayers.PLAYER_1:
+                        # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
+                        return_val.player1_total_play_score += e.deal_info.player_play_score
+                        return_val.player1_total_show_score += e.deal_info.player_show_score
+                        return_val.player2_total_play_score += e.deal_info.dealer_play_score
+                        return_val.player2_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        return_val.player2_total_show_score += e.deal_info.dealer_show_score
+                        return_val.player2_total_crib_score += e.deal_info.dealer_crib_score
+                    case CribbagePlayers.PLAYER_2:
+                        # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
+                        return_val.player2_total_play_score += e.deal_info.player_play_score
+                        return_val.player2_total_show_score += e.deal_info.player_show_score
+                        return_val.player1_total_play_score += e.deal_info.dealer_play_score
+                        return_val.player1_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        return_val.player1_total_show_score += e.deal_info.dealer_show_score
+                        return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
 
             # Log end of deal board
@@ -177,6 +195,21 @@ class CribbageGame:
  
         # Log end of game results
         logger.info(f"At game end, after {deal_count} deals:\n{str(self._board)}")
+        logger.info(f"     Winning Player: {return_val.winning_player}")
+        logger.info(f"     Winning Player Final Score: {return_val.winning_player_final_score}")
+        logger.info(f"     Losing Player Final Score: {return_val.losing_player_final_score}")
+        logger.info(f"Statistics for {self._player1}:")
+        logger.info(f"     Total Play Score: {return_val.player1_total_play_score}")
+        logger.info(f"     Total His Heals Score: {return_val.player1_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {return_val.player1_total_show_score}")
+        logger.info(f"     Total Crib Score: {return_val.player1_total_crib_score}")
+        logger.info(f"     Check Sum: {return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score}")
+        logger.info(f"Statistics for {self._player2}:")
+        logger.info(f"     Total Play Score: {return_val.player2_total_play_score}")
+        logger.info(f"     Total His Heals Score: {return_val.player2_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {return_val.player2_total_show_score}")
+        logger.info(f"     Total Crib Score: {return_val.player2_total_crib_score}")
+        logger.info(f"     Check Sum: {return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score}")
 
         return return_val
 

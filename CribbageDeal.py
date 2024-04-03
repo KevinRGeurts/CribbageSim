@@ -10,6 +10,7 @@ from CribbagePlayStrategy import CribbagePlayStrategy
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
 from CribbageCombination import CribFlushCombination
 from CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
+from exceptions import CribbageGameOverError
 
 
 class CribbageRole(Enum):
@@ -20,6 +21,8 @@ class CribbageRole(Enum):
     PLAYER = 2
 
 
+# TODO: Consider using @dataclass decoration from module dataclasses for this type of member only class throughout.
+# Mentioned in (https://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python)
 class CribbageDealInfo:
     """
     A class with all members/attributes considered public. Used to return information about the results of a cribbage deal,
@@ -292,8 +295,7 @@ class CribbageDeal:
 
     def log_pegging_info(self):
         """
-        Currently outputs to stdout current state of pegging for dealer and player cumulatively during the hand.
-        Eventually this will be converted to use logging.
+        Logs current state of pegging for dealer and player cumulatively during the hand.
         :return: None
         """
         # Get the logger 'cribbage_logger'
@@ -305,7 +307,7 @@ class CribbageDeal:
     
     def log_play_info(self, preface = '', go_round_count = 0):
         """
-        Currently outputs to stdout current state of hands, play piles, play count, and scores. Eventually this will be converted to using logging.
+        Logs current state of hands, play piles, play count, and scores.
         :parameter preface: A string to use as a header for the output, for example to indicate that it is 'after lead', 'after follow', 'after go', etc., string
         :parameter go_round_count: The current play count during the go round, int
         :return: None
@@ -314,12 +316,12 @@ class CribbageDeal:
         logger = logging.getLogger('cribbage_logger')
 
         logger.info(f"{preface}:")
-        logger.debug(f"     Dealer hand after lead: {self._dealer_hand}")
-        logger.info(f"     Dealer pile after lead: {self._dealer_pile}")
-        logger.debug(f"     Player hand after lead: {self._player_hand}")
-        logger.info(f"     Player pile after lead: {self._player_pile}")
-        logger.info(f"     Combined pile after lead: {self._combined_pile}")
-        logger.info(f"     Play count after lead: {go_round_count}")
+        logger.debug(f"     Dealer hand after card played: {self._dealer_hand}")
+        logger.info(f"     Dealer pile after card played: {self._dealer_pile}")
+        logger.debug(f"     Player hand after card played: {self._player_hand}")
+        logger.info(f"     Player pile after card played: {self._player_pile}")
+        logger.info(f"     Combined pile after played: {self._combined_pile}")
+        logger.info(f"     Play count after card played: {go_round_count}")
         return None
 
     def play(self):
@@ -327,6 +329,11 @@ class CribbageDeal:
         Play the cribbage deal.
         :return: Information about the results of the deal, CribbageDealInfo object
         """
+        # TODO: Every time we call peg_for_player(), or peg_for_deal(), or a play strategy go(), we may need to catch CribbageGameOverError.
+        # Would then need to bundle into it the most up to date CribbageDealInfo object, and then re-raise it, so that the CribbageGame object
+        # can update it's CribbageGameInfo with the details from the final deal. This my require moving CribbageDealInfo to a separate file, so
+        # that exception.py doesn't have to import CribbageDeal.py and vice versa to end up with a cirular import problem.
+
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
 
@@ -362,8 +369,12 @@ class CribbageDeal:
         if starter.get_pips() == 'J':
             # Peg 2 for dealer
             logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
-            self.peg_for_dealer(2)
             deal_info.dealer_his_heals_score += 2
+            try:
+                self.peg_for_dealer(2)
+            except CribbageGameOverError as e:
+                # Raise a new CribbageGameOverError with the added deal_info
+                raise CribbageGameOverError(e.args, deal_info = deal_info)
 
         # Set variable that tracks which player will play next.
         # For the first go round of the deal, the player always leads.    
@@ -396,8 +407,12 @@ class CribbageDeal:
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
                             logger.info(f"Score: {score}")
-                            self.peg_for_player(score)
                             deal_info.player_play_score += score
+                            try:
+                                self.peg_for_player(score)
+                            except CribbageGameOverError as e:
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
                         next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
@@ -408,8 +423,12 @@ class CribbageDeal:
                         if not go_declared:
                             score = self.determine_score_playing(self._combined_pile)
                             logger.info(f"Score: {score}")
-                            self.peg_for_dealer(score)
                             deal_info.dealer_play_score += score
+                            try:
+                                self.peg_for_dealer(score)
+                            except CribbageGameOverError as e:
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
                         next_to_play = CribbageRole.PLAYER
                 go_round_count += count
@@ -424,13 +443,21 @@ class CribbageDeal:
                         case CribbageRole.PLAYER:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
                             logger.info('Go round ends with count of 31 by Dealer.')
-                            self.peg_for_dealer(2)
                             deal_info.dealer_play_score += 2
+                            try:
+                                self.peg_for_dealer(2)
+                            except CribbageGameOverError as e:
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
                         case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
                             logger.info('Go round ends with count of 31 by Player.')
-                            self.peg_for_player(2)
                             deal_info.player_play_score += 2
+                            try:
+                                self.peg_for_player(2)
+                            except CribbageGameOverError as e:
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
                     self.log_pegging_info()
                     continue # Get us out of the while.
 
@@ -439,32 +466,75 @@ class CribbageDeal:
                     match next_to_play:
                         case CribbageRole.PLAYER:
                             prefix  = 'After go declared by Dealer'
-                            count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
-                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player,
-                                                                  self.record_play)
+                            # Capture player score before play strategy GO call
+                            pre_go_score = self._player_score
+                            # Try/Except requrired in case call to self.peg_for_player ends game.
+                            # TODO: Make sure we have a unit test case that hits the except.
+                            try:
+                                count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
+                                                                      self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player,
+                                                                      self.record_play)
+                            except CribbageGameOverError as e:
+                                # Dig go_play_score out of e, and add it to deal_info
+                                deal_info.player_play_score += e.go_play_score
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                # TODO: Should I feed go_play_score into the new exception?
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                            # Need to handle adding any play score during play strategy GO to deal_info
+                            deal_info.player_play_score += (self._player_score - pre_go_score)
                             # Score 1 or 2 for the player, depending on how the player played out the go
                             go_round_count += count
                             if (go_round_count) == 31:
-                                self.peg_for_player(2)
                                 deal_info.player_play_score += 2
+                                try:
+                                    self.peg_for_player(2)
+                                except CribbageGameOverError as e:
+                                    # Raise a new CribbageGameOverError with the added deal_info
+                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
-                                self.peg_for_player(1)
                                 deal_info.player_play_score += 1
+                                try:
+                                    self.peg_for_player(1)
+                                except CribbageGameOverError as e:
+                                    # Raise a new CribbageGameOverError with the added deal_info
+                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
+
                             # Rotate who will play next
                             next_to_play = CribbageRole.DEALER
                         case CribbageRole.DEALER:
                             prefix  = 'After go declared by Player'
-                            count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
-                                                                  self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer,
-                                                                  self.record_play)
+                            # Capture dealer score before play strategy GO call
+                            pre_go_score = self._dealer_score
+                            # Try/Except requrired in case call to self.peg_for_dealer ends game.
+                            # TODO: Make sure we have a unit test case that hits the except.
+                            try:
+                                count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
+                                                                      self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer,
+                                                                      self.record_play)
+                            except CribbageGameOverError as e:
+                                # Dig go_play_score out of e, and add it to deal_info
+                                deal_info.dealer_play_score += e.go_play_score
+                                # Raise a new CribbageGameOverError with the added deal_info
+                                # TODO: Should I feed go_play_score into the new exception?
+                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                            # Need to handle adding any play score during play strategy GO to deal_info
+                            deal_info.dealer_play_score += (self._dealer_score - pre_go_score)
                             # Score 1 or 2 for the dealer, depending on how the dealer played out the go
                             go_round_count += count
                             if (go_round_count) == 31:
-                                self.peg_for_dealer(2)
                                 deal_info.dealer_play_score += 2
+                                try:
+                                    self.peg_for_dealer(2)
+                                except CribbageGameOverError as e:
+                                    # Raise a new CribbageGameOverError with the added deal_info
+                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
-                                self.peg_for_dealer(1)
                                 deal_info.dealer_play_score += 1
+                                try:
+                                    self.peg_for_dealer(1)
+                                except CribbageGameOverError as e:
+                                    # Raise a new CribbageGameOverError with the added deal_info
+                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
                             # Rotate who will play next
                             next_to_play = CribbageRole.PLAYER
                     self.log_play_info(prefix, go_round_count)
@@ -483,20 +553,32 @@ class CribbageDeal:
         # Score the player's hand
         score = self.determine_score_showing_hand(self._player_pile, starter)
         logger.info(f"Player score from showing hand {str(self._player_pile)}: {score}")
-        self.peg_for_player(score)
         deal_info.player_show_score += score
-        
+        try:
+            self.peg_for_player(score)
+        except CribbageGameOverError as e:
+            # Raise a new CribbageGameOverError with the added deal_info
+            raise CribbageGameOverError(e.args, deal_info = deal_info)
+ 
         # Score the dealer's hand
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
         logger.info(f"Dealer score from showing hand {str(self._dealer_pile)}: {score}")
-        self.peg_for_dealer(score)
         deal_info.dealer_show_score += score
+        try:
+            self.peg_for_dealer(score)
+        except CribbageGameOverError as e:
+            # Raise a new CribbageGameOverError with the added deal_info
+            raise CribbageGameOverError(e.args, deal_info = deal_info)
         
         # Score the dealer's crib
         score = self.determine_score_showing_crib(self._crib_hand, starter)
         logger.info(f"Dealer score from showing crib {str(self._crib_hand)}: {score}")
-        self.peg_for_dealer(score)
         deal_info.dealer_crib_score += score
+        try:
+            self.peg_for_dealer(score)
+        except CribbageGameOverError as e:
+            # Raise a new CribbageGameOverError with the added deal_info
+            raise CribbageGameOverError(e.args, deal_info = deal_info)
         
         self.log_pegging_info()
         

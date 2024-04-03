@@ -134,7 +134,52 @@ class Test_CribbageGame(unittest.TestCase):
         act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
-       
+    def test_play_both_automatic(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567890)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 98
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 8 deals?
+        exp_val = 8
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(20, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(82, return_val.player1_total_show_score)
+        self.assertEqual(26, return_val.player1_total_crib_score)
+        self.assertEqual(27, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(58, return_val.player2_total_show_score)
+        self.assertEqual(13, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+        
+
+    
 
 if __name__ == '__main__':
     unittest.main()

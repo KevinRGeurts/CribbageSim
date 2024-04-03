@@ -1,4 +1,5 @@
 # Standard imports
+from ast import Try
 from enum import Enum
 
 # Local imports
@@ -7,6 +8,7 @@ from CribbageCombination import CribbageComboInfo
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
 from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
 from hand import Hand
+from exceptions import CribbageGameOverError
 
 
 class CribbageCribOption:
@@ -242,7 +244,11 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
             # Score any pairs or runs due to the played card
             score_count = score_play_callback(get_play_pile_callback())
-            peg_callback(score_count)
+            try:
+                peg_callback(score_count)
+            except CribbageGameOverError as e:
+                # Raise a new CribbageGameOverError with the added information about score during play
+                raise CribbageGameOverError(e.args, go_play_score = score_count)
 
             # Generate list of which if any cards can still be played
             playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
@@ -778,7 +784,11 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
 
             # Score any pairs or runs due to the played card
             score_count = score_play_callback(get_play_pile_callback())
-            peg_callback(score_count)
+            try:
+                peg_callback(score_count)
+            except CribbageGameOverError as e:
+                # Raise a new CribbageGameOverError with the added deal_info
+                raise CribbageGameOverError(e.args, go_play_score = score_count)
 
             # Generate list of which if any cards can still be played
             playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]

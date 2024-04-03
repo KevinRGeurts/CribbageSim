@@ -1,5 +1,6 @@
 # Standard imports
 from enum import Enum
+import random
 
 # Local imports
 from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
@@ -669,6 +670,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         return None
 
     def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
+        # TODO: This doc string needs arguments documented for the callback functions, as do several other doc strings in this module.
         """
         Ask human player which card to follow (play) in a go round.
         :parameter go_count: The current cumulative count of the go round before the follow, int
@@ -796,3 +798,167 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
         
         return (play_count - go_count)
+
+
+class RandomCribbagePlayStrategy(CribbagePlayStrategy):
+    """
+    CribbagePlayStrategy that simply chooses randomly from hand to form crib, and randomly from playable cards to follow or go.
+    This of course is a very unintelligent automatic play strategy, but as such, it is intended to be a reference against which to compare
+    other automatic play strategies.
+    """
+    def __init__(self):
+        """
+        Construct an object of this class.
+        """
+        # Instantiate a random number generator to be used for selecting cards by this strategy.
+        # This is intended to keep this randmom number stream isolated from the random number stream that draws cards, so that
+        # comparison of playing a game with two different strategies has both the games see the same card draws, provided a seed for
+        # the drawing random number generator is provided.
+        self._random_generator = random.Random()
+        # All elements of the _guaranteed_4card_combinations and _guaranteed_2card_combinations lists must be children of
+        # CribbageCombinationShowing class.
+        self._guaranteed_4card_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination()]
+        self._guaranteed_2card_combinations = [PairCombination(), FifteenCombination()]
+        # All elements of the _play_combinations list must be children of CribbageCombinationPlaying class.
+        self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
+ 
+    def follow(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, play_recorder_callback=None):
+        """
+        Follows (plays) a random playable card.
+        :parameter go_count: The current cumulative count of the go round before the follow, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: (The pips count of the card played as int, Go declared as boolean), tuple
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+        
+        # Default tuple to return, arbitrarily here a GO tuple, but expected to be set in all branches below
+        return_val = (0, True)
+        
+        # Determine list of cards in the hand that can be played without go_count exceeding 31.
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - go_count)]
+
+        if len(playable) > 0:
+            if len(get_play_pile_callback()) == 0:
+                # The play pile has no cards in it, so this is a lead, so call lead(...) method
+                h = Hand()
+                h.add_cards(playable)
+                (count, card) = self.lead(h)
+                play_card_callback(get_hand_callback().index(card))
+                return_val = (count, False)
+            else:
+                # Apply logic for following - which is just to pick a random card from playable list
+                card = playable[self._random_generator.randrange(len(playable))]
+                count = card.count_card()
+                play_card_callback(get_hand_callback().index(card))
+                return_val = (count, False)
+                
+        else:
+            # If no cards in the hand can be played, then return (0, True), in other words, declare GO.
+            return (0, True) 
+
+        return return_val
+
+    def go(self, go_count, play_card_callback, get_hand_callback, get_play_pile_callback, score_play_callback, peg_callback,
+           play_recorder_callback=None):
+        """
+        Randomly selects which card(s) if any to play in a go round after opponent has declared go.
+        :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
+        :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter get_play_pile_callback: Bound method used to obtain the pile of played cards, e.g., CribbageDeal.get_player_hand
+        :parameter score_play_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.determine_score_playing
+        :parameter peg_callback: Bound method used to determine any scoring while go is being played out, e.g., CribbageDeal.peg_for_player
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to play during the go
+        :return: The sum of pips count of any cards played, int
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(play_card_callback))
+        assert(callable(get_hand_callback))
+        assert(callable(get_play_pile_callback))
+        assert(callable(score_play_callback))
+        assert(callable(peg_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+
+        # The overall process flow in this function is the same as for 
+
+        play_count = go_count
+        
+        # Generate list of which if any cards can still be played
+        playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+
+        while (len(playable) > 0):
+
+            # Randomly select a card to play from the playable list
+            card = playable[self._random_generator.randrange(len(playable))]
+            count = card.count_card()
+
+            # Play card
+            play_card_callback(get_hand_callback().index(card))
+            play_count += count
+
+            # Score any pairs or runs due to the played card
+            score_count = score_play_callback(get_play_pile_callback())
+            try:
+                peg_callback(score_count)
+            except CribbageGameOverError as e:
+                # TODO: Cover by a unit test
+                # Raise a new CribbageGameOverError with the added information about score during play
+                raise CribbageGameOverError(e.args, go_play_score = score_count)
+
+            # Generate list of which if any cards can still be played
+            playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
+        
+        return (play_count - go_count)
+
+    def lead(self, hand = Hand()):
+        """
+        Leads (plays) a first card in a go round by selecting a random playable card from the hand.
+        This is a utility method intended to be called by follow(...) method, not by outsiders.
+        :parameter hand: The hand from which to lead a card, Hand object
+        :return: Tuple of (The pips count of the card to be led, The card to be led) (int, Card object) 
+        """
+
+        # Get a random card out of the hand
+        lead_card = hand[self._random_generator.randrange(len(hand))]
+        lead_count = lead_card.count_card()
+        
+        return (lead_count, lead_card)
+
+    def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
+        """
+        Forms the crib based on randomly selecting cards from the hand.
+        :parameter xfer_to_crib_callback: Bound method used to transfer cards from hand to crib, e.g., CribbageDeal.xfer_player_card_to_crib
+        :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
+        :parameter play_recorder_callback: Bound method used to record user choices for cards to lay off in the crib
+        :return: None
+        """
+        # Sanity check the arguments to make sure they are callable. This does not guarantee they are bound methods, e.g., a class is callable
+        # for construction. But it is better than nothing.
+        assert(callable(xfer_to_crib_callback))
+        assert(callable(get_hand_callback))
+        if play_recorder_callback: assert(callable(play_recorder_callback))
+
+        # Get the cards in the hand
+        cards = get_hand_callback()
+
+        # Transfer the first card to the crib by selecting randomly from cards
+        crib_card_1 =cards[self._random_generator.randrange(len(cards))]
+        xfer_to_crib_callback(cards.index(crib_card_1))
+
+        # Refresh the list of cards to select from since we've transferred one out to the crib
+        cards = get_hand_callback()
+
+        # Transfer the second card to the crib by selecting randomly from cards
+        crib_card_2 =cards[self._random_generator.randrange(len(cards))]
+        xfer_to_crib_callback(cards.index(crib_card_2))
+ 
+        return None

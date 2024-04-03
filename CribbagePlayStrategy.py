@@ -1,5 +1,4 @@
 # Standard imports
-from ast import Try
 from enum import Enum
 
 # Local imports
@@ -247,6 +246,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
             try:
                 peg_callback(score_count)
             except CribbageGameOverError as e:
+                # (except covered by unit test)
                 # Raise a new CribbageGameOverError with the added information about score during play
                 raise CribbageGameOverError(e.args, go_play_score = score_count)
 
@@ -787,7 +787,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             try:
                 peg_callback(score_count)
             except CribbageGameOverError as e:
-                # Raise a new CribbageGameOverError with the added deal_info
+                # Raise a new CribbageGameOverError with the added information about score during play
                 raise CribbageGameOverError(e.args, go_play_score = score_count)
 
             # Generate list of which if any cards can still be played

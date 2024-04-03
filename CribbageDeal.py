@@ -329,11 +329,6 @@ class CribbageDeal:
         Play the cribbage deal.
         :return: Information about the results of the deal, CribbageDealInfo object
         """
-        # TODO: Every time we call peg_for_player(), or peg_for_deal(), or a play strategy go(), we may need to catch CribbageGameOverError.
-        # Would then need to bundle into it the most up to date CribbageDealInfo object, and then re-raise it, so that the CribbageGame object
-        # can update it's CribbageGameInfo with the details from the final deal. This my require moving CribbageDealInfo to a separate file, so
-        # that exception.py doesn't have to import CribbageDeal.py and vice versa to end up with a cirular import problem.
-
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
 
@@ -373,6 +368,7 @@ class CribbageDeal:
             try:
                 self.peg_for_dealer(2)
             except CribbageGameOverError as e:
+                # (except covered by unit test)
                 # Raise a new CribbageGameOverError with the added deal_info
                 raise CribbageGameOverError(e.args, deal_info = deal_info)
 
@@ -411,6 +407,7 @@ class CribbageDeal:
                             try:
                                 self.peg_for_player(score)
                             except CribbageGameOverError as e:
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
@@ -427,6 +424,7 @@ class CribbageDeal:
                             try:
                                 self.peg_for_dealer(score)
                             except CribbageGameOverError as e:
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
@@ -447,6 +445,7 @@ class CribbageDeal:
                             try:
                                 self.peg_for_dealer(2)
                             except CribbageGameOverError as e:
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         case CribbageRole.DEALER:
@@ -456,6 +455,7 @@ class CribbageDeal:
                             try:
                                 self.peg_for_player(2)
                             except CribbageGameOverError as e:
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                     self.log_pegging_info()
@@ -469,7 +469,6 @@ class CribbageDeal:
                             # Capture player score before play strategy GO call
                             pre_go_score = self._player_score
                             # Try/Except requrired in case call to self.peg_for_player ends game.
-                            # TODO: Make sure we have a unit test case that hits the except.
                             try:
                                 count = self._player_play_strategy.go(go_round_count, self.play_card_for_player, self.get_player_hand,
                                                                       self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player,
@@ -477,6 +476,7 @@ class CribbageDeal:
                             except CribbageGameOverError as e:
                                 # Dig go_play_score out of e, and add it to deal_info
                                 deal_info.player_play_score += e.go_play_score
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
@@ -489,6 +489,7 @@ class CribbageDeal:
                                 try:
                                     self.peg_for_player(2)
                                 except CribbageGameOverError as e:
+                                    # (except covered by unit test)
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
@@ -496,7 +497,9 @@ class CribbageDeal:
                                 try:
                                     self.peg_for_player(1)
                                 except CribbageGameOverError as e:
+                                    # (except covered by unit test)
                                     # Raise a new CribbageGameOverError with the added deal_info
+
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
 
                             # Rotate who will play next
@@ -506,7 +509,6 @@ class CribbageDeal:
                             # Capture dealer score before play strategy GO call
                             pre_go_score = self._dealer_score
                             # Try/Except requrired in case call to self.peg_for_dealer ends game.
-                            # TODO: Make sure we have a unit test case that hits the except.
                             try:
                                 count = self._dealer_play_strategy.go(go_round_count, self.play_card_for_dealer, self.get_dealer_hand,
                                                                       self.get_combined_play_pile, self.determine_score_playing, self.peg_for_dealer,
@@ -514,6 +516,7 @@ class CribbageDeal:
                             except CribbageGameOverError as e:
                                 # Dig go_play_score out of e, and add it to deal_info
                                 deal_info.dealer_play_score += e.go_play_score
+                                # (except covered by unit test)
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
@@ -526,6 +529,7 @@ class CribbageDeal:
                                 try:
                                     self.peg_for_dealer(2)
                                 except CribbageGameOverError as e:
+                                    # (except covered by unit test)
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
@@ -533,6 +537,7 @@ class CribbageDeal:
                                 try:
                                     self.peg_for_dealer(1)
                                 except CribbageGameOverError as e:
+                                    # (except covered by unit test)
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             # Rotate who will play next
@@ -557,6 +562,7 @@ class CribbageDeal:
         try:
             self.peg_for_player(score)
         except CribbageGameOverError as e:
+            # (except covered by unit test)
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
  
@@ -567,6 +573,7 @@ class CribbageDeal:
         try:
             self.peg_for_dealer(score)
         except CribbageGameOverError as e:
+            # (except covered by unit test)
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
         
@@ -577,6 +584,7 @@ class CribbageDeal:
         try:
             self.peg_for_dealer(score)
         except CribbageGameOverError as e:
+            # (except covered by unit test)
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
         

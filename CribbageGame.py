@@ -153,10 +153,7 @@ class CribbageGame:
                         return_val.player1_total_show_score += deal_info.dealer_show_score
                         return_val.player1_total_crib_score += deal_info.dealer_crib_score
             except CribbageGameOverError as e:
-                # TODO: Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception
-                # Not sure how to do this. Perhaps a CribbageDealInfo object with the info can be returned with the exception? That returned object
-                # would be "dynamic' having only the already pegged information in it. Not sure if this means handling and then reraising the exception
-                # at the deal level, where the deal info could be packaged in?
+                # Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception ending the game.
                 (p1_score, p2_score) = self._board.get_scores()
                 if p1_score == 121:
                     return_val.winning_player = self._player1

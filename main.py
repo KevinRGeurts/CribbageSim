@@ -65,11 +65,19 @@ def play_debug():
     """
     # Seed the random number generator
     from random import seed
-    seed(1234567890)
 
-    game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
-                        dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
-    return_val = game.play()
+    my_seed = 1234568673
+    
+    while my_seed <= 1234568673:
+       
+        print(f"Seed Value: {my_seed}")
+        seed(my_seed)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        my_seed += 1
 
     return None
 

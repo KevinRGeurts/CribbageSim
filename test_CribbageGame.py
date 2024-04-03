@@ -134,7 +134,7 @@ class Test_CribbageGame(unittest.TestCase):
         act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
-    def test_play_both_automatic(self):
+    def test_play_both_automatic_end_player_show(self):
         
         # Seed the random number generator
         from random import seed
@@ -178,8 +178,578 @@ class Test_CribbageGame(unittest.TestCase):
         self.assertEqual(return_val.losing_player_final_score,
                          return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
         
+    def test_play_both_automatic_end_dealer_show(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567891)
 
-    
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 99
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 8 deals?
+        exp_val = 8
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(25, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(53, return_val.player1_total_show_score)
+        self.assertEqual(21, return_val.player1_total_crib_score)
+        self.assertEqual(18, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(91, return_val.player2_total_show_score)
+        self.assertEqual(12, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_go_not_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567892)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 84
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(24, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(77, return_val.player1_total_show_score)
+        self.assertEqual(20, return_val.player1_total_crib_score)
+        self.assertEqual(29, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(43, return_val.player2_total_show_score)
+        self.assertEqual(12, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_follow(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567896)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 105
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(37, return_val.player1_total_play_score)
+        self.assertEqual(2, return_val.player1_total_his_heals_score)
+        self.assertEqual(72, return_val.player1_total_show_score)
+        self.assertEqual(11, return_val.player1_total_crib_score)
+        self.assertEqual(35, return_val.player2_total_play_score)
+        self.assertEqual(2, return_val.player2_total_his_heals_score)
+        self.assertEqual(44, return_val.player2_total_show_score)
+        self.assertEqual(24, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_crib(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567899)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 88
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 8 deals?
+        exp_val = 8
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(19, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(51, return_val.player1_total_show_score)
+        self.assertEqual(18, return_val.player1_total_crib_score)
+        self.assertEqual(27, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(72, return_val.player2_total_show_score)
+        self.assertEqual(25, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+   
+    def test_play_both_automatic_end_dealer_follow_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567903)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 92
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(39, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(65, return_val.player1_total_show_score)
+        self.assertEqual(17, return_val.player1_total_crib_score)
+        self.assertEqual(33, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(51, return_val.player2_total_show_score)
+        self.assertEqual(8, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+
+    def test_play_both_automatic_end_player_follow(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567909)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 99
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(22, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(61, return_val.player1_total_show_score)
+        self.assertEqual(16, return_val.player1_total_crib_score)
+        self.assertEqual(29, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(62, return_val.player2_total_show_score)
+        self.assertEqual(30, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_player_follow_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567917)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 104
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 10 deals?
+        exp_val = 10
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(24, return_val.player1_total_play_score)
+        self.assertEqual(2, return_val.player1_total_his_heals_score)
+        self.assertEqual(76, return_val.player1_total_show_score)
+        self.assertEqual(20, return_val.player1_total_crib_score)
+        self.assertEqual(17, return_val.player2_total_play_score)
+        self.assertEqual(2, return_val.player2_total_his_heals_score)
+        self.assertEqual(69, return_val.player2_total_show_score)
+        self.assertEqual(16, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_go_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567940)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 113
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(30, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(63, return_val.player1_total_show_score)
+        self.assertEqual(28, return_val.player1_total_crib_score)
+        self.assertEqual(31, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(66, return_val.player2_total_show_score)
+        self.assertEqual(16, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score)
+
+    def test_play_both_automatic_end_player_go_not_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234567983)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 87
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(25, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(54, return_val.player1_total_show_score)
+        self.assertEqual(8, return_val.player1_total_crib_score)
+        self.assertEqual(27, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(67, return_val.player2_total_show_score)
+        self.assertEqual(27, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_his_heals(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234568026)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 104
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 10 deals?
+        exp_val = 10
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(23, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(50, return_val.player1_total_show_score)
+        self.assertEqual(31, return_val.player1_total_crib_score)
+        self.assertEqual(34, return_val.player2_total_play_score)
+        self.assertEqual(2, return_val.player2_total_his_heals_score)
+        self.assertEqual(66, return_val.player2_total_show_score)
+        self.assertEqual(19, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_dealer_go_play_score(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234568209)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 110
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 10 deals?
+        exp_val = 10
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(26, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(56, return_val.player1_total_show_score)
+        self.assertEqual(28, return_val.player1_total_crib_score)
+        self.assertEqual(29, return_val.player2_total_play_score)
+        self.assertEqual(2, return_val.player2_total_his_heals_score)
+        self.assertEqual(68, return_val.player2_total_show_score)
+        self.assertEqual(22, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_player_go_31(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234568435)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 118
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(33, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(65, return_val.player1_total_show_score)
+        self.assertEqual(20, return_val.player1_total_crib_score)
+        self.assertEqual(38, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(72, return_val.player2_total_show_score)
+        self.assertEqual(12, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
+    def test_play_both_automatic_end_player_go_play_score(self):
+        
+        # Seed the random number generator
+        from random import seed
+        seed(1234568673)
+
+        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+        return_val = game.play()
+
+        # Did Player2 win?
+        exp_val = game._player2
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is winning player score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Is losing player score as expected?
+        exp_val = 99
+        act_val = return_val.losing_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been 9 deals?
+        exp_val = 9
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+        
+        # Are the game scoring statistics as expected
+        self.assertEqual(32, return_val.player1_total_play_score)
+        self.assertEqual(0, return_val.player1_total_his_heals_score)
+        self.assertEqual(50, return_val.player1_total_show_score)
+        self.assertEqual(17, return_val.player1_total_crib_score)
+        self.assertEqual(43, return_val.player2_total_play_score)
+        self.assertEqual(0, return_val.player2_total_his_heals_score)
+        self.assertEqual(54, return_val.player2_total_show_score)
+        self.assertEqual(24, return_val.player2_total_crib_score)
+        
+        # Does losing player score check out?
+        self.assertEqual(return_val.losing_player_final_score,
+                         return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
+
 
 if __name__ == '__main__':
     unittest.main()

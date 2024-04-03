@@ -751,5 +751,42 @@ class Test_CribbageGame(unittest.TestCase):
                          return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score)
 
 
+    # Patch results in dealer scoring a pair after a go by their opponent and winning the game
+    @patch('sys.stdin', io.StringIO('5\n4\n5\n4\n0\n0\n0\n2\ng\n0\n'))
+    def test_play_both_interactive_end_at_go_combo(self):
+
+        # Create a stacked deck
+        sd = StackedDeck()
+        # Player will be dealt cards 1 - 6
+        # Dealer will be dealt cards 7 - 12
+        # Starter will be card 13
+        card_list = [Card('S','10'), Card('C','K'), Card('D','10'), Card('C','9'), Card('H','8'), Card('H','7'),
+                     Card('S','8'), Card('H','10'), Card('C','A'), Card('D','A'), Card('H','K'), Card('S','K'),
+                     Card('H','5')]
+        sd.add_cards(card_list)
+        
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
+        game._deal._deck = sd
+        
+        # Player1 will be two point from winning when the game begins, and a pair of A played during first go will end the game
+        game._board.peg_for_player1(119)
+        return_val = game.play()
+
+        # Did Player1 win?
+        exp_val = game._player1
+        act_val = return_val.winning_player
+        self.assertEqual(exp_val, act_val)
+
+        # Is Player1 score 121?
+        exp_val = 121
+        act_val = return_val.winning_player_final_score
+        self.assertEqual(exp_val, act_val)
+
+        # Has there been only 1 deal?
+        exp_val = 1
+        act_val = return_val.deals_in_game
+        self.assertEqual(exp_val, act_val)
+
+
 if __name__ == '__main__':
     unittest.main()

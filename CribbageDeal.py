@@ -369,6 +369,8 @@ class CribbageDeal:
                 self.peg_for_dealer(2)
             except CribbageGameOverError as e:
                 # (except covered by unit test)
+                # Output the play record to facilitate unit test creation
+                logger.debug(f"Play record: {self._recorded_play}")
                 # Raise a new CribbageGameOverError with the added deal_info
                 raise CribbageGameOverError(e.args, deal_info = deal_info)
 
@@ -408,6 +410,8 @@ class CribbageDeal:
                                 self.peg_for_player(score)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
@@ -425,6 +429,8 @@ class CribbageDeal:
                                 self.peg_for_dealer(score)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         # Rotate who will play next
@@ -446,6 +452,8 @@ class CribbageDeal:
                                 self.peg_for_dealer(2)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                         case CribbageRole.DEALER:
@@ -456,6 +464,8 @@ class CribbageDeal:
                                 self.peg_for_player(2)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
                     self.log_pegging_info()
@@ -474,9 +484,11 @@ class CribbageDeal:
                                                                       self.get_combined_play_pile, self.determine_score_playing, self.peg_for_player,
                                                                       self.record_play)
                             except CribbageGameOverError as e:
+                                # (except covered by unit test)
                                 # Dig go_play_score out of e, and add it to deal_info
                                 deal_info.player_play_score += e.go_play_score
-                                # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
@@ -490,6 +502,8 @@ class CribbageDeal:
                                     self.peg_for_player(2)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
+                                    # Output the play record to facilitate unit test creation
+                                    logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
@@ -498,8 +512,9 @@ class CribbageDeal:
                                     self.peg_for_player(1)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
+                                    # Output the play record to facilitate unit test creation
+                                    logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
-
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
 
                             # Rotate who will play next
@@ -517,6 +532,8 @@ class CribbageDeal:
                                 # Dig go_play_score out of e, and add it to deal_info
                                 deal_info.dealer_play_score += e.go_play_score
                                 # (except covered by unit test)
+                                # Output the play record to facilitate unit test creation
+                                logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
                                 raise CribbageGameOverError(e.args, deal_info = deal_info)
@@ -530,6 +547,8 @@ class CribbageDeal:
                                     self.peg_for_dealer(2)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
+                                    # Output the play record to facilitate unit test creation
+                                    logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             else:
@@ -538,6 +557,8 @@ class CribbageDeal:
                                     self.peg_for_dealer(1)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
+                                    # Output the play record to facilitate unit test creation
+                                    logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
                                     raise CribbageGameOverError(e.args, deal_info = deal_info)
                             # Rotate who will play next
@@ -563,6 +584,8 @@ class CribbageDeal:
             self.peg_for_player(score)
         except CribbageGameOverError as e:
             # (except covered by unit test)
+            # Output the play record to facilitate unit test creation
+            logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
  
@@ -574,6 +597,8 @@ class CribbageDeal:
             self.peg_for_dealer(score)
         except CribbageGameOverError as e:
             # (except covered by unit test)
+            # Output the play record to facilitate unit test creation
+            logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
         
@@ -585,6 +610,8 @@ class CribbageDeal:
             self.peg_for_dealer(score)
         except CribbageGameOverError as e:
             # (except covered by unit test)
+            # Output the play record to facilitate unit test creation
+            logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
             raise CribbageGameOverError(e.args, deal_info = deal_info)
         

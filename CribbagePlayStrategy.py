@@ -779,14 +779,16 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
             # Play card
-            play_card_callback(int(response))
-            play_count += playable[int(response)].count_card()
+            card = playable[int(response)]
+            play_card_callback(get_hand_callback().index(card))
+            play_count += card.count_card()
 
             # Score any pairs or runs due to the played card
             score_count = score_play_callback(get_play_pile_callback())
             try:
                 peg_callback(score_count)
             except CribbageGameOverError as e:
+                # (except covered by unit test)
                 # Raise a new CribbageGameOverError with the added information about score during play
                 raise CribbageGameOverError(e.args, go_play_score = score_count)
 

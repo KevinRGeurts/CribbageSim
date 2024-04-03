@@ -63,21 +63,44 @@ def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
     """
-    # Seed the random number generator
-    from random import seed
 
-    my_seed = 1234568673
+    # Stack the deck to set up play that ends with a scoring combination during a GO ending the game, to establish a unit test for
+    # the exception catch within the InteractiveCribbagePlayStrategy.go()
+
+
+    # Create a stacked deck
+    sd = StackedDeck()
+    # Player will be dealt cards 1 - 6
+    # Dealer will be dealt cards 7 - 12
+    # Starter will be card 13
+    card_list = [Card('S','10'), Card('C','K'), Card('D','10'), Card('C','9'), Card('H','8'), Card('H','7'),
+                    Card('S','8'), Card('H','10'), Card('C','A'), Card('D','A'), Card('H','K'), Card('S','K'),
+                    Card('H','5')]
+    sd.add_cards(card_list)
+        
+    game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
+    game._deal._deck = sd
+        
+    # Player1 will be two point from winning when the game begins, so the first score for that player will probably win the game.
+    game._board.peg_for_player1(119)
+    return_val = game.play()
+
+
+    # # Seed the random number generator
+    # from random import seed
+
+    # my_seed = 1234568673
     
-    while my_seed <= 1234568673:
+    # while my_seed <= 1234568673:
        
-        print(f"Seed Value: {my_seed}")
-        seed(my_seed)
+    #     print(f"Seed Value: {my_seed}")
+    #     seed(my_seed)
 
-        game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
-                            dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
-        return_val = game.play()
+    #     game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+    #                         dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+    #     return_val = game.play()
 
-        my_seed += 1
+    #     my_seed += 1
 
     return None
 
@@ -90,7 +113,7 @@ if __name__ == '__main__':
     """
     
     # Set up logging
-    CribbageSimulator().setup_logging()
+    CribbageSimulator().setup_logging(True)
     
     print('---------------------------------')
     print('*** Python Cribbage Simulator ***')

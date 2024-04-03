@@ -13,10 +13,11 @@ class CribbageSimulator:
     games played automatically, for some reason. Right now it's utility is a top sort of level to set up logging.
     """
 
-    def setup_logging(self):
+    def setup_logging(self, debug = False):
         """
         This method configures logging. It should be called ahead of any calls to CribbageGame.play() or CribbageDeal.play() to ensure the
         expected behavior of logging. Though failure to do so should not be breaking.
+        :parameter debug: If True, then logger level set to DEBUG (and hidden information will be revealed in output), boolean
         :return: None
         """
         # Create a logger with name 'cribbage_logger'. This is NOT the root logger, which is one level up from here, and has no name.
@@ -29,7 +30,10 @@ class CribbageSimulator:
         #           an automatic player's dealt hand)
         #   INFO = info messages sent to this logger would end up on stderr, but see below where this is changed
         #           (e.g., all the scattered output to screen an interactive user needs to understand what is happening)
-        logger.setLevel(logging.INFO)
+        if not debug:
+            logger.setLevel(logging.INFO)
+        else:
+            logger.setLevel(logging.DEBUG)
         # Set up this highest level below root logger with a stream handler
         # The stream handler logs to sys.stdout, not the default of sys.stderr, so that, I hope, interlaces appropriately withs prints
         sh = logging.StreamHandler(stream=sys.stdout)

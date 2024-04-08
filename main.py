@@ -19,9 +19,10 @@ from CribbageSimulator import CribbageSimulator
 
 def play_interactive_game():
     """
-    Use CribbageSimulator to play an interactive game.
+    Use CribbageSimulator to play an interactive game as player 1.
     """
 
+    print('You are playing a game as player 1, against a machine player 2.')
     game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
                         dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
     game.play()
@@ -33,6 +34,7 @@ def play_interactive_deal():
     Use CribbageSimulator to play an interactive deal, as the dealer.
     """
 
+    print('You are playing a deal as the dealer, against a machine player.')
     deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), InteractiveCribbagePlayStrategy())
     deal.play()
 
@@ -40,7 +42,7 @@ def play_interactive_deal():
 
 def play_auto_game():
         """
-        Use CribbageSimulator to plan an interactive game, as player1.
+        Use CribbageSimulator to play a completely automatic game.
         """
         
         game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),

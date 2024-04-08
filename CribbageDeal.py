@@ -94,6 +94,13 @@ class CribbageDeal:
         self._player_peg_callback = player_peg_callback
         self._dealer_peg_callback = dealer_peg_callback
         
+    def last_card_played(self):
+        """
+        Return the most recent played card, that is, the last card in the list self._combined_pile.
+        :return: The most recent played card, Card object
+        """
+        return self._combined_pile[len(self._combined_pile)-1]
+        
     def record_play(self, play_string = ''):
         """
         A utility function intended to help with creating unit tests. play_string argument is appended to self._recorded_play. The concept is that
@@ -254,7 +261,7 @@ class CribbageDeal:
         for combo in self._hand_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            if info.number_instances > 0: logger.info(str(info))
+            if info.number_instances > 0: logger.info(f"     {str(info)}")
             score += info.score
         return score
 
@@ -272,7 +279,7 @@ class CribbageDeal:
         for combo in self._crib_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            if info.number_instances > 0: logger.info(str(info))
+            if info.number_instances > 0: logger.info(f"     {str(info)}")
             score += info.score
         return score
 
@@ -289,7 +296,7 @@ class CribbageDeal:
         for combo in self._play_combinations:
             assert(isinstance(combo, CribbageCombinationPlaying))
             info = combo.score(combined_pile)
-            if info.number_instances > 0: logger.info(str(info))
+            if info.number_instances > 0: logger.info(f"     {str(info)}")
             score += info.score
         return score
 
@@ -403,8 +410,9 @@ class CribbageDeal:
                                                                                  self.record_play)
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
                         if not go_declared:
+                            logger.info(f"Scoring combinations from {str(next_to_play)} play of card {str(self.last_card_played())}:")
                             score = self.determine_score_playing(self._combined_pile)
-                            logger.info(f"Score: {score}")
+                            logger.info(f"     Score: {score}")
                             deal_info.player_play_score += score
                             try:
                                 self.peg_for_player(score)
@@ -422,8 +430,9 @@ class CribbageDeal:
                                                                                  self.record_play)
                         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
                         if not go_declared:
+                            logger.info(f"Scoring combinations from {str(next_to_play)} play of card {str(self.last_card_played())}:")
                             score = self.determine_score_playing(self._combined_pile)
-                            logger.info(f"Score: {score}")
+                            logger.info(f"     Score: {score}")
                             deal_info.dealer_play_score += score
                             try:
                                 self.peg_for_dealer(score)
@@ -438,7 +447,7 @@ class CribbageDeal:
                 go_round_count += count
                 
                 self.log_play_info(prefix, go_round_count)
-                logger.info(f"Go Declared?: {go_declared}")
+                logger.info(f"     Go Declared?: {go_declared}")
                 self.log_pegging_info()
                 
                 # Has count for the go round reached exactly 31?
@@ -577,8 +586,9 @@ class CribbageDeal:
         # It's time to show (that is, count the hands after playing). During play, the hands have been emptied into the play piles, so score the piles.
  
         # Score the player's hand
+        logger.info(f"Showing player hand: {str(self._player_pile)}")
         score = self.determine_score_showing_hand(self._player_pile, starter)
-        logger.info(f"Player score from showing hand {str(self._player_pile)}: {score}")
+        logger.info(f"     Total player score from showing hand: {score}")
         deal_info.player_show_score += score
         try:
             self.peg_for_player(score)
@@ -590,8 +600,9 @@ class CribbageDeal:
             raise CribbageGameOverError('Game ended while showing player hand', deal_info = deal_info)
  
         # Score the dealer's hand
+        logger.info(f"Showing dealer hand: {str(self._dealer_pile)}")
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
-        logger.info(f"Dealer score from showing hand {str(self._dealer_pile)}: {score}")
+        logger.info(f"     Total dealer score from showing hand: {score}")
         deal_info.dealer_show_score += score
         try:
             self.peg_for_dealer(score)
@@ -603,8 +614,9 @@ class CribbageDeal:
             raise CribbageGameOverError('Game ended while showing dealer hand', deal_info = deal_info)
         
         # Score the dealer's crib
+        logger.info(f"Showing dealer crib: {str(self._crib_hand)}")
         score = self.determine_score_showing_crib(self._crib_hand, starter)
-        logger.info(f"Dealer score from showing crib {str(self._crib_hand)}: {score}")
+        logger.info(f"     Total dealer score from showing crib: {score}")
         deal_info.dealer_crib_score += score
         try:
             self.peg_for_dealer(score)

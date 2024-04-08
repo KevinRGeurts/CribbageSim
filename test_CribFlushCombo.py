@@ -28,7 +28,7 @@ class Test_CribFlushCombination(unittest.TestCase):
         cfc = CribFlushCombination()
         info = cfc.score(h, s)
 
-        exp_val = 'flush: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)
 

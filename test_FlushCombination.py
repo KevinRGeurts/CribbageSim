@@ -40,7 +40,7 @@ class Test_FlushCombination(unittest.TestCase):
         fc = FlushCombination()
         info = fc.score(h, s)
 
-        exp_val = 'flush: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)  
 

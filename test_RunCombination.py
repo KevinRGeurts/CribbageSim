@@ -52,7 +52,7 @@ class Test_RunCombination(unittest.TestCase):
         rc = RunCombination()
         info = rc.score(h, s)
 
-        exp_val = 'run: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)        
 

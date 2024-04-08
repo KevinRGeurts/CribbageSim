@@ -28,7 +28,7 @@ class Test_PairCombination(unittest.TestCase):
         pc = PairCombination()
         info = pc.score(h, s)
 
-        exp_val = 'pair: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)        
 

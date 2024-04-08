@@ -76,7 +76,7 @@ class Test_FifteenCombination(unittest.TestCase):
         fc = FifteenCombination()
         info = fc.score(h, s)
 
-        exp_val = 'fifteen: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)        
 

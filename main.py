@@ -127,7 +127,7 @@ if __name__ == '__main__':
     """
     
     # Set up logging
-    CribbageSimulator().setup_logging(True)
+    CribbageSimulator().setup_logging(False)
     
     print('---------------------------------')
     print('*** Python Cribbage Simulator ***')

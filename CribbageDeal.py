@@ -254,7 +254,7 @@ class CribbageDeal:
         for combo in self._hand_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            logger.info(str(info))
+            if info.number_instances > 0: logger.info(str(info))
             score += info.score
         return score
 
@@ -272,7 +272,7 @@ class CribbageDeal:
         for combo in self._crib_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            logger.info(str(info))
+            if info.number_instances > 0: logger.info(str(info))
             score += info.score
         return score
 
@@ -289,7 +289,7 @@ class CribbageDeal:
         for combo in self._play_combinations:
             assert(isinstance(combo, CribbageCombinationPlaying))
             info = combo.score(combined_pile)
-            logger.info(str(info))
+            if info.number_instances > 0: logger.info(str(info))
             score += info.score
         return score
 

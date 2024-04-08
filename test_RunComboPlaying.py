@@ -70,7 +70,7 @@ class Test_RunCombinationPlaying(unittest.TestCase):
         rcp = RunCombinationPlaying()
         info = rcp.score(pile)
 
-        exp_val = 'run: 0 for 0: '
+        exp_val = ''
         act_val = str(info)
         self.assertEqual(exp_val, act_val)        
 

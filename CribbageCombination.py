@@ -24,14 +24,15 @@ class CribbageComboInfo(object):
         
     def __str__(self):
         s = ''
-        s += self.combo_name + ': ' + str(self.number_instances) + ' for ' + str(self.score) + ': '
-        for combo in self.instance_list:
-            for card in combo:
-                s += str(card) + ' '
-            s += ', '
-        if len(self.instance_list) > 0:
-            # Remove unneeded trailing space-comma-space
-            s = s[0:len(s)-3]
+        if self.number_instances > 0:
+            s += f"{self.combo_name}: {str(self.number_instances)} for {str(self.score)}: "
+            for combo in self.instance_list:
+                for card in combo:
+                    s += f"{str(card)} "
+                s += ', '
+            if len(self.instance_list) > 0:
+                # Remove unneeded trailing space-comma-space
+                s = s[0:len(s)-3]
         return s
 
 

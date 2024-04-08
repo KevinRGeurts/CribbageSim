@@ -372,7 +372,7 @@ class CribbageDeal:
                 # Output the play record to facilitate unit test creation
                 logger.debug(f"Play record: {self._recorded_play}")
                 # Raise a new CribbageGameOverError with the added deal_info
-                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                raise CribbageGameOverError('Game ended on drawing His Heels as starter', deal_info = deal_info)
 
         # Set variable that tracks which player will play next.
         # For the first go round of the deal, the player always leads.    
@@ -413,7 +413,7 @@ class CribbageDeal:
                                 # Output the play record to facilitate unit test creation
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended while scoring player play combination', deal_info = deal_info)
                         # Rotate who will play next
                         next_to_play = CribbageRole.DEALER
                     case CribbageRole.DEALER:
@@ -432,7 +432,7 @@ class CribbageDeal:
                                 # Output the play record to facilitate unit test creation
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended while scoring dealer play combination', deal_info = deal_info)
                         # Rotate who will play next
                         next_to_play = CribbageRole.PLAYER
                 go_round_count += count
@@ -455,7 +455,7 @@ class CribbageDeal:
                                 # Output the play record to facilitate unit test creation
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended when dealer played to 31', deal_info = deal_info)
                         case CribbageRole.DEALER:
                             # Since we rotate who will play next above, this means that player played to reach 31
                             logger.info('Go round ends with count of 31 by Player.')
@@ -467,7 +467,7 @@ class CribbageDeal:
                                 # Output the play record to facilitate unit test creation
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended when player played to 31', deal_info = deal_info)
                     self.log_pegging_info()
                     continue # Get us out of the while.
 
@@ -491,7 +491,7 @@ class CribbageDeal:
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended when player scored a combination during GO', deal_info = deal_info)
                             # Need to handle adding any play score during play strategy GO to deal_info
                             deal_info.player_play_score += (self._player_score - pre_go_score)
                             # Score 1 or 2 for the player, depending on how the player played out the go
@@ -505,7 +505,7 @@ class CribbageDeal:
                                     # Output the play record to facilitate unit test creation
                                     logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
-                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                    raise CribbageGameOverError('Game ended when player scored after GO', deal_info = deal_info)
                             else:
                                 deal_info.player_play_score += 1
                                 try:
@@ -515,7 +515,7 @@ class CribbageDeal:
                                     # Output the play record to facilitate unit test creation
                                     logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
-                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                    raise CribbageGameOverError('Game ended when player scored after GO', deal_info = deal_info)
 
                             # Rotate who will play next
                             next_to_play = CribbageRole.DEALER
@@ -536,7 +536,7 @@ class CribbageDeal:
                                 logger.debug(f"Play record: {self._recorded_play}")
                                 # Raise a new CribbageGameOverError with the added deal_info
                                 # TODO: Should I feed go_play_score into the new exception?
-                                raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                raise CribbageGameOverError('Game ended when dealer scored a combination during GO', deal_info = deal_info)
                             # Need to handle adding any play score during play strategy GO to deal_info
                             deal_info.dealer_play_score += (self._dealer_score - pre_go_score)
                             # Score 1 or 2 for the dealer, depending on how the dealer played out the go
@@ -550,7 +550,7 @@ class CribbageDeal:
                                     # Output the play record to facilitate unit test creation
                                     logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
-                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                    raise CribbageGameOverError('Game ended when dealer scored after GO', deal_info = deal_info)
                             else:
                                 deal_info.dealer_play_score += 1
                                 try:
@@ -560,7 +560,7 @@ class CribbageDeal:
                                     # Output the play record to facilitate unit test creation
                                     logger.debug(f"Play record: {self._recorded_play}")
                                     # Raise a new CribbageGameOverError with the added deal_info
-                                    raise CribbageGameOverError(e.args, deal_info = deal_info)
+                                    raise CribbageGameOverError('Game ended when dealer scored after GO', deal_info = deal_info)
                             # Rotate who will play next
                             next_to_play = CribbageRole.PLAYER
                     self.log_play_info(prefix, go_round_count)
@@ -587,7 +587,7 @@ class CribbageDeal:
             # Output the play record to facilitate unit test creation
             logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
-            raise CribbageGameOverError(e.args, deal_info = deal_info)
+            raise CribbageGameOverError('Game ended while showing player hand', deal_info = deal_info)
  
         # Score the dealer's hand
         score = self.determine_score_showing_hand(self._dealer_pile, starter)
@@ -600,7 +600,7 @@ class CribbageDeal:
             # Output the play record to facilitate unit test creation
             logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
-            raise CribbageGameOverError(e.args, deal_info = deal_info)
+            raise CribbageGameOverError('Game ended while showing dealer hand', deal_info = deal_info)
         
         # Score the dealer's crib
         score = self.determine_score_showing_crib(self._crib_hand, starter)
@@ -613,7 +613,7 @@ class CribbageDeal:
             # Output the play record to facilitate unit test creation
             logger.debug(f"Play record: {self._recorded_play}")
             # Raise a new CribbageGameOverError with the added deal_info
-            raise CribbageGameOverError(e.args, deal_info = deal_info)
+            raise CribbageGameOverError('Game ended while showing crib', deal_info = deal_info)
         
         self.log_pegging_info()
         

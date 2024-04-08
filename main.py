@@ -73,7 +73,9 @@ def play_debug():
 
     # game = CribbageGame(player_strategy1 = RandomCribbagePlayStrategy(), player_strategy2 = RandomCribbagePlayStrategy())
     game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
-                    dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+                dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
+    # game = CribbageGame(player_strategy1 = RandomCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
+    #                 dealer_strategy1 = RandomCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
     return_val = game.play()
 
     # # Stack the deck to set up play that ends with a scoring combination during a GO ending the game, to establish a unit test for

@@ -22,7 +22,7 @@ class CribbageRole(Enum):
 
 
 # TODO: Consider using @dataclass decoration from module dataclasses for this type of member only class throughout.
-# Mentioned in (https://stackoverflow.com/questions/1319615/proper-way-to-declare-custom-exceptions-in-modern-python)
+# See (https://docs.python.org/3/library/dataclasses.html#module-dataclasses)
 class CribbageDealInfo:
     """
     A class with all members/attributes considered public. Used to return information about the results of a cribbage deal,

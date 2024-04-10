@@ -75,6 +75,24 @@ class CribbageGame:
             self._player2_dealer_strategy = player_strategy2
         self._deal = CribbageDeal(self._player2_player_strategy, self._player1_dealer_strategy)
 
+    def get_player1_name(self):
+        """
+        :return: Name of player1, string
+        """
+        return self._player1
+    
+    def get_player2_name(self):
+        """
+        :return: Name of player2, string
+        """
+        return self._player2
+    
+    def get_player_scores(self):
+        """
+        :return: (player1 score, player2 score), tuple
+        """
+        return self._board.get_scores()
+        
     def peg_for_player1(self, count = 1):
         """
         Peg on the board count for player1.

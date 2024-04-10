@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from time import process_time
 from random import seed
+import tkinter as tk
 
 # Local
 from deck import StackedDeck, Deck
@@ -15,6 +16,7 @@ from CribbagePlayStrategy import RandomCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
+from CribbageApp import CribbageApp
 
 
 def play_interactive_game():
@@ -61,6 +63,20 @@ def play_auto_deal():
 
     deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
     deal.play()
+    
+    return None
+
+def launch_tkinter_app():
+    """
+    Launch tkinter based Cribbage Application
+    """
+    
+    root = tk.Tk()
+    myapp = CribbageApp(root)
+    myapp.master.title("Cribbage Application")
+    myapp.mainloop()
+
+    return None
 
 def play_debug():
     """
@@ -137,7 +153,7 @@ if __name__ == '__main__':
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'
-    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal',  'd':'Debug'}
+    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal',  't':'Launch App', 'd':'Debug'}
     response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
     
     while response != 'q':
@@ -155,6 +171,9 @@ if __name__ == '__main__':
 
             case 'b':
                 play_auto_deal()
+                
+            case 't':
+                launch_tkinter_app()
 
             case 'd':
                 play_debug()

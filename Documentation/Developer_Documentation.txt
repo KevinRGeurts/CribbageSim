@@ -133,6 +133,50 @@ Cribbage Simulator Project Developer Documentation
         (7) Lead any card greater than 5 in your hand. With preference running Face/10 > 9 > 8 > 7 > 6.
         (8) Very last option would be to lead a 5.
 
+    *** Concept development for using JSON to interact with UI ***
+
+        Some principles:
+        (1) Hope to be able to continue to use logging module by having a custom logger (for example) that generates the JSON
+
+        What kind of messages do we need to send from the CribbageGame to the UI?
+
+        (1) Start a new game (names of players, who will deal first, reset board score to 0-0)
+            information sent: name player1 (string), name player2 (string), first dealer name (string)
+            actions taken: update player names in UI, update dealer name in UI, set board score to 0-0 in UI
+            Note: Should we query for player names?
+        (2) Start a new deal (which player will deal, clear hands, starter, crib, play piles, go round count)
+            information sent: name of player who will deal (string)
+            actions taken: update dealer name in UI, clear hands / crib / starter / play piles / go round count in UI
+        (3) Update Hand(s)
+            information sent: Cards in hand (string, like 'KH AD 2S JC 5H 4H')
+            actions taken: Update Hand(s) in UI
+        (4) Update Starter
+            information sent: card drawn as starter (string, like '7H')
+            actions taken: Update starter card in UI
+        (5) Update Crib
+            information sent: Cards in crib (string, like '2S JC 5H 4H')
+            actions taken: Update Crib in UI
+        (6) Update Combined Play Pile (and count for go round, with option to clear the play pile and zero the count)
+            information sent: card to add to combined pile (string, like '7H'), updated go round count (int)
+            actions taken: Update combined pile in UI, update go round count in UI
+        (7) Update player play pile
+            information sent: card to add to player play pile (string, like '7H')
+            actions taken: Update player play pile in UI
+        (8) Update dealer play pile
+            information sent: card to add to dealer play pile (string, like '7H')
+            actions taken: Update dealer play pile in UI
+        (9) Update player score (including event, like comobo score during play, reaching 31, showing hand, ...)
+            information sent: name of player that scored (string), pegs scored (integer), score event info (dictionary?)
+            action taken: Update player score on board in UI, display score achieved and eveng info (something like 'Peg 2 for playing to 31')
+        (10) Update dealer score (as for player)
+            information sent: name of player that scored (string), pegs scored (integer), score event info (dictionary?)
+            action taken: Update dealer score on board in UI, display score achieved and eveng info (something like 'Peg 2 for playing to 31')
+        
+        What kind of queries do we need to make of the UI?
+
+        Essentially the same as what the UserResponseCollector handles now, which for Cribbage is all menu queries.
+        (1) Menu Query: Query Preface, Dictionary of menu choices
+
 
 
 

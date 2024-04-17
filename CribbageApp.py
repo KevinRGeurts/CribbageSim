@@ -1,8 +1,12 @@
 # standard imports
 from ast import Lambda
+from quopri import decodestring
 import tkinter as tk
 from tkinter import ttk
 from functools import partial
+from threading import Thread
+from time import sleep
+from queue import Queue
 
 # local imports
 from CribbageGame import CribbageGame
@@ -20,6 +24,9 @@ class CribbageApp(ttk.Frame):
         parent.columnconfigure(0, weight=1) # Grid-0 in Documentation\UI_WireFrame.pptx
         parent.rowconfigure(0, weight=1) # Grid-0 in Documentation\UI_WireFrame.pptx
         
+        # Event queue (FIFO) for communicating with the thread running the Cribbage Game
+        self._game_event_queue=Queue(10)
+       
         # The CribbageGame object used to play the cribbage game
         self._game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
                                   dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
@@ -76,6 +83,33 @@ class CribbageApp(ttk.Frame):
         # self._btn_quit = ttk.Button(self, text='Quit', command=parent.destroy)
         # self._btn_quit.grid(column=2, row=3, sticky='WE')
         
+    def CribbageGameOutputEventHandler(self, event):
+        """
+        Used with StubGame object as PoC of ability for tkinter UI to respond to events where CribbageGame is trying to provide output for it
+        to display. Actual implemetation might want this inside of a "controler" or "mediator" rather than in the App?
+        """
+        # Retrieve an item from the game event queue
+        item = self._game_event_queue.get(timeout = 1)
+        # Just for testing, we will assume the item is a tuple of leading and trailing peg locations for player 1
+        self._board_widget.set_pegs_player1(item[0], item[1])
+        # self._info_widget.insert_end(item)
+
+    def CribbageGameQueryEventHandler(self, event):
+        """
+        Used with StubGame object as PoC of ability for tkinter UI to respond to events where CribbageGame is trying to request input from the user
+        from it. Actual implemetation might want this inside of a "controler" or "mediator" rather than in the App?
+        """
+        # Retrieve an item from the game event queue to determine what type of information we need from the user
+        item = self._game_event_queue.get(timeout = 1)
+        # For test purposes, we are assuming we are being asked to have the user pick a card to play from the hand
+        self._info_widget.insert_end(f"\n{item[0]} : {item[1]}\n")
+        self._player_hand_widget._lbls_cards[1].set(item[1])
+        # Send message to the game's thread to alert it to check the queue?
+        # May not be necessary, may make more sense for the game to wait in a tight loop for an item to appear in the queue,
+        # after it has posted it's request for a response to a query to the App.
+        # Here for testing, we are actually waiting for the user to click card index = 1 in the player hand, and that handler will
+        # insert the resonse in the CribbageGame response queue
+        
 class CribbagePlayerHandWidget(ttk.Labelframe):
     """
     Class represents a tkinter label frame, the wdiget contents of which will represent a player's hand visually in the application.
@@ -91,39 +125,59 @@ class CribbagePlayerHandWidget(ttk.Labelframe):
         
         # List of buttons representing cards in the hand
         self._btns_cards = []
+        # List of StringVar control variables for the card labels
+        self._lbls_cards = []
         
         # Note: partial is used in order to be able to pass along a button index to the command function, which otherwise takes no arguments
         # TODO: Size the buttons with ['heigth'], ['width'] in text lines and characters
         # TODO: Assign TextVar to buttons for managing their text label
         # See: (https://stackoverflow.com/questions/6920302/how-to-pass-arguments-to-a-button-command-in-tkinter)
-        self._btns_cards.append(tk.Button(self, text='QH', command=partial(self.OnCardButtonClick, 0)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 0)))
         self._btns_cards[0].grid(column=0, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(0, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.rowconfigure(0, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[0].set('QH')
+        self._btns_cards[0]['textvariable']=self._lbls_cards[0]
 
-        self._btns_cards.append(tk.Button(self, text='6C', command=partial(self.OnCardButtonClick, 1)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 1)))
         self._btns_cards[1].grid(column=1, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(1, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[1].set('6C')
+        self._btns_cards[1]['textvariable']=self._lbls_cards[1]
 
-        self._btns_cards.append(tk.Button(self, text='--', command=partial(self.OnCardButtonClick, 1)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 1)))
         self._btns_cards[2].grid(column=2, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(2, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
         self._btns_cards[2]['state']=tk.DISABLED
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[2].set('--')
+        self._btns_cards[2]['textvariable']=self._lbls_cards[2]
 
-        self._btns_cards.append(tk.Button(self, text='--', command=partial(self.OnCardButtonClick, 1)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 1)))
         self._btns_cards[3].grid(column=3, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self._btns_cards[3]['state']=tk.DISABLED
         self.columnconfigure(3, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[3].set('--')
+        self._btns_cards[3]['textvariable']=self._lbls_cards[3]
 
-        self._btns_cards.append(tk.Button(self, text='--', command=partial(self.OnCardButtonClick, 1)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 1)))
         self._btns_cards[4].grid(column=4, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(4, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
         self._btns_cards[4]['state']=tk.DISABLED
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[4].set('--')
+        self._btns_cards[4]['textvariable']=self._lbls_cards[4]
 
-        self._btns_cards.append(tk.Button(self, text='--', command=partial(self.OnCardButtonClick, 1)))
+        self._btns_cards.append(tk.Button(self, command=partial(self.OnCardButtonClick, 1)))
         self._btns_cards[5].grid(column=5, row=0) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(5, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
         self._btns_cards[5]['state']=tk.DISABLED
+        self._lbls_cards.append(tk.StringVar())
+        self._lbls_cards[5].set('--')
+        self._btns_cards[5]['textvariable']=self._lbls_cards[5]
 
         for b in self._btns_cards:
              b['height']=8
@@ -136,6 +190,16 @@ class CribbagePlayerHandWidget(ttk.Labelframe):
 
     def OnCardButtonClick(self, index):
         # Inform the mediator object which index button was pressed
+        
+        # Temporarily, for proof-of-concept, if card button 0 is clicked, call play() method of stub app, on a new thread
+        if index == 0:
+            self.master._game = StubGame(self.master.master, self.master)
+            thread = Thread(target=self.master._game.play)
+            thread.start()
+        # Temporarily, for proof-of-concept, if card button 1 is clicked, it is a response to a request for input from the game, and
+        # the response shoudl be injected into the game's response queue
+        if index == 1:
+            self.master._game._response_queue.put('1', timeout=1)
         pass
 
     def OnUndoButtonClick(self):
@@ -287,7 +351,7 @@ class CribbageBoardWidget(ttk.Labelframe):
             self._player2_holes[i]['state']=tk.DISABLED
             # Create and assign control variables
             self._player2_pegs.append(tk.IntVar())
-            self._player2_holes[i]['variable'] = self._player1_pegs[i]
+            self._player2_holes[i]['variable'] = self._player2_pegs[i]
         for i in range(31,62):
             self._player2_holes.append(ttk.Checkbutton(self._player2_track, text=str(i)))
             self._player2_holes[i].grid(column=1, row=(i-30)) # Grid-3 in Documentation\UI_WireFrame.pptx
@@ -295,7 +359,7 @@ class CribbageBoardWidget(ttk.Labelframe):
             self._player2_holes[i]['state']=tk.DISABLED
             # Create and assign control variables
             self._player2_pegs.append(tk.IntVar())
-            self._player2_holes[i]['variable'] = self._player1_pegs[i]
+            self._player2_holes[i]['variable'] = self._player2_pegs[i]
         # Initialize so that both player's pegs start in pre-game positions (0 and 61)
         self.set_pegs_player1()
         self.set_pegs_player2()
@@ -307,6 +371,9 @@ class CribbageBoardWidget(ttk.Labelframe):
         :parameter trail: Hole location of trailing peg, int
         :return None:
         """
+        # Clear any existing peg locations
+        for p in self._player1_pegs: p.set(0)
+        # Set the new peg locatons
         self._player1_pegs[lead].set(1)
         self._player1_pegs[trail].set(1)
         return None
@@ -318,6 +385,9 @@ class CribbageBoardWidget(ttk.Labelframe):
         :parameter trail: Hole location of trailing peg, int
         :return None:
         """
+        # Clear any existing peg locations
+        for p in self._player2_pegs: p.set(0)
+        # Set the new peg locatons
         self._player2_pegs[lead].set(1)
         self._player2_pegs[trail].set(1)
         return None
@@ -334,4 +404,58 @@ class CribbagePlayShowInfoWidget(ttk.Labelframe):
         self._txt_info.grid(column=0, row=0, sticky='NWSE') # Grid-2 in Documentation\UI_WireFrame.pptx
         self.columnconfigure(0, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
         self.rowconfigure(0, weight=1) # Grid-2 in Documentation\UI_WireFrame.pptx
-        self._txt_info.insert('end','Player 2 scored 15 for 2: KH 5S\nPlayer 1 scored pair for 2; 5S 5D')
+        self.insert_end('Player 2 scored 15 for 2: KH 5S\nPlayer 1 scored pair for 2; 5S 5D')
+
+    def insert_end(self, message=''):
+        self._txt_info.insert('end', message)
+        return None
+        
+
+class StubGame:
+    """
+    A simple class used as a proxy for the GribbageGame class, for purposes of exploring how I can plumb the game to CribbageApp.
+    """
+    def __init__(self, destination, queue_owner):
+        """
+        """
+        # The tkinter widget that will generate events when the game has ouput to sent to the CribbageApp
+        self._destination = destination
+        # The CribbageApp, used to access its _game_event_queue member. In the actual implementation, might just make this a callback
+        # since all we need to ever do from this end is a put.
+        self._queue_owner = queue_owner
+        # The queue where we expect the CribbageApp to place a response to a querey for input from the user
+        self._response_queue = Queue(10)
+    
+    def play(self):
+        """
+        """
+        # Send an event to CribbageApp
+        sleep(1)
+        self.send_event()
+        sleep(1)
+        # Request input from CribbageApp
+        result = self.request_input()
+        return None
+    
+    def request_input(self):
+        """
+        """
+        # Add a query item to the game event queue
+        self._queue_owner._game_event_queue.put(item=('play_card_query','5S'), timeout=1)
+        # Generate event that will cause the query item to be picked out of the game event queue and acted on
+        self._destination.event_generate('<<CribbageGameQueryEvent>>')
+        # Wait in a tight loop for the CribbageApp to provide a response in the response queue
+        while self._response_queue.empty():
+            sleep(1)
+        response = self._response_queue.get(timeout=1)
+        return None
+    
+    def send_event(self):
+        """
+        """
+        # Add an item to the game event queue
+        self._queue_owner._game_event_queue.put(item=(35,29), timeout=1)
+        # Generate event that will cause the item to be picked out of the game event queue and acted on
+        self._destination.event_generate('<<CribbageGameOutputEvent>>')
+        
+        return False

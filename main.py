@@ -16,7 +16,7 @@ from CribbagePlayStrategy import RandomCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
-from CribbageApp import CribbageApp
+from CribbageApp import CribbageApp, StubGame
 
 
 def play_interactive_game():
@@ -74,6 +74,8 @@ def launch_tkinter_app():
     root = tk.Tk()
     myapp = CribbageApp(root)
     myapp.master.title("Cribbage Application")
+    root.bind('<<CribbageGameOutputEvent>>', myapp.CribbageGameOutputEventHandler)
+    root.bind('<<CribbageGameQueryEvent>>', myapp.CribbageGameQueryEventHandler)
     myapp.mainloop()
 
     return None

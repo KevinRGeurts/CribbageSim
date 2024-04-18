@@ -35,7 +35,6 @@
     <Compile Include="..\BlackJackSim\UserResponseCollector.py">
       <Link>UserResponseCollector.py</Link>
     </Compile>
-    <Compile Include="CribbageApp.py" />
     <Compile Include="CribbageBoard.py" />
     <Compile Include="CribbageCombination.py" />
     <Compile Include="CribbageDeal.py" />
@@ -55,9 +54,7 @@
     <Compile Include="test_CribbagePlayStrategy.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="test_CribbageSimulation.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="test_CribbageSimulator.py" />
     <Compile Include="test_CribFlushCombo.py">
       <SubType>Code</SubType>
     </Compile>

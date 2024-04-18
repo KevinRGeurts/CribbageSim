@@ -10,13 +10,12 @@ from deck import StackedDeck, Deck
 from card import Card
 from hand import Hand
 from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination, PairCombinationPlaying, RunCombinationPlaying
-from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbagePlayStrategy import RandomCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
-from CribbageApp import CribbageApp, StubGame
+import UserResponseCollector
 
 
 def play_interactive_game():
@@ -70,12 +69,15 @@ def launch_tkinter_app():
     """
     Launch tkinter based Cribbage Application
     """
-    
+
+    # Create and configure the app
     root = tk.Tk()
     myapp = CribbageApp(root)
     myapp.master.title("Cribbage Application")
     root.bind('<<CribbageGameOutputEvent>>', myapp.CribbageGameOutputEventHandler)
-    root.bind('<<CribbageGameQueryEvent>>', myapp.CribbageGameQueryEventHandler)
+    root.bind('<<TkinterAppQueryEvent>>', myapp.CribbageGameQueryEventHandler)
+
+    # Start the app's event loop running
     myapp.mainloop()
 
     return None
@@ -155,8 +157,8 @@ if __name__ == '__main__':
         
     # Build a query for the user to obtain their choice of how to user the simulator
     query_preface = 'How do you want to use the simulator?'
-    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal',  't':'Launch App', 'd':'Debug'}
-    response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+    query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal', 'd':'Debug'}
+    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
     
     while response != 'q':
         
@@ -173,14 +175,11 @@ if __name__ == '__main__':
 
             case 'b':
                 play_auto_deal()
-                
-            case 't':
-                launch_tkinter_app()
 
             case 'd':
                 play_debug()
         
         print('--------------------')
-        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
       
    

@@ -1,7 +1,7 @@
 
 class CribbageError(Exception):
     """
-    Base exception class for all custom excpetions specific to CribbageSimulator project.
+    Base exception class for all custom exceptions specific to CribbageSimulator project.
     """
     pass
 

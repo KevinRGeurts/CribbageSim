@@ -3,7 +3,7 @@ from enum import Enum
 import random
 
 # Local imports
-from UserResponseCollector import UserResponseCollector_query_user, BlackJackQueryType
+import UserResponseCollector # Leave this like it is, so that import can be used to do a swap out of the UserResponseCollector between base and child if needed
 from CribbageCombination import CribbageComboInfo
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
 from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
@@ -650,7 +650,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         for card in get_hand_callback():
             query_dic[str(position)] = str(card)
             position += 1
-        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
         xfer_to_crib_callback(int(response))
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
@@ -663,7 +663,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         for card in get_hand_callback():
             query_dic[str(position)] = str(card)
             position += 1
-        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
         xfer_to_crib_callback(int(response))
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
@@ -707,7 +707,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         if len(playable) == 0:
             # User has no playable cards, so add 'Go' to the list of choices
             query_dic['g'] = 'Go'
-        response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
         
         while not valid_choice:
 
@@ -734,7 +734,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                     if len(playable) == 0:
                         # User has no playable cards, so add 'Go' to the list of choices
                         query_dic['g'] = 'Go'
-                    response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+                    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
                     
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
@@ -777,7 +777,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             for card in playable:
                 query_dic[str(position)] = str(card)
                 position += 1
-            response = UserResponseCollector_query_user(BlackJackQueryType.MENU, query_preface, query_dic)
+            response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
             if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
             # Play card

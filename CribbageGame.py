@@ -7,6 +7,7 @@ from CribbageBoard import CribbageBoard
 from CribbageDeal import CribbageDeal
 from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
+from UserResponseCollector import UserResponseCollectorError, UserResponseCollectorTerminateQueryingThreadError
 
 class CribbagePlayers(Enum):
     """
@@ -206,6 +207,12 @@ class CribbageGame:
                         return_val.player1_total_show_score += e.deal_info.dealer_show_score
                         return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
+        
+            except UserResponseCollectorTerminateQueryingThreadError as e:
+                # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
+                # TODO: Investigate any problems
+                logger.info(f"Cribbage game terminating in the middle of play, at request of user.")
+                return CribbageGameInfo()
 
             # Log end of deal board
             logger.info(f"After deal {str(deal_count)}:\n{str(self._board)}")

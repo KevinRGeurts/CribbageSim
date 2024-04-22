@@ -1,6 +1,7 @@
 
 # Standard
 import logging
+from logging.handlers import QueueHandler as QueueHandler
 import sys
 
 # Local
@@ -13,11 +14,12 @@ class CribbageSimulator:
     games played automatically, for some reason. Right now it's utility is a top sort of level to set up logging.
     """
 
-    def setup_logging(self, debug = False):
+    def setup_logging(self, debug = False, queue = None):
         """
         This method configures logging. It should be called ahead of any calls to CribbageGame.play() or CribbageDeal.play() to ensure the
         expected behavior of logging. Though failure to do so should not be breaking.
         :parameter debug: If True, then logger level set to DEBUG (and hidden information will be revealed in output), boolean
+        :parameter queue: If is not None, then a queue handler will be set up with this queue. Queue object
         :return: None
         """
         # Create a logger with name 'cribbage_logger'. This is NOT the root logger, which is one level up from here, and has no name.
@@ -41,6 +43,14 @@ class CribbageSimulator:
         sh.setLevel(logging.DEBUG)
         # Add the stream handler to the logger
         logger.addHandler(sh)
+
+        # if argument queue is not None, then set up the highest level below root logger with a QueueHandler
+        if queue is not None:
+            qh = QueueHandler(queue)
+            # Set the threshold for the queue handler itself, which will come into play only after the logger threshold is met.
+            qh.setLevel(logging.DEBUG)
+            # Add the queue handler to the logger
+            logger.addHandler(qh)
     
         # Create the new logger that will handle form_crib/follow/go data going to file.
         # Create it as a child of the logger, 'cribbage_logger'

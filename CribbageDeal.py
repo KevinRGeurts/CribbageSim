@@ -11,6 +11,7 @@ from CribbageCombination import CribbageCombinationShowing, PairCombination, Fif
 from CribbageCombination import CribFlushCombination
 from CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
 from exceptions import CribbageGameOverError
+from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 
 
 class CribbageRole(Enum):
@@ -205,10 +206,11 @@ class CribbageDeal:
         :parameter count: The number of pegs (points) to add to the player's score, int
         :return: The current player point score, int
         """
-        # Update score for the deal
-        self._player_score += count
-        # Update score for the game
-        if (self._player_peg_callback): self._player_peg_callback(count)
+        if count > 0:
+            # Update score for the deal
+            self._player_score += count
+            # Update score for the game
+            if (self._player_peg_callback): self._player_peg_callback(count)
         return self._player_score
 
     def peg_for_dealer(self, count = 1):
@@ -217,10 +219,11 @@ class CribbageDeal:
         :parameter count: The number of pegs (points) to add to the dealer's score, int
         :return: The current dealer point score, int
         """
-        # Update score for the deal
-        self._dealer_score += count
-        # Update score for the game
-        if (self._dealer_peg_callback): self._dealer_peg_callback(count)
+        if count > 0:
+            # Update score for the deal
+            self._dealer_score += count
+            # Update score for the game
+            if (self._dealer_peg_callback): self._dealer_peg_callback(count)
         return self._dealer_score
 
     def xfer_player_card_to_crib(self, index = 0):
@@ -327,7 +330,9 @@ class CribbageDeal:
         logger.info(f"     Dealer pile after card played: {self._dealer_pile}")
         logger.debug(f"     Player hand after card played: {self._player_hand}")
         logger.info(f"     Player pile after card played: {self._player_pile}")
-        logger.info(f"     Combined pile after played: {self._combined_pile}")
+        logger.info(f"     Combined pile after played: {self._combined_pile}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile),
+                                              go_round_count=go_round_count))
         logger.info(f"     Play count after card played: {go_round_count}")
         return None
 
@@ -365,7 +370,8 @@ class CribbageDeal:
 
         # Deal the starter card. IFF it is a Jack, peg 2 for the dealer.
         starter = self.draw_starter_card()
-        logger.info(f"Starter card: {starter}")
+        logger.info(f"Starter card: {starter}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_STARTER, starter=str(starter)))
         # To facilitate creating a unit test from the deal
         logger.debug(f"Starter card: {repr(starter)}")
         if starter.get_pips() == 'J':
@@ -614,7 +620,8 @@ class CribbageDeal:
             raise CribbageGameOverError('Game ended while showing dealer hand', deal_info = deal_info)
         
         # Score the dealer's crib
-        logger.info(f"Showing dealer crib: {str(self._crib_hand)}")
+        logger.info(f"Showing dealer crib: {str(self._crib_hand)}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_CRIB,  crib=str(self._crib_hand)))
         score = self.determine_score_showing_crib(self._crib_hand, starter)
         logger.info(f"     Total dealer score from showing crib: {score}")
         deal_info.dealer_crib_score += score

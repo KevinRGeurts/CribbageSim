@@ -1,5 +1,9 @@
-# Local
+# Standard imports
+import logging
+
+# Local imports
 from exceptions import CribbageGameOverError
+from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 
 
 class CribbageBoard(object):
@@ -24,11 +28,18 @@ class CribbageBoard(object):
         :parameter points: The number of points to peg, int
         :return: The current score for player 1, after pegging points, int
         """
+        assert(points>0)
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         self._player1_previous = self._player1_current
         self._player1_current += points
         if self._player1_current >= 121:
             self._player1_current = 121
             raise CribbageGameOverError
+        logger.info(f"Player 1 peg locations: {self._player1_current},{self._player1_previous}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
+                                              score_player1=(self._player1_current,self._player1_previous)))
         return self._player1_current
         
     def peg_for_player2(self, points = 1):
@@ -37,11 +48,18 @@ class CribbageBoard(object):
         :parameter points: The number of points to peg, int
         :return: The current score for player 2, after pegging points, int
         """
+        assert(points>0)
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         self._player2_previous = self._player2_current
         self._player2_current += points
         if self._player2_current >= 121:
             self._player2_current = 121
             raise CribbageGameOverError
+        logger.info(f"Player 2 peg locations: {self._player2_current},{self._player2_previous}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
+                                              score_player2=(self._player2_current,self._player2_previous)))
         return self._player2_current
     
     def get_scores(self):

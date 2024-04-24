@@ -39,6 +39,9 @@
     <Compile Include="CribbageCombination.py" />
     <Compile Include="CribbageDeal.py" />
     <Compile Include="CribbageGame.py" />
+    <Compile Include="CribbageGameOutputEvents.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="CribbagePlayStrategy.py" />
     <Compile Include="CribbageSimulator.py" />
     <Compile Include="exceptions.py" />

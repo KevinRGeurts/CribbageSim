@@ -8,9 +8,11 @@ from CribbageDeal import CribbageDeal
 from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
 from UserResponseCollector import UserResponseCollectorError, UserResponseCollectorTerminateQueryingThreadError
+from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+
 
 class CribbagePlayers(Enum):
-    """
+    """CribbageGameOutputEvents
     An enumeration of the participants in a cribbage simulator.
     """
     PLAYER_1 = 1 
@@ -119,6 +121,10 @@ class CribbageGame:
 
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
+        
+        logger.info(f"Starting a new game of cribbage with {self._player1} vs {self._player2}.",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_GAME, name_player1=self._player1,
+                                              name_player2=self._player2))
 
         game_over = False
         deal_count = 0
@@ -136,14 +142,16 @@ class CribbageGame:
             # Reset deal so we are ready for a new deal
             match next_to_deal:
                 case CribbagePlayers.PLAYER_1:
-                    logger.info(f"Player {self._player1} will deal.")
+                    logger.info(f"Player {self._player1} will deal.",
+                                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_DEAL, name_dealer=self._player1))
                     self._deal.reset_deal(self.peg_for_player2, self.peg_for_player1)
                     # Set the correct strategies for player and dealer
                     self._deal.set_player_play_strategy(self._player2_player_strategy)
                     self._deal.set_dealer_play_strategy(self._player1_dealer_strategy)
                     next_to_deal = CribbagePlayers.PLAYER_2
                 case CribbagePlayers.PLAYER_2:
-                    logger.info(f"Player {self._player2} will deal.")
+                    logger.info(f"Player {self._player2} will deal.",
+                                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_DEAL, name_dealer=self._player2))
                     self._deal.reset_deal(self.peg_for_player1, self.peg_for_player2)
                     # Set the correct strategies for player and dealer
                     self._deal.set_player_play_strategy(self._player1_player_strategy)

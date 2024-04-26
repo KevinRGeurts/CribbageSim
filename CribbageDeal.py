@@ -14,6 +14,14 @@ from exceptions import CribbageGameOverError
 from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 
 
+class CribbagePlayers(Enum):
+    """
+    An enumeration of the participants in a cribbage simulator.
+    """
+    PLAYER_1 = 1 
+    PLAYER_2 = 2
+
+
 class CribbageRole(Enum):
     """
     An enumeration of the roles of participants in a cribbage simulator.
@@ -47,7 +55,7 @@ class CribbageDeal:
     """
     
     def __init__(self, player_strategy = CribbagePlayStrategy(), dealer_strategy = CribbagePlayStrategy(),
-                 player_peg_callback = None, dealer_peg_callback = None):
+                 player_peg_callback = None, dealer_peg_callback = None, player_participant = None, dealer_participant = None):
         """
         Construct a finite deck of Cards, an empty dealer Hand, an empty player Hand, and, and empty crib Hand.
         Create a starter card, which is expected to be replaced with a dealt one.
@@ -59,23 +67,27 @@ class CribbageDeal:
         :parameter dealerer_strategy: CribbagePlayStrategy instance used to play dealer hand, CribbagePlayStrategy or child instance
         :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
         :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
+        :parameter player_participant: Which game participant is the player for this deal?, CribbagePlayers Enum
+        :parameter dealer_participant: Which game participant is the dealer for this deal?, CribbagePlayers Enum
         """
         self._deck = Deck(isInfinite = False) # So that self has a valid _deck attribute when self.reset_deal() is called
-        self.reset_deal(player_peg_callback,dealer_peg_callback)
+        self.reset_deal(player_peg_callback,dealer_peg_callback,player_participant,dealer_participant)
         self.set_dealer_play_strategy(dealer_strategy)
         self.set_player_play_strategy(player_strategy)
         # All elements of the _play_combinations list must be children of CribbageCombinationPlaying class.
         self._play_combinations = [FifteenCombinationPlaying(), PairCombinationPlaying(), RunCombinationPlaying()]
         # All elements of the _hand_show_combinations list must be children of CribbageCombinationShowing class.
         self._hand_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), FlushCombination(), HisNobsCombination()]
-        # All elements of the _crib_show_combinations list must be children of CribbageCombinationShowing class.
+        # All elements of the  list must be children of CribbageCombinationShowing class.
         self._crib_show_combinations = [PairCombination(), FifteenCombination(), RunCombination(), CribFlushCombination(), HisNobsCombination()]
 
-    def reset_deal(self, player_peg_callback = None, dealer_peg_callback = None):
+    def reset_deal(self, player_peg_callback = None, dealer_peg_callback = None, player_participant = None, dealer_participant = None):
         """
         Reset everything as necessary to have a fresh deal.
         :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
         :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
+        :parameter player_participant: Which game participant is the player for this deal?, CribbagePlayers Enum
+        :parameter dealer_participant: Which game participant is the dealer for this deal?, CribbagePlayers Enum
         """
         # If a StackDeck has been injected, for example as part of unit testing, then leave it in place
         if not isinstance(self._deck, StackedDeck): self._deck = Deck(isInfinite = False)
@@ -94,6 +106,8 @@ class CribbageDeal:
         if (dealer_peg_callback): assert(callable(dealer_peg_callback))
         self._player_peg_callback = player_peg_callback
         self._dealer_peg_callback = dealer_peg_callback
+        self._participant_player = player_participant
+        self._participant_dealer = dealer_participant
         
     def last_card_played(self):
         """
@@ -146,7 +160,20 @@ class CribbageDeal:
         :parameter number: How many cards to draw into dealer's hand, int
         :return: A list of Card(s) in the hand after the draw
         """
-        return self._dealer_hand.add_cards(self._deck.draw(number))
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        card_list = self._dealer_hand.add_cards(self._deck.draw(number))
+
+        # If dealer for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_dealer == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_dealer} after dealing: {self._dealer_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._dealer_hand)))
+        elif self._participant_dealer == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_dealer} after dealing: {self._dealer_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._dealer_hand)))
+
+        return card_list
 
     def draw_for_player(self, number=1):
         """
@@ -154,7 +181,20 @@ class CribbageDeal:
         :parameter number: How many cards to draw into player's hand, int
         :return: A list of Card(s) in the hand after the draw
         """
-        return self._player_hand.add_cards(self._deck.draw(number))
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        card_list = self._player_hand.add_cards(self._deck.draw(number))
+
+        # If player for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_player == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_player} after deal: {self._player_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._player_hand)))
+        elif self._participant_player == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_player} after deal: {self._player_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._player_hand)))
+
+        return card_list
 
     def get_player_hand(self):
         """
@@ -184,9 +224,31 @@ class CribbageDeal:
         :parameter index: The index location in the player's hand of the card to play, int [0...number of cards in hand - 1]
         :return: The pips count of the card played, int
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         card = self._player_hand.remove_card(index)
         self._player_pile.add_cards(card)
         self._combined_pile.add_cards(card)
+
+        # If player for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_player == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_player} after playing {card}: {self._player_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._player_hand)))
+            # Also log to info update player1 play pile
+            logger.info(f"     Pile for {self._participant_player} after playing {card}: {self._player_pile}",
+                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_PILE, pile_player1=str(self._player_pile)))
+        elif self._participant_player == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_player} after playing {card}: {self._player_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._player_hand)))
+            # Also log to info update player2 play pile
+            logger.info(f"     Pile for {self._participant_player} after playing {card}: {self._player_pile}",
+                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_PILE, pile_player2=str(self._player_pile)))
+
+        # Log updated combined play pile to info
+        logger.info(f"     Combined pile after {self._participant_player} played {card}: {self._combined_pile}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile)))
+
         return card.count_card()
         
     def play_card_for_dealer(self, index = 0):
@@ -195,9 +257,32 @@ class CribbageDeal:
         :parameter index: The index location in the dealer's hand of the card to play, int [0...number of cards in hand - 1]
         :return: The pips count of the card played, int
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         card = self._dealer_hand.remove_card(index)
         self._dealer_pile.add_cards(card)
         self._combined_pile.add_cards(card)
+
+        # If dealer for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_dealer == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_dealer} after playing {card}: {self._dealer_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._dealer_hand)))
+            # Also log to info update player1 play pile
+            logger.info(f"     Pile for {self._participant_dealer} after playing {card}: {self._dealer_pile}",
+                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_PILE, pile_player1=str(self._dealer_pile)))
+        elif self._participant_dealer == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_dealer} after playing {card}: {self._dealer_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._dealer_hand)))
+            # Also log to info update player2 play pile
+            logger.info(f"     Pile for {self._participant_dealer} after playing {card}: {self._dealer_pile}",
+                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_PILE, pile_player2=str(self._dealer_pile)))
+
+        # Log updated combined play pile to info
+        logger.info(f"     Combined pile after {self._participant_player} played {card}: {self._combined_pile}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile)))
+
+
         return card.count_card()
 
     def peg_for_player(self, count = 1):
@@ -234,8 +319,20 @@ class CribbageDeal:
         :parameter index: The index location in the player's hand of the card to play, int [0...number of cards in hand - 1]
         :return None:
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         card = self._player_hand.remove_card(index)
         self._crib_hand.add_cards(card)
+
+        # If player for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_player == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_player} after laying {card} in crib: {self._player_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._player_hand)))
+        elif self._participant_player == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_player} after laying {card} in crib: {self._player_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._player_hand)))
+
         return None
 
     def xfer_dealer_card_to_crib(self, index = 0):
@@ -246,8 +343,20 @@ class CribbageDeal:
         :parameter index: The index location in the dealer's hand of the card to play, int [0...number of cards in hand - 1]
         :return None:
         """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
         card = self._dealer_hand.remove_card(index)
         self._crib_hand.add_cards(card)
+
+        # If dealer for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
+        if self._participant_dealer == CribbagePlayers.PLAYER_1:
+            logger.info(f"     Hand for {self._participant_dealer} after laying {card} in crib: {self._dealer_hand}",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._dealer_hand)))
+        elif self._participant_dealer == CribbagePlayers.PLAYER_2:
+            logger.debug(f"     Hand for {self._participant_dealer} after laying {card} in crib: {self._dealer_hand}",
+                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._dealer_hand)))
+
         return None
 
     def determine_score_showing_hand(self, hand = Hand(), starter = None):
@@ -330,9 +439,7 @@ class CribbageDeal:
         logger.info(f"     Dealer pile after card played: {self._dealer_pile}")
         logger.debug(f"     Player hand after card played: {self._player_hand}")
         logger.info(f"     Player pile after card played: {self._player_pile}")
-        logger.info(f"     Combined pile after played: {self._combined_pile}",
-                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile),
-                                              go_round_count=go_round_count))
+        logger.info(f"     Combined pile after played: {self._combined_pile}")
         logger.info(f"     Play count after card played: {go_round_count}")
         return None
 

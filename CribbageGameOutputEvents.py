@@ -3,9 +3,12 @@ The following is a list of CribbageGameOutputEvents and the attributes that are 
 START_GAME: name_player1, name_player2
 START_DEAL: name_dealer
 UPDATE_PLAYER1_HAND: hand_player1
+UPDATE_PLAYER2_HAND: hand_player2
 UPDATE_STARTER: starter 
 UPDATE_CRIB: crib
 UPDATE_PILE_COMBINED: pile_combined, go_round_count
+UPDATE_PLAYER1_PILE: pile_player1
+UPDATE_PLAYER2_PILE: pile_player2
 UPDATE_SCORE_PLAYER1: score_player1
 UPDATE_SCORE_PLAYER2: score_player2
 """
@@ -29,8 +32,8 @@ class CribbageGameOutputEvents(Enum):
     UPDATE_STARTER = 5
     UPDATE_CRIB = 6
     UPDATE_PILE_COMBINED = 7
-    UPDATE_PILE_PLAYER1 = 8
-    UPDATE_PILE_PLAYER2 = 9
+    UPDATE_PLAYER1_PILE = 8
+    UPDATE_PLAYER2_PILE = 9
     UPDATE_SCORE_PLAYER1 = 10
     UPDATE_SCORE_PLAYER2 = 11
 
@@ -54,8 +57,8 @@ class CribbageGameLogInfo:
         self.crib = '' # String like 'KH AD 2S JC'
         self.pile_combined = '' # String like 'KH AD 2S JC'
         self.go_round_count = 0
-        self.pile_player1 = [] # List of strings like ['KH', 'AD', '2S', 'JC']
-        self.pile_player2 = [] # List of strings like ['KH', 'AD', '2S', 'JC']
+        self.pile_player1 = '' # String like 'KH AD 2S JC'
+        self.pile_player2 = '' # String like 'KH AD 2S JC'
         self.score_player1 = None # Tuple (leading peg position as int, trailing peg position as int)
         self.score_player2 = None # Tuple (leading peg position as int, trailing peg position as int)
 

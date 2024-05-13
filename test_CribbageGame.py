@@ -47,7 +47,7 @@ class Test_CribbageGame(unittest.TestCase):
         act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
-    @patch('sys.stdin', io.StringIO('3\n0\n3\n2\n1\n0\n2\n0\ng\n1\n0\n0\ng\n0\ng\n1\n0\n2\n0\n1\n0\n1\n2\n0\n0\n0\n0\ng\n'))
+    @patch('sys.stdin', io.StringIO('3\n0\n3\n2\n1\n0\n2\n0\ng\n1\n0\n0\ng\n0\ng\nc\n1\n0\n2\n0\n1\n0\n1\n2\n0\n0\n0\n0\ng\n'))
     def test_play_both_interactive_end_at_second_show(self):
 
         # Create a stacked deck
@@ -90,7 +90,7 @@ class Test_CribbageGame(unittest.TestCase):
         act_val = return_val.deals_in_game
         self.assertEqual(exp_val, act_val)
 
-    @patch('sys.stdin', io.StringIO('3\n2\n0\n0\n1\ng\n0\n1\n0\n2\n1\n1\n0\ng\n'))
+    @patch('sys.stdin', io.StringIO('3\n2\n0\n0\n1\ng\n0\nc\n1\n0\n2\n1\n1\n0\ng\n'))
     def test_play_one_interactive_end_at_second_show(self):
 
         # Create a stacked deck

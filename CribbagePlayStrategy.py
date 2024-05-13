@@ -1,5 +1,5 @@
 # Standard imports
-from enum import Enum
+from enum import KEEP, Enum
 import random
 
 # Local imports
@@ -47,6 +47,8 @@ class CribbagePlayStrategy:
             the current "go" round by both dealer and player. Could also depend on how close to done the game is, since when a player is a few
             pegs from winning and the game is close, scoring during play may be more valualbe than getting a high count during show.
         go(...) - For playing out as many cards as possible AFTER opponent has declared "go".
+        continue_save_end(...) - For deciding weether to continue by playing another deal, saving the game state and ending, or ending without
+            saving the game state.
     """
     
     def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
@@ -90,7 +92,7 @@ class CribbagePlayStrategy:
            play_recorder_callback=None):
         """
         This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
-        Deter,ome which card(s) if any to play in a go round after opponent has declared go.
+        Determine which card(s) if any to play in a go round after opponent has declared go.
         :parameter go_count: The current cumulative count of the go round that caused opponent to declare go, int
         :parameter play_card_callback: Bound method used to play a card from hand, e.g., CribbageDeal.play_card_for_player
         :parameter get_hand_callback: Bound method used to obtain cards in hand, e.g., CribbageDeal.get_player_hand
@@ -110,9 +112,18 @@ class CribbagePlayStrategy:
         raise NotImplementedError
         return 0
 
+    def continue_save_end(self):
+        """
+        This is an abstract method that must be implemented by children. If called, it will raise NotImplementedError.
+        Determine if game play should continue by proceeding to the next deal, if current game state should be saved and game play ended,
+        or if game play should be ended without saving current game state.
+        :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
+        """
+        raise NotImplementedError
+        return (False, False)
+
 
     # Note: Will need separate strategies for dealer and player, since, for example, form_crib(...) logic will depend heavily on who dealt
-
 
 class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
     """
@@ -255,6 +266,15 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
             playable = [c for c in get_hand_callback() if c.count_card() <= (31 - play_count)]
         
         return (play_count - go_count)
+    
+    def continue_save_end(self):
+        """
+        Determine if game play should continue by proceeding to the next deal, if current game state should be saved and game play ended,
+        or if game play should be ended without saving current game state. Since this strategy is for automatic play (i.e., for a machine player),
+        answer will always be to continue the game.
+        :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
+        """
+        return (True, False)
 
     def lead(self, hand = Hand()):
         """
@@ -799,6 +819,28 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         
         return (play_count - go_count)
 
+    def continue_save_end(self):
+        """
+        Ask human player if game play should continue by proceeding to the next deal, if current game state should be saved and game play ended,
+        or if game play should be ended without saving current game state.
+        :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
+        """
+        query_preface = f"Do you wish to keep playing?"
+        query_dic = {'c':'Continue game', 's':'Save and end game', 'e':'End game'}
+        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        
+        keep_playing = False
+        save_state = False
+        
+        match response:
+            case 'c':
+                keep_playing = True
+            case 's':
+                save_state = True
+            case 'e':
+                pass
+        
+        return (keep_playing, save_state)
 
 class RandomCribbagePlayStrategy(CribbagePlayStrategy):
     """
@@ -962,3 +1004,12 @@ class RandomCribbagePlayStrategy(CribbagePlayStrategy):
         xfer_to_crib_callback(cards.index(crib_card_2))
  
         return None
+
+    def continue_save_end(self):
+        """
+        Determine if game play should continue by proceeding to the next deal, if current game state should be saved and game play ended,
+        or if game play should be ended without saving current game state. Since this strategy is for automatic play (i.e., for a machine player),
+        answer will always be to continue the game.
+        :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
+        """
+        return (True, False)

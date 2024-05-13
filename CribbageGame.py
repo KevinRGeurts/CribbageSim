@@ -1,15 +1,15 @@
 # Standard imports
 import logging
 from enum import Enum
+import shelve
 
 # Local imports
 from CribbageBoard import CribbageBoard
 from CribbageDeal import CribbageDeal, CribbagePlayers
 from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
-from UserResponseCollector import UserResponseCollectorError, UserResponseCollectorTerminateQueryingThreadError
 from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
-
+import UserResponseCollector
 
 class CribbageGameInfo:
     """
@@ -69,6 +69,8 @@ class CribbageGame:
         else:
             self._player2_dealer_strategy = player_strategy2
         self._deal = CribbageDeal(self._player2_player_strategy, self._player1_dealer_strategy)
+        self._next_to_deal = CribbagePlayers.PLAYER_1
+        self._deal_count = 0
 
     def get_player1_name(self):
         """
@@ -119,19 +121,19 @@ class CribbageGame:
                                               name_player2=self._player2))
 
         game_over = False
-        deal_count = 0
+        self._deal_count = 0
         return_val = CribbageGameInfo()
         
         # TODO: For now player1 will always deal first, but implement random selection, such as cutting for high card
         # Consider that this predictability is beneficial to unit testing.
-        next_to_deal = CribbagePlayers.PLAYER_1
+        self._next_to_deal = CribbagePlayers.PLAYER_1
         
         while not game_over:
         
-            deal_count += 1
+            self._deal_count += 1
 
             # Reset deal so we are ready for a new deal
-            match next_to_deal:
+            match self._next_to_deal:
                 case CribbagePlayers.PLAYER_1:
                     logger.info(f"Player {self._player1} will deal.",
                                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_DEAL, name_dealer=self._player1))
@@ -140,7 +142,7 @@ class CribbageGame:
                     # Set the correct strategies for player and dealer
                     self._deal.set_player_play_strategy(self._player2_player_strategy)
                     self._deal.set_dealer_play_strategy(self._player1_dealer_strategy)
-                    next_to_deal = CribbagePlayers.PLAYER_2
+                    self._next_to_deal = CribbagePlayers.PLAYER_2
                 case CribbagePlayers.PLAYER_2:
                     logger.info(f"Player {self._player2} will deal.",
                                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_DEAL, name_dealer=self._player2))
@@ -149,13 +151,13 @@ class CribbageGame:
                     # Set the correct strategies for player and dealer
                     self._deal.set_player_play_strategy(self._player1_player_strategy)
                     self._deal.set_dealer_play_strategy(self._player2_dealer_strategy)
-                    next_to_deal = CribbagePlayers.PLAYER_1
+                    self._next_to_deal = CribbagePlayers.PLAYER_1
             
             # Play the current deal
             try:
                 deal_info = self._deal.play()
                 # Accumulate deal results info into game results info
-                match next_to_deal:
+                match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
                         return_val.player1_total_play_score += deal_info.player_play_score
@@ -181,16 +183,16 @@ class CribbageGame:
                     return_val.winning_player = self._player1
                     return_val.winning_player_final_score = p1_score
                     return_val.losing_player_final_score = p2_score
-                    return_val.deals_in_game = deal_count
+                    return_val.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player1} wins the game.")
                 else:
                     return_val.winning_player = self._player2
                     return_val.winning_player_final_score = p2_score
                     return_val.losing_player_final_score = p1_score
-                    return_val.deals_in_game = deal_count
+                    return_val.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player2} wins the game.")
                 # Handle accumulating deal info that arrived in CribbageGameOverError into game info
-                match next_to_deal:
+                match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
                         return_val.player1_total_play_score += e.deal_info.player_play_score
@@ -209,17 +211,41 @@ class CribbageGame:
                         return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
         
-            except UserResponseCollectorTerminateQueryingThreadError as e:
+            except UserResponseCollector.UserResponseCollectorTerminateQueryingThreadError as e:
                 # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
                 # TODO: Investigate any problems
                 logger.info(f"Cribbage game terminating in the middle of play, at request of user.")
                 return CribbageGameInfo()
 
             # Log end of deal board
-            logger.info(f"After deal {str(deal_count)}:\n{str(self._board)}")
+            logger.info(f"After deal {str(self._deal_count)}:\n{str(self._board)}")
+
+            # Query player 1 (since in a human/machine game, player 1 will be the human) play strategy
+            # if we should save the current state of the game and end play, or if we should continue to the next deal.
+            match self._next_to_deal:
+                case CribbagePlayers.PLAYER_1:
+                    # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
+                    response = self._player1_player_strategy.continue_save_end()
+                case CribbagePlayers.PLAYER_2:
+                    # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
+                    response = self._player1_dealer_strategy.continue_save_end()
+            match response:
+                case (True, False): # Continue play
+                    pass
+                case (False, True): # Stop play, save game state
+                    # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
+                    # TODO: Investigate any problems
+                    self.shelve_game()
+                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.")
+                    return CribbageGameInfo()
+                case (False, False): # Stop play, do NOT save game state
+                    # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
+                    # TODO: Investigate any problems
+                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.")
+                    return CribbageGameInfo()
  
         # Log end of game results
-        logger.info(f"At game end, after {deal_count} deals:\n{str(self._board)}")
+        logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}")
         logger.info(f"     Winning Player: {return_val.winning_player}")
         logger.info(f"     Winning Player Final Score: {return_val.winning_player_final_score}")
         logger.info(f"     Losing Player Final Score: {return_val.losing_player_final_score}")
@@ -237,4 +263,68 @@ class CribbageGame:
         logger.info(f"     Check Sum: {return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score}")
 
         return return_val
+
+    def shelve_game(self, path=None):
+        """
+        Save the game by shelving/pickleing it.
+        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+            If no path is provided, then user will be queried.
+        :return None:
+        """
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        if path is None:
+            query_preface = 'Enter a valid file system path to the shelve file, without file extension, and with escaped backslashes.'
+            save_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH, query_preface)
+        else:
+            save_path = path
+
+        logger.info(f"Saving game to path: {save_path}")
+
+        # TODO: Actually shelve the game. Right now at best this will work only for a typical interactive game where 1 player is human and 1 player
+        # is machine, because it relies on the defaults for the game's __init__, so generalize, or error check.
+
+        file = shelve.open(str(save_path))
+        
+        file['board']=self._board
+        file['player1']=self._player1
+        file['player2']=self._player2
+        file['next_to_deal']=self._next_to_deal
+        file['deal_count']=self._deal_count
+
+        return None
+
+    def un_shelve_game(self, path=None):
+        """
+        Resotre the game by un-shelving/pickleing it.
+        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+            If no path is provided, then user will be queried.
+        :return None:
+        """
+
+        # Get the logger 'cribbage_logger'
+        logger = logging.getLogger('cribbage_logger')
+
+        if path is None:
+            query_preface = 'Enter a valid file system path to the shelve file, without file extension, and with escaped backslashes.'
+            load_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH, query_preface)
+        else:
+            load_path = path
+
+        logger.info(f"Loading game from path: {load_path}")
+
+        # TODO: Actually un-shelve the game. Right now at best this will work only for a typical interactive game where 1 player is human and 1 player
+        # is machine, because it relies on the defaults for the game's __init__, so generalize, or error check.
+
+        file = shelve.open(str(load_path))
+        
+        self._board=file['board']
+        self._player1=file['player1']
+        self._player2=file['player2']
+        self._next_to_deal=file['next_to_deal']
+        self._deal_count=file['deal_count']
+
+        return None
+
 

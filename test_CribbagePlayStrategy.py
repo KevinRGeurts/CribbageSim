@@ -39,6 +39,11 @@ class Test_CribbagePlayStrategy(unittest.TestCase):
         cps = CribbagePlayStrategy()
         self.assertRaises(NotImplementedError, cps.go, 0, cd.play_card_for_player, cd.get_player_hand,
                           cd.get_combined_play_pile, cd.determine_score_playing, cd.peg_for_player)
+        
+    def test_continue_save_end(self):
+        
+        cps = CribbagePlayStrategy()
+        self.assertRaises(NotImplementedError, cps.continue_save_end)
 
 
 if __name__ == '__main__':

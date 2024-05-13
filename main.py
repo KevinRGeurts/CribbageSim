@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from time import process_time
 from random import seed
-import tkinter as tk
 
 # Local
 from deck import StackedDeck, Deck
@@ -63,23 +62,6 @@ def play_auto_deal():
     deal = CribbageDeal(HoyleishPlayerCribbagePlayStrategy(), HoyleishDealerCribbagePlayStrategy())
     deal.play()
     
-    return None
-
-def launch_tkinter_app():
-    """
-    Launch tkinter based Cribbage Application
-    """
-
-    # Create and configure the app
-    root = tk.Tk()
-    myapp = CribbageApp(root)
-    myapp.master.title("Cribbage Application")
-    root.bind('<<CribbageGameOutputEvent>>', myapp.CribbageGameOutputEventHandler)
-    root.bind('<<TkinterAppQueryEvent>>', myapp.CribbageGameQueryEventHandler)
-
-    # Start the app's event loop running
-    myapp.mainloop()
-
     return None
 
 def play_debug():

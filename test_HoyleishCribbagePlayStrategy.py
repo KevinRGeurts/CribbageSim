@@ -10,7 +10,13 @@ from CribbageDeal import CribbageDeal
 
 
 class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
-    
+            
+    def test_continue_save_end(self):
+        hcp = HoyleishPlayerCribbagePlayStrategy()
+        exp_val = (True, False)
+        act_val = hcp.continue_save_end()
+        self.assertTupleEqual(exp_val, act_val)
+
     def test_guaranteed_hand_score(self):
         
         hcp = HoyleishCribbagePlayStrategy()
@@ -634,7 +640,7 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         act_val = (crib[0].get_suit(), crib[0].get_pips())
         self.assertTupleEqual(exp_val, act_val)
 
-        # Do we have the expected first card in the crib?
+        # Do we have the expected second card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('H', '8')
         act_val = (crib[1].get_suit(), crib[1].get_pips())
@@ -661,7 +667,7 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         act_val = (crib[0].get_suit(), crib[0].get_pips())
         self.assertTupleEqual(exp_val, act_val)
 
-        # Do we have the expected first card in the crib?
+        # Do we have the expected second card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('H', '8')
         act_val = (crib[1].get_suit(), crib[1].get_pips())

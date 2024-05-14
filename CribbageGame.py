@@ -282,8 +282,8 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
-            query_preface = 'Enter a valid file system path to the shelve file, without file extension, and with escaped backslashes.'
-            save_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH, query_preface)
+            query_preface = 'Where do you want to save the game?'
+            save_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH_SAVE, query_preface)
         else:
             save_path = path
 
@@ -313,8 +313,8 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
-            query_preface = 'Enter a valid file system path to the shelve file, without file extension, and with escaped backslashes.'
-            load_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH, query_preface)
+            query_preface = 'Which saved game do you want to open?'
+            load_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH_OPEN, query_preface)
         else:
             load_path = path
 
@@ -329,6 +329,14 @@ class CribbageGame:
         self._player2=file['player2']
         self._next_to_deal=file['next_to_deal']
         self._deal_count=file['deal_count']
+
+        logger.info(f"Player 1 peg locations: {self._board.get_player1_status()[0]},{self._board.get_player1_status()[1]}",
+            extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
+                                        score_player1=(self._board.get_player1_status()[0],self._board.get_player1_status()[0])))
+
+        logger.info(f"Player 2 peg locations: {self._board.get_player2_status()[0]},{self._board.get_player2_status()[1]}",
+            extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
+                                        score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[0])))
 
         return None
 

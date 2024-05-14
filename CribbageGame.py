@@ -106,27 +106,34 @@ class CribbageGame:
         """
         return self._board.peg_for_player2(count)
         
-    def play(self):
+    def play(self, load_game=False):
         """
         Play a game of cribbage.
+        :parameter load_game: Should we load a shelved game? as Boolean
         :return: Information about the results of the game, CribbageGameInfo object
-        :return: (Name of Winning Player, Winning Player Final Score, Losing Player Final Score, Number of Deals In Game), tuple (string, int, int, int)
         """
 
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
         
-        logger.info(f"Starting a new game of cribbage with {self._player1} vs {self._player2}.",
-                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_GAME, name_player1=self._player1,
-                                              name_player2=self._player2))
+        if load_game:
+            # Load a shelved game
+            logger.info(f"Restarting a saved game of cribbage with {self._player1} vs {self._player2}.",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_GAME, name_player1=self._player1,
+                                                  name_player2=self._player2))
+            self.un_shelve_game()
+        else:
+            # Start a new game
+            logger.info(f"Starting a new game of cribbage with {self._player1} vs {self._player2}.",
+                        extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.START_GAME, name_player1=self._player1,
+                                                  name_player2=self._player2))
+            self._deal_count = 0
+            # TODO: For now player1 will always deal first, but implement random selection, such as cutting for high card
+            # Consider that this predictability is beneficial to unit testing.
+            self._next_to_deal = CribbagePlayers.PLAYER_1
 
-        game_over = False
-        self._deal_count = 0
         return_val = CribbageGameInfo()
-        
-        # TODO: For now player1 will always deal first, but implement random selection, such as cutting for high card
-        # Consider that this predictability is beneficial to unit testing.
-        self._next_to_deal = CribbagePlayers.PLAYER_1
+        game_over = False
         
         while not game_over:
         
@@ -282,8 +289,7 @@ class CribbageGame:
 
         logger.info(f"Saving game to path: {save_path}")
 
-        # TODO: Actually shelve the game. Right now at best this will work only for a typical interactive game where 1 player is human and 1 player
-        # is machine, because it relies on the defaults for the game's __init__, so generalize, or error check.
+        # Note that this does not shelve the play strategy attributes of the game.
 
         file = shelve.open(str(save_path))
         
@@ -314,8 +320,7 @@ class CribbageGame:
 
         logger.info(f"Loading game from path: {load_path}")
 
-        # TODO: Actually un-shelve the game. Right now at best this will work only for a typical interactive game where 1 player is human and 1 player
-        # is machine, because it relies on the defaults for the game's __init__, so generalize, or error check.
+        # Note that this does not un-shelve the play strategy attributes of the game.
 
         file = shelve.open(str(load_path))
         

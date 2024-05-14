@@ -21,11 +21,21 @@ def play_interactive_game():
     """
     Use CribbageSimulator to play an interactive game as player 1.
     """
+    
+    # Ask user if they want to unshelve a shelved game
+    query_preface = 'Do you want to start a new game, or reload a saved game?'
+    query_dic = {'n':'New Game', 's':'Saved Game'}
+    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+    match response:
+        case 'n':
+            load_game = False
+        case 's':
+            load_game = True
 
     print('You are playing a game as player 1, against a machine player 2.')
     game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
                         dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
-    game.play()
+    game.play(load_game)
 
     return None
 

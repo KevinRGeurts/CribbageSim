@@ -11,6 +11,7 @@ UPDATE_PLAYER1_PILE: pile_player1
 UPDATE_PLAYER2_PILE: pile_player2
 UPDATE_SCORE_PLAYER1: score_player1
 UPDATE_SCORE_PLAYER2: score_player2
+END_GAME: 
 """
 
 # Standard imports
@@ -36,6 +37,7 @@ class CribbageGameOutputEvents(Enum):
     UPDATE_PLAYER2_PILE = 9
     UPDATE_SCORE_PLAYER1 = 10
     UPDATE_SCORE_PLAYER2 = 11
+    END_GAME = 12 # Sent when game engine ends game.
 
 
 class CribbageGameLogInfo:

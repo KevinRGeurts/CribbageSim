@@ -243,16 +243,19 @@ class CribbageGame:
                     # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
                     # TODO: Investigate any problems
                     self.shelve_game()
-                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.")
+                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.",
+                                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
                     return CribbageGameInfo()
                 case (False, False): # Stop play, do NOT save game state
                     # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
                     # TODO: Investigate any problems
-                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.")
+                    logger.info(f"Cribbage game terminating at end of deal, at request of player 1.",
+                                extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
                     return CribbageGameInfo()
  
         # Log end of game results
-        logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}")
+        logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}",
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
         logger.info(f"     Winning Player: {return_val.winning_player}")
         logger.info(f"     Winning Player Final Score: {return_val.winning_player_final_score}")
         logger.info(f"     Losing Player Final Score: {return_val.losing_player_final_score}")

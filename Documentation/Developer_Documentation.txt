@@ -178,7 +178,36 @@ Cribbage Simulator Project Developer Documentation
         (1) Menu Query: Query Preface, Dictionary of menu choices
 
 
+*** Concept development for sending a "scoring/pegging" record to the tkinter-based CribbageApp ***
 
+    (1) The idea is that every time pegging happens, a record of why will be logged to info. The GUI will use this record to show the user the details
+    of the scoring. Let's imagine each record during a go round / deal appearing in a listbox, and when the user clicks on an item in the listbox, the 
+    cards associated with the score will be highlighted in the GUI.
+
+        (a) Starter is a Jack, then the starter card is highlighted in the GUI.
+        (b) Playing a card leads to a pair in the play pile, then the pair of cards is highlighted in the GUI.
+        (c) When showing the player's hand, clicking an item in the scoring list will highlight the associated cards in the hand / starter.
+        (d) When showing the crib, clicking an item in the scoring list will highlight teh associated cards in the crib / starter.
+
+    (2) Some issues to sort out:
+
+        (a) Can't use the play pile to show scoring cards after we've advanced to the next go round, within the deal, because the play pile
+            clears at the end of each go round. So the score list will need to clear at the end of each go round.
+        (b) By the time the player's hand is shown, the hand display in the GUI has been emptied, as each card has been played, so it will
+            be necessary to restore the hand in conjunction with the show.
+        (c) GUI currently does not show opponents hand (so you can't cheat), but that means there is no place to show the details of the opponents
+            scoring, which should be visible. A possible solution is using the player hand widget to show the opponent hand, but change the
+            frame label to clarify what is happening.
+        (d) The game engine will shove all show information (both player's hands and the crib) at the GUI sequentially without pause. The GUI will need
+            to cache this info appropriately. I think the fact that the game engine asks at the end of a deal if the user wants to play another deal
+            will provide the "pause" that allows the user to spend time interacting with the show scoring information before moving on to the next
+            deal.
+        (e) Should we pass the scoring record information to the pegging functions and have them do the info logging, so all this is centralized?
+
+    (3) What should a scoring record look like?
+
+        Maybe we can reuse CribbageComboInfo objects (self.combo_name = 'none', self.number_instances = 0, self.score = 0, self.instance_list = [])?
+        This would need to be "extended" for drawing a jack as starter, and for scoring a "go".
 
 
         

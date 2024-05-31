@@ -1,5 +1,7 @@
 # Standard imports
 import logging
+from xml.dom.expatbuilder import ParseEscape
+from CribbageCombination import CribbageComboInfo
 
 # Local imports
 from exceptions import CribbageGameOverError
@@ -21,45 +23,66 @@ class CribbageBoard(object):
         self._player1_previous = 0
         self._player2_current = 0
         self._player2_previous = 0
-        
-    def peg_for_player1(self, points = 1):
+    
+    def _make_reasons_string(self, reasons=[]):
+        """
+        Utility function that converts a list of CribbageComboInfo objects to a string.
+        :parameter reasons: List of CribbageComboInfo objects
+        :returnb reasons_string: A string representing the list of reasons
+        """
+        reasons_string=''
+        for reason in reasons:
+            reasons_string += f"{str(reason)}\n"
+        return reasons_string
+
+    def peg_for_player1(self, points = 1, reasons = []):
         """
         Peg the argument points for player 1, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int
+        :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
         :return: The current score for player 1, after pegging points, int
         """
         assert(points>0)
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
 
+        # If a reason wasn't provided in the argument, add a default 'none' one to the list
+        if len(reasons)==0: reasons=[CribbageComboInfo()]
+
         self._player1_previous = self._player1_current
         self._player1_current += points
         if self._player1_current >= 121:
             self._player1_current = 121
             raise CribbageGameOverError
-        logger.info(f"Player 1 peg locations: {self._player1_current},{self._player1_previous}",
+        logger.info(f"Player 1 peg locations: {self._player1_current},{self._player1_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
-                                              score_player1=(self._player1_current,self._player1_previous)))
+                                              score_player1=(self._player1_current,self._player1_previous),
+                                              score_record=reasons))
         return self._player1_current
         
-    def peg_for_player2(self, points = 1):
+    def peg_for_player2(self, points = 1, reasons = []):
         """
         Peg the argument points for player 2, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int
+        :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
         :return: The current score for player 2, after pegging points, int
         """
         assert(points>0)
         # Get the logger 'cribbage_logger'
         logger = logging.getLogger('cribbage_logger')
+        
+        # If a reason wasn't provided in the argument, add a default 'none' one to the list
+        if len(reasons)==0: reasons=[CribbageComboInfo()]
 
         self._player2_previous = self._player2_current
         self._player2_current += points
         if self._player2_current >= 121:
             self._player2_current = 121
             raise CribbageGameOverError
-        logger.info(f"Player 2 peg locations: {self._player2_current},{self._player2_previous}",
+        logger.info(f"Player 2 peg locations: {self._player2_current},{self._player2_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
-                                              score_player2=(self._player2_current,self._player2_previous)))
+                                              score_player2=(self._player2_current,self._player2_previous),
+                                              score_record=reasons))
         return self._player2_current
     
     def get_scores(self):

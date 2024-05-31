@@ -1,6 +1,7 @@
 # Standard imports
 import logging
 from enum import Enum
+import re
 import shelve
 
 # Local imports
@@ -90,21 +91,23 @@ class CribbageGame:
         """
         return self._board.get_scores()
         
-    def peg_for_player1(self, count = 1):
+    def peg_for_player1(self, count = 1, reason = []):
         """
         Peg on the board count for player1.
         :parameter count: The count to peg for player1 on the board, int
+        :parameter reason: Why the points are being pegged, list of CribbageComboInfo objects
         :return: Current peg total for player1 after pegging count, int
         """
-        return self._board.peg_for_player1(count)
+        return self._board.peg_for_player1(count, reason)
         
-    def peg_for_player2(self, count = 1):
+    def peg_for_player2(self, count = 1, reason = []):
         """
         Peg on the board count for player2.
         :parameter count: The count to peg for player2 on the board, int
+        :parameter reason: Why the points are being pegged, list of CribbageComboInfo objects
         :return: Current peg total for player2 after pegging count, int
         """
-        return self._board.peg_for_player2(count)
+        return self._board.peg_for_player2(count, reason)
         
     def play(self, load_game=False):
         """

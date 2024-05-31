@@ -7,7 +7,7 @@ from card import Card
 from deck import Deck, StackedDeck
 from hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
+from CribbageCombination import CribbageCombinationShowing, CribbageComboInfo, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
 from CribbageCombination import CribFlushCombination
 from CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
 from exceptions import CribbageGameOverError
@@ -242,20 +242,20 @@ class CribbageDeal:
 
         # If player for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
         if self._participant_player == CribbagePlayers.PLAYER_1:
-            logger.info(f"     Hand for {self._participant_player} after playing {card}: {self._player_hand}",
+            logger.info(f"     Hand for player {self._participant_player} after playing {card}: {self._player_hand}",
                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._player_hand)))
             # Also log to info update player1 play pile
-            logger.info(f"     Pile for {self._participant_player} after playing {card}: {self._player_pile}",
+            logger.info(f"     Pile for player {self._participant_player} after playing {card}: {self._player_pile}",
                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_PILE, pile_player1=str(self._player_pile)))
         elif self._participant_player == CribbagePlayers.PLAYER_2:
-            logger.debug(f"     Hand for {self._participant_player} after playing {card}: {self._player_hand}",
+            logger.debug(f"     Hand for player {self._participant_player} after playing {card}: {self._player_hand}",
                          extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._player_hand)))
             # Also log to info update player2 play pile
-            logger.info(f"     Pile for {self._participant_player} after playing {card}: {self._player_pile}",
+            logger.info(f"     Pile for player {self._participant_player} after playing {card}: {self._player_pile}",
                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_PILE, pile_player2=str(self._player_pile)))
 
         # Log updated combined play pile to info
-        logger.info(f"Combined pile after {self._participant_player} played {card}: {self._combined_pile}",
+        logger.info(f"Combined pile after player {self._participant_player} played {card}: {self._combined_pile}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile),
                                               go_round_count=go_round_count))
 
@@ -279,50 +279,75 @@ class CribbageDeal:
 
         # If dealer for this deal is player1 for the game, then we can log an updated hand to INFO, otherwise log it to DEBUG
         if self._participant_dealer == CribbagePlayers.PLAYER_1:
-            logger.info(f"     Hand for {self._participant_dealer} after playing {card}: {self._dealer_hand}",
+            logger.info(f"     Hand for dealer {self._participant_dealer} after playing {card}: {self._dealer_hand}",
                         extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_HAND, hand_player1=str(self._dealer_hand)))
             # Also log to info update player1 play pile
-            logger.info(f"     Pile for {self._participant_dealer} after playing {card}: {self._dealer_pile}",
+            logger.info(f"     Pile for dealer {self._participant_dealer} after playing {card}: {self._dealer_pile}",
                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER1_PILE, pile_player1=str(self._dealer_pile)))
         elif self._participant_dealer == CribbagePlayers.PLAYER_2:
-            logger.debug(f"     Hand for {self._participant_dealer} after playing {card}: {self._dealer_hand}",
+            logger.debug(f"     Hand for dealer {self._participant_dealer} after playing {card}: {self._dealer_hand}",
                          extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_HAND, hand_player2=str(self._dealer_hand)))
             # Also log to info update player2 play pile
-            logger.info(f"     Pile for {self._participant_dealer} after playing {card}: {self._dealer_pile}",
+            logger.info(f"     Pile for dealer {self._participant_dealer} after playing {card}: {self._dealer_pile}",
                 extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PLAYER2_PILE, pile_player2=str(self._dealer_pile)))
 
         # Log updated combined play pile to info
-        logger.info(f"Combined pile after {self._participant_dealer} played {card}: {self._combined_pile}",
+        logger.info(f"Combined pile after dealer {self._participant_dealer} played {card}: {self._combined_pile}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_PILE_COMBINED, pile_combined=str(self._combined_pile),
                                               go_round_count=go_round_count))
 
-
         return card.count_card()
 
-    def peg_for_player(self, count = 1):
+    # TODO: Identify a solution such that this method is not duplicated in the deal, game, and board classes.
+    def _make_reasons_string(self, reasons=[]):
+        """
+        Utility , that converts a list of CribbageComboInfo objects to a string.
+        :parameter reasons: List of CribbageComboInfo objects
+        :returnb reasons_string: A string representing the list of reasons
+        """
+        reasons_string=''
+        for reason in reasons:
+            reasons_string += f"{str(reason)}\n"
+        return reasons_string
+
+    def peg_for_player(self, count = 1, reasons = []):
         """
         Add count to the player's score.
         :parameter count: The number of pegs (points) to add to the player's score, int
+        :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
         :return: The current player point score, int
         """
         if count > 0:
             # Update score for the deal
             self._player_score += count
             # Update score for the game
-            if (self._player_peg_callback): self._player_peg_callback(count)
+            if (self._player_peg_callback):
+                self._player_peg_callback(count, reasons)
+            else:
+                # No callback available to peg for player, so, log scoring info from here
+                # Get the logger 'cribbage_logger'
+                logger = logging.getLogger('cribbage_logger')
+                logger.info(f"Player pegs a total of {count} for:\n{self._make_reasons_string(reasons)}")
         return self._player_score
 
-    def peg_for_dealer(self, count = 1):
+    def peg_for_dealer(self, count = 1, reasons = []):
         """
         Add count to the dealer's score.
         :parameter count: The number of pegs (points) to add to the dealer's score, int
+        :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
         :return: The current dealer point score, int
         """
         if count > 0:
             # Update score for the deal
             self._dealer_score += count
             # Update score for the game
-            if (self._dealer_peg_callback): self._dealer_peg_callback(count)
+            if (self._dealer_peg_callback):
+                self._dealer_peg_callback(count, reasons)
+            else:
+                # No callback available to peg for dealer, so, log scoring info from here
+                # Get the logger 'cribbage_logger'
+                logger = logging.getLogger('cribbage_logger')
+                logger.info(f"Dealer pegs a total of {count} for:\n{self._make_reasons_string(reasons)}")                
         return self._dealer_score
 
     def xfer_player_card_to_crib(self, index = 0):
@@ -373,11 +398,14 @@ class CribbageDeal:
 
         return None
 
-    def determine_score_showing_hand(self, hand = Hand(), starter = None):
+    def determine_score_showing_hand(self, hand = Hand(), starter = None, score_reasons = []):
         """
         Determine the score of hand during show.
         :parameter hand: The hand to score, Hand instance
         :parameter starter: The starter card, Card instance
+        :parameter score_info: List of CribbageComboInfo objects associated with the returned score. An empty list is expected to be passed in
+            as an argument, and it will be populated by this method. Since a list is mutable, the outside one passed in can be modified inside
+            the method.
         :return: The total score of all combinations in the hand, int
         """
         # Get the logger 'cribbage_logger'
@@ -387,15 +415,21 @@ class CribbageDeal:
         for combo in self._hand_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            if info.number_instances > 0: logger.info(f"     {str(info)}")
+            if info.number_instances > 0:
+                score_reasons.append(info)
+                # TODO: Remove the following logger line, once this has been "centralized" into pegging methods.
+                # logger.info(f"     {str(info)}")
             score += info.score
         return score
 
-    def determine_score_showing_crib(self, hand = Hand(), starter = None):
+    def determine_score_showing_crib(self, hand = Hand(), starter = None, score_reasons = []):
         """
         Determine the score of crib during show.
         :parameter hand: The crib to score, Hand instance
         :parameter starter: The starter card, Card instance
+        :parameter score_info: List of CribbageComboInfo objects associated with the returned score. An empty list is expected to be passed in
+            as an argument, and it will be populated by this method. Since a list is mutable, the outside one passed in can be modified inside
+            the method.
         :return: The total score of all combinations in the crib, int
         """
         # Get the logger 'cribbage_logger'
@@ -405,15 +439,21 @@ class CribbageDeal:
         for combo in self._crib_show_combinations:
             assert(isinstance(combo, CribbageCombinationShowing))
             info = combo.score(hand, starter)
-            if info.number_instances > 0: logger.info(f"     {str(info)}")
+            if info.number_instances > 0:
+                score_reasons.append(info)
+                # TODO: Remove the following logger line, once this has been "centralized" into pegging methods.
+                # logger.info(f"     {str(info)}")
             score += info.score
         return score
 
-    def determine_score_playing(self, combined_pile = Hand(), role_that_played = None):
+    def determine_score_playing(self, combined_pile = Hand(), role_that_played = None, score_reasons = []):
         """
         Determine the score during play.
         :parameter hand: The combined, ordered pile of played cards to check for a score, Hand instance
         :parameter role_that_played: Which CribbageRole played the card that we are scoring?, as CribbageRole Enum
+        :parameter score_info: List of CribbageComboInfo objects associated with the returned score. An empty list is expected to be passed in
+            as an argument, and it will be populated by this method. Since a list is mutable, the outside one passed in can be modified inside
+            the method.
         :return: Points scored based on play of last card, int
         """
         # Get the logger 'cribbage_logger'
@@ -425,13 +465,17 @@ class CribbageDeal:
         for combo in self._play_combinations:
             assert(isinstance(combo, CribbageCombinationPlaying))
             info = combo.score(combined_pile)
-            if info.number_instances > 0: info_list.append(info)
+            if info.number_instances > 0:
+                info_list.append(info)
+                score_reasons.append(info)
             score += info.score
 
         if score >0:
             logger.info(f"Scoring combinations from {str(role_that_played)} play of card {str(self.last_card_played(combined_pile))}:")
             for info in info_list:
-                logger.info(f"     {str(info)}")
+                # TODO: Remove the following logger line, once this has been "centralized" into pegging methods.
+                # logger.info(f"     {str(info)}")
+                pass
             logger.info(f"     Score: {score}")
 
         return score
@@ -509,8 +553,14 @@ class CribbageDeal:
             # Peg 2 for dealer
             logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
             deal_info.dealer_his_heals_score += 2
+            # Build a CribbageComboInfo object to explain the reason for scoring
+            reason = CribbageComboInfo()
+            reason.combo_name='His Heels'
+            reason.number_instances=1
+            reason.score=2
+            reason.instance_list=[[starter]]
             try:
-                self.peg_for_dealer(2)
+                self.peg_for_dealer(2, [reason])
             except CribbageGameOverError as e:
                 # (except covered by unit test)
                 # Output the play record to facilitate unit test creation
@@ -547,10 +597,11 @@ class CribbageDeal:
                                                                                  self.record_play)
                         # Assess if any score in play has occured based on the player's follow. If so, peg it for the player.
                         if not go_declared:
-                            score = self.determine_score_playing(self._combined_pile, next_to_play)
+                            reasons = []
+                            score = self.determine_score_playing(self._combined_pile, next_to_play, reasons)
                             deal_info.player_play_score += score
                             try:
-                                self.peg_for_player(score)
+                                self.peg_for_player(score, reasons)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -565,10 +616,11 @@ class CribbageDeal:
                                                                                  self.record_play)
                         # Assess if any score in play has occured based on the dealer's follow. If so, peg it for the dealer.
                         if not go_declared:
-                            score = self.determine_score_playing(self._combined_pile, next_to_play)
+                            reasons = []
+                            score = self.determine_score_playing(self._combined_pile, next_to_play, reasons)
                             deal_info.dealer_play_score += score
                             try:
-                                self.peg_for_dealer(score)
+                                self.peg_for_dealer(score, reasons)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -590,8 +642,13 @@ class CribbageDeal:
                             # Since we rotate who will play next above, this means that dealer played to reach 31
                             logger.info('Go round ends with count of 31 by Dealer.')
                             deal_info.dealer_play_score += 2
+                            # Build a CribbageComboInfo object to explain the reason for scoring
+                            reason = CribbageComboInfo()
+                            reason.combo_name='Go 31'
+                            reason.number_instances=1
+                            reason.score=2
                             try:
-                                self.peg_for_dealer(2)
+                                self.peg_for_dealer(2, [reason])
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -602,8 +659,13 @@ class CribbageDeal:
                             # Since we rotate who will play next above, this means that player played to reach 31
                             logger.info('Go round ends with count of 31 by Player.')
                             deal_info.player_play_score += 2
+                            # Build a CribbageComboInfo object to explain the reason for scoring
+                            reason = CribbageComboInfo()
+                            reason.combo_name='Go 31'
+                            reason.number_instances=1
+                            reason.score=2
                             try:
-                                self.peg_for_player(2)
+                                self.peg_for_player(2, [reason])
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -640,8 +702,13 @@ class CribbageDeal:
                             go_round_count += count
                             if (go_round_count) == 31:
                                 deal_info.player_play_score += 2
+                                # Build a CribbageComboInfo object to explain the reason for scoring
+                                reason = CribbageComboInfo()
+                                reason.combo_name='Go 31'
+                                reason.number_instances=1
+                                reason.score=2
                                 try:
-                                    self.peg_for_player(2)
+                                    self.peg_for_player(2, [reason])
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -650,8 +717,13 @@ class CribbageDeal:
                                     raise CribbageGameOverError('Game ended when player scored after GO', deal_info = deal_info)
                             else:
                                 deal_info.player_play_score += 1
+                                # Build a CribbageComboInfo object to explain the reason for scoring
+                                reason = CribbageComboInfo()
+                                reason.combo_name='Go <31'
+                                reason.number_instances=1
+                                reason.score=1
                                 try:
-                                    self.peg_for_player(1)
+                                    self.peg_for_player(1, [reason])
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -685,8 +757,13 @@ class CribbageDeal:
                             go_round_count += count
                             if (go_round_count) == 31:
                                 deal_info.dealer_play_score += 2
+                                # Build a CribbageComboInfo object to explain the reason for scoring
+                                reason = CribbageComboInfo()
+                                reason.combo_name='Go 31'
+                                reason.number_instances=1
+                                reason.score=2
                                 try:
-                                    self.peg_for_dealer(2)
+                                    self.peg_for_dealer(2, [reason])
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -695,8 +772,13 @@ class CribbageDeal:
                                     raise CribbageGameOverError('Game ended when dealer scored after GO', deal_info = deal_info)
                             else:
                                 deal_info.dealer_play_score += 1
+                                # Build a CribbageComboInfo object to explain the reason for scoring
+                                reason = CribbageComboInfo()
+                                reason.combo_name='Go <31'
+                                reason.number_instances=1
+                                reason.score=1
                                 try:
-                                    self.peg_for_dealer(1)
+                                    self.peg_for_dealer(1, [reason])
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -720,11 +802,12 @@ class CribbageDeal:
  
         # Score the player's hand
         logger.info(f"Showing player hand: {str(self._player_pile)}")
-        score = self.determine_score_showing_hand(self._player_pile, starter)
+        reasons = []
+        score = self.determine_score_showing_hand(self._player_pile, starter, reasons)
         logger.info(f"     Total player score from showing hand: {score}")
         deal_info.player_show_score += score
         try:
-            self.peg_for_player(score)
+            self.peg_for_player(score, reasons)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation
@@ -734,11 +817,12 @@ class CribbageDeal:
  
         # Score the dealer's hand
         logger.info(f"Showing dealer hand: {str(self._dealer_pile)}")
-        score = self.determine_score_showing_hand(self._dealer_pile, starter)
+        reasons = []
+        score = self.determine_score_showing_hand(self._dealer_pile, starter, reasons)
         logger.info(f"     Total dealer score from showing hand: {score}")
         deal_info.dealer_show_score += score
         try:
-            self.peg_for_dealer(score)
+            self.peg_for_dealer(score, reasons)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation
@@ -749,11 +833,12 @@ class CribbageDeal:
         # Score the dealer's crib
         logger.info(f"Showing dealer crib: {str(self._crib_hand)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_CRIB,  crib=str(self._crib_hand)))
-        score = self.determine_score_showing_crib(self._crib_hand, starter)
+        reasons = []
+        score = self.determine_score_showing_crib(self._crib_hand, starter, reasons)
         logger.info(f"     Total dealer score from showing crib: {score}")
         deal_info.dealer_crib_score += score
         try:
-            self.peg_for_dealer(score)
+            self.peg_for_dealer(score, reasons)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation

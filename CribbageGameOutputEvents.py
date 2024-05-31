@@ -9,8 +9,8 @@ UPDATE_CRIB: crib
 UPDATE_PILE_COMBINED: pile_combined, go_round_count
 UPDATE_PLAYER1_PILE: pile_player1
 UPDATE_PLAYER2_PILE: pile_player2
-UPDATE_SCORE_PLAYER1: score_player1
-UPDATE_SCORE_PLAYER2: score_player2
+UPDATE_SCORE_PLAYER1: score_player1, score_record
+UPDATE_SCORE_PLAYER2: score_player2, score_record
 END_GAME: 
 """
 
@@ -63,6 +63,7 @@ class CribbageGameLogInfo:
         self.pile_player2 = '' # String like 'KH AD 2S JC'
         self.score_player1 = None # Tuple (leading peg position as int, trailing peg position as int)
         self.score_player2 = None # Tuple (leading peg position as int, trailing peg position as int)
+        self.score_record = [] # List of CribbageComboInfo objects associated with the score
 
         # Now process any kwargs to populate some of the attributes
         for k,v in kwargs.items():

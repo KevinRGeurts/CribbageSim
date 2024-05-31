@@ -254,9 +254,10 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
             play_count += count
 
             # Score any pairs or runs due to the played card
-            score_count = score_play_callback(get_play_pile_callback())
+            reasons = []
+            score_count = score_play_callback(get_play_pile_callback(), score_reasons=reasons)
             try:
-                peg_callback(score_count)
+                peg_callback(score_count, reasons)
             except CribbageGameOverError as e:
                 # (except covered by unit test)
                 # Raise a new CribbageGameOverError with the added information about score during play
@@ -806,9 +807,10 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             play_count += card.count_card()
 
             # Score any pairs or runs due to the played card
-            score_count = score_play_callback(get_play_pile_callback())
+            reasons = []
+            score_count = score_play_callback(get_play_pile_callback(), score_reasons=reasons)
             try:
-                peg_callback(score_count)
+                peg_callback(score_count, reasons)
             except CribbageGameOverError as e:
                 # (except covered by unit test)
                 # Raise a new CribbageGameOverError with the added information about score during play
@@ -948,9 +950,10 @@ class RandomCribbagePlayStrategy(CribbagePlayStrategy):
             play_count += count
 
             # Score any pairs or runs due to the played card
-            score_count = score_play_callback(get_play_pile_callback())
+            reasons = []
+            score_count = score_play_callback(get_play_pile_callback(), score_reasons=reasons)
             try:
-                peg_callback(score_count)
+                peg_callback(score_count, reasons)
             except CribbageGameOverError as e:
                 # TODO: Cover by a unit test
                 # Raise a new CribbageGameOverError with the added information about score during play

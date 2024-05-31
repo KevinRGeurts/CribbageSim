@@ -451,7 +451,7 @@ class CribbageDeal:
         Determine the score during play.
         :parameter hand: The combined, ordered pile of played cards to check for a score, Hand instance
         :parameter role_that_played: Which CribbageRole played the card that we are scoring?, as CribbageRole Enum
-        :parameter score_info: List of CribbageComboInfo objects associated with the returned score. An empty list is expected to be passed in
+        :parameter score_reasons: List of CribbageComboInfo objects associated with the returned score. An empty list is expected to be passed in
             as an argument, and it will be populated by this method. Since a list is mutable, the outside one passed in can be modified inside
             the method.
         :return: Points scored based on play of last card, int

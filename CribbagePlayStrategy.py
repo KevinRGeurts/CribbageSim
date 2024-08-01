@@ -1,9 +1,10 @@
 # Standard imports
-from enum import KEEP, Enum
+from enum import Enum
 import random
 
 # Local imports
-import UserResponseCollector # Leave this like it is, so that import can be used to do a swap out of the UserResponseCollector between base and child if needed
+import UserQueryReceiver # Leave this like it is, so that import can be used to do a swap out of the UserQueryReceiver between base and child if needed
+from UserQueryCommand import UserQueryCommandMenu
 from CribbageCombination import CribbageComboInfo
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
 from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
@@ -663,6 +664,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         # We're interactive here, so ask the user which cards from their hand they want in the crib
 
         # Build a query for the user to obtain a decision on first card to put in the crib
+        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         h = Hand()
         h.add_cards(get_hand_callback())
         query_preface = f"Your hand: {str(h)}\nWhat is the first card you wish to place in the crib?"
@@ -671,7 +673,8 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         for card in get_hand_callback():
             query_dic[str(position)] = str(card)
             position += 1
-        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+        response = command.Execute()
         xfer_to_crib_callback(int(response))
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
@@ -684,7 +687,8 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         for card in get_hand_callback():
             query_dic[str(position)] = str(card)
             position += 1
-        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+        response = command.Execute()
         xfer_to_crib_callback(int(response))
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
@@ -719,6 +723,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         valid_choice = False
         
         # Build a query for the user to obtain a decision on card to play
+        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         query_preface = 'Current play count is ' + str(go_count) + '. What card do you wish to play?'
         query_dic = {}
         position = 0
@@ -728,7 +733,8 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         if len(playable) == 0:
             # User has no playable cards, so add 'Go' to the list of choices
             query_dic['g'] = 'Go'
-        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+        response = command.Execute()
         
         while not valid_choice:
 
@@ -755,7 +761,8 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                     if len(playable) == 0:
                         # User has no playable cards, so add 'Go' to the list of choices
                         query_dic['g'] = 'Go'
-                    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+                    command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+                    response = command.Execute()
                     
         if play_recorder_callback: play_recorder_callback(f"{response}\\n")
         
@@ -792,13 +799,15 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             # We're interactive here, so ask the user which card from playable they want to play
 
             # Build a query for the user to obtain a decision on card to play
+            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Opponent has declared GO. Current play count is ' + str(play_count) + '. What card do you wish to play?'
             query_dic = {}
             position = 0
             for card in playable:
                 query_dic[str(position)] = str(card)
                 position += 1
-            response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+            command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+            response = command.Execute()
             if play_recorder_callback: play_recorder_callback(f"{response}\\n")
 
             # Play card
@@ -827,9 +836,11 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         or if game play should be ended without saving current game state.
         :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
         """
+        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         query_preface = f"Do you wish to keep playing?"
         query_dic = {'c':'Continue game', 's':'Save and end game', 'e':'End game'}
-        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+        response = command.Execute()
         
         keep_playing = False
         save_state = False

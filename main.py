@@ -14,7 +14,8 @@ from CribbagePlayStrategy import RandomCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
-import UserResponseCollector
+from UserQueryCommand import UserQueryCommandMenu, UserQueryCommandPathOpen, UserQueryCommandPathSave
+import UserQueryReceiver
 
 
 def play_interactive_game():
@@ -23,9 +24,11 @@ def play_interactive_game():
     """
     
     # Ask user if they want to unshelve a shelved game
+    receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
     query_preface = 'Do you want to start a new game, or reload a saved game?'
     query_dic = {'n':'New Game', 's':'Saved Game'}
-    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+    command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+    response = command.Execute()
     match response:
         case 'n':
             load_game = False
@@ -148,9 +151,11 @@ if __name__ == '__main__':
     print('---------------------------------')
         
     # Build a query for the user to obtain their choice of how to user the simulator
+    receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
     query_preface = 'How do you want to use the simulator?'
     query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal', 'd':'Debug'}
-    response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+    command = UserQueryCommandMenu(receiver, query_preface, query_dic)
+    response = command.Execute()
     
     while response != 'q':
         
@@ -172,6 +177,6 @@ if __name__ == '__main__':
                 play_debug()
         
         print('--------------------')
-        response = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.MENU, query_preface, query_dic)
+        response = command.Execute()
       
    

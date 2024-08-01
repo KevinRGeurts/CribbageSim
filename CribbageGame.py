@@ -1,7 +1,6 @@
 # Standard imports
 import logging
 from enum import Enum
-import re
 import shelve
 
 # Local imports
@@ -10,7 +9,8 @@ from CribbageDeal import CribbageDeal, CribbagePlayers
 from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
 from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
-import UserResponseCollector
+from UserQueryCommand import UserQueryCommandMenu, UserQueryCommandPathOpen, UserQueryCommandPathSave
+import UserQueryReceiver
 
 class CribbageGameInfo:
     """
@@ -221,7 +221,7 @@ class CribbageGame:
                         return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
         
-            except UserResponseCollector.UserResponseCollectorTerminateQueryingThreadError as e:
+            except UserQueryReceiver.UserQueryReceiverTerminateQueryingThreadError as e:
                 # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
                 # TODO: Investigate any problems
                 logger.info(f"Cribbage game terminating in the middle of play, at request of user.")
@@ -288,8 +288,10 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
+            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Where do you want to save the game?'
-            save_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH_SAVE, query_preface)
+            command = UserQueryCommandPathSave(receiver, query_preface)
+            save_path = command.Execute()
         else:
             save_path = path
 
@@ -319,8 +321,10 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
+            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Which saved game do you want to open?'
-            load_path = UserResponseCollector.UserResponseCollector_query_user(UserResponseCollector.BlackJackQueryType.PATH_OPEN, query_preface)
+            command = UserQueryCommandPathOpen(receiver, query_preface)
+            load_path = command.Execute()
         else:
             load_path = path
 

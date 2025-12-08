@@ -1,21 +1,13 @@
 # Standard
-import logging
-from pathlib import Path
-from time import process_time
-from random import seed
+
 
 # Local
-from deck import StackedDeck, Deck
-from card import Card
-from hand import Hand
-from CribbageCombination import CribbageComboInfo, PairCombination, HisNobsCombination, RunCombination, FifteenCombination, PairCombinationPlaying, RunCombinationPlaying
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
-from CribbagePlayStrategy import RandomCribbagePlayStrategy
+from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 from CribbageGame import CribbageGame
 from CribbageSimulator import CribbageSimulator
-from UserQueryCommand import UserQueryCommandMenu, UserQueryCommandPathOpen, UserQueryCommandPathSave
-import UserQueryReceiver
+from UserResponseCollector.UserQueryCommand import UserQueryCommandMenu
+import UserResponseCollector.UserQueryReceiver
 
 
 def play_interactive_game():
@@ -24,7 +16,7 @@ def play_interactive_game():
     """
     
     # Ask user if they want to unshelve a shelved game
-    receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+    receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
     query_preface = 'Do you want to start a new game, or reload a saved game?'
     query_dic = {'n':'New Game', 's':'Saved Game'}
     command = UserQueryCommandMenu(receiver, query_preface, query_dic)
@@ -95,44 +87,6 @@ def play_debug():
     #                 dealer_strategy1 = RandomCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
     return_val = game.play()
 
-    # # Stack the deck to set up play that ends with a scoring combination during a GO ending the game, to establish a unit test for
-    # # the exception catch within the InteractiveCribbagePlayStrategy.go()
-
-
-    # # Create a stacked deck
-    # sd = StackedDeck()
-    # # Player will be dealt cards 1 - 6
-    # # Dealer will be dealt cards 7 - 12
-    # # Starter will be card 13
-    # card_list = [Card('S','10'), Card('C','K'), Card('D','10'), Card('C','9'), Card('H','8'), Card('H','7'),
-    #                 Card('S','8'), Card('H','10'), Card('C','A'), Card('D','A'), Card('H','K'), Card('S','K'),
-    #                 Card('H','5')]
-    # sd.add_cards(card_list)
-        
-    # game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
-    # game._deal._deck = sd
-        
-    # # Player1 will be two point from winning when the game begins, so the first score for that player will probably win the game.
-    # game._board.peg_for_player1(119)
-    # return_val = game.play()
-
-
-    # # Seed the random number generator
-    # from random import seed
-
-    # my_seed = 1234568673
-    
-    # while my_seed <= 1234568673:
-       
-    #     print(f"Seed Value: {my_seed}")
-    #     seed(my_seed)
-
-    #     game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
-    #                         dealer_strategy1 = HoyleishDealerCribbagePlayStrategy(), dealer_strategy2 = HoyleishDealerCribbagePlayStrategy())
-    #     return_val = game.play()
-
-    #     my_seed += 1
-
     return None
 
 
@@ -151,7 +105,7 @@ if __name__ == '__main__':
     print('---------------------------------')
         
     # Build a query for the user to obtain their choice of how to user the simulator
-    receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+    receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
     query_preface = 'How do you want to use the simulator?'
     query_dic = {'q':'Quit', 'g':'Interactive Game', 'i':'Interactive Deal', 'a':'Automatic Game', 'b':'Automatic Deal', 'd':'Debug'}
     command = UserQueryCommandMenu(receiver, query_preface, query_dic)
@@ -179,4 +133,3 @@ if __name__ == '__main__':
         print('--------------------')
         response = command.Execute()
       
-   

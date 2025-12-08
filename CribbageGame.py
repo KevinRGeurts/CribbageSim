@@ -1,16 +1,15 @@
 # Standard imports
 import logging
-from enum import Enum
 import shelve
 
 # Local imports
 from CribbageBoard import CribbageBoard
 from CribbageDeal import CribbageDeal, CribbagePlayers
-from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
+from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from exceptions import CribbageGameOverError
 from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
-from UserQueryCommand import UserQueryCommandMenu, UserQueryCommandPathOpen, UserQueryCommandPathSave
-import UserQueryReceiver
+from UserResponseCollector.UserQueryCommand import UserQueryCommandPathOpen, UserQueryCommandPathSave
+import UserResponseCollector.UserQueryReceiver
 
 class CribbageGameInfo:
     """
@@ -221,7 +220,7 @@ class CribbageGame:
                         return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
         
-            except UserQueryReceiver.UserQueryReceiverTerminateQueryingThreadError as e:
+            except UserResponseCollector.UserQueryReceiver.UserQueryReceiverTerminateQueryingThreadError as e:
                 # For now, do nothing but (1) Log that game terminated early, and (2) return a default CribbageGameInfo object
                 # TODO: Investigate any problems
                 logger.info(f"Cribbage game terminating in the middle of play, at request of user.")
@@ -288,7 +287,7 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
-            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+            receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Where do you want to save the game?'
             command = UserQueryCommandPathSave(receiver, query_preface)
             save_path = command.Execute()
@@ -321,7 +320,7 @@ class CribbageGame:
         logger = logging.getLogger('cribbage_logger')
 
         if path is None:
-            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+            receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Which saved game do you want to open?'
             command = UserQueryCommandPathOpen(receiver, query_preface)
             load_path = command.Execute()

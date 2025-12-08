@@ -166,7 +166,7 @@ class PairCombination(CribbageCombinationShowing):
                     
         # Iterate through the permutations and determine how many of them are pairs
         for p in permutations:
-            if p[0].get_pips() == p[1].get_pips():
+            if p[0].pips == p[1].pips:
                 info.number_instances += 1
                 info.instance_list.append(p)
                 
@@ -208,9 +208,9 @@ class FlushCombination(CribbageCombinationShowing):
 
         # Do all cards in the hand have the same suit?
         is_flush = True
-        suit = cards[0].get_suit()
+        suit = cards[0].suit
         for i in range(1, len(cards)):
-            if cards[i].get_suit() != suit:
+            if cards[i].suit != suit:
                 is_flush = False
                 break;
 
@@ -220,7 +220,7 @@ class FlushCombination(CribbageCombinationShowing):
             info.score = info.number_instances * self._score_per_combo
             
             # Check if the starter is also the same suit as the flush
-            if starter and starter.get_suit() == suit:
+            if starter and starter.suit == suit:
                 info.instance_list[0].append(starter)
                 info.score = info.score + 1
         
@@ -258,13 +258,13 @@ class CribFlushCombination(CribbageCombinationShowing):
 
         # Do all cards in the hand have the same suit?
         is_flush = True
-        suit = cards[0].get_suit()
+        suit = cards[0].suit
         for i in range(1, len(cards)):
-            if cards[i].get_suit() != suit:
+            if cards[i].suit != suit:
                 is_flush = False
                 break;
 
-        if is_flush and starter.get_suit() == suit:
+        if is_flush and starter.suit == suit:
             # In the crib, we only score a flush if all cards in the crib AND the starter card are of the same suit
             info.number_instances = 1
             info.instance_list = [cards]
@@ -306,8 +306,8 @@ class HisNobsCombination(CribbageCombinationShowing):
         # Are any of the cards in the hand a Jack? If so, does the suit of the Jack match the starter? Then list them.
         jacks_in_hand = []
         for i in range(len(cards)):
-            if cards[i].get_pips() == "J":
-                if cards[i].get_suit() == starter.get_suit():
+            if cards[i].pips == "J":
+                if cards[i].suit == starter.suit:
                     jacks_in_hand.append(cards[i])
 
         # Since cribbage should always be played with a single, non-infinite deck, we should never find more than one Jack where the suit
@@ -420,10 +420,10 @@ class RunCombination(CribbageCombinationShowing):
                 # Sort the cards in the permutation, this requires, Card class to have __lt__ method implemented
                 p.sort()
                 first_card = p.pop(0)
-                prev_sequence_count = first_card.get_sequence_count()
+                prev_sequence_count = first_card._get_sequence_count()
                 for c in p:
-                    if c.get_sequence_count() == prev_sequence_count + 1:
-                        prev_sequence_count = c.get_sequence_count()
+                    if c._get_sequence_count() == prev_sequence_count + 1:
+                        prev_sequence_count = c._get_sequence_count()
                     else:
                         is_run = False
                         break
@@ -467,19 +467,19 @@ class PairCombinationPlaying(CribbageCombinationPlaying):
         info.combo_name = self._combo_name
         
         # Note that it is important that the if strucure here is "greedy" attempting to score the higher combinations first
-        if (len(pile) >= 4) and (pile[-2].get_pips() == pile[-1].get_pips()) and (pile[-3].get_pips() == pile[-2].get_pips()) and (pile[-4].get_pips() == pile[-3].get_pips()):
+        if (len(pile) >= 4) and (pile[-2].pips == pile[-1].pips) and (pile[-3].pips == pile[-2].pips) and (pile[-4].pips == pile[-3].pips):
                 # Last card played made a double pair royal (4 of a kind)
                 info.combo_name = 'double pair royal'
                 info.number_instances = 1
                 info.score = 12
                 info.instance_list.append([pile[-4], pile[-3], pile[-2], pile[-1]])
-        elif (len(pile) >= 3) and (pile[-2].get_pips() == pile[-1].get_pips()) and (pile[-3].get_pips() == pile[-2].get_pips()):
+        elif (len(pile) >= 3) and (pile[-2].pips == pile[-1].pips) and (pile[-3].pips == pile[-2].pips):
                 # Last card played made a pair royal (3 of a kind)
                 info.combo_name = 'pair royal'
                 info.number_instances = 1
                 info.score = 6
                 info.instance_list.append([pile[-3], pile[-2], pile[-1]])
-        elif (len(pile) >= 2) and (pile[-2].get_pips() == pile[-1].get_pips()):
+        elif (len(pile) >= 2) and (pile[-2].pips == pile[-1].pips):
                 # Last card played made a pair royal (3 of a kind)
                 info.combo_name = 'pair'
                 info.number_instances = 1
@@ -544,10 +544,10 @@ class RunCombinationPlaying(CribbageCombinationPlaying):
             # form a list of the last x cards in pile
             cards = [pile[i] for i in range(-1,(-x-1),-1)]
             cards.sort()
-            prev_sequence_count = cards.pop(0).get_sequence_count()
+            prev_sequence_count = cards.pop(0)._get_sequence_count()
             for c in cards:
-                if c.get_sequence_count() == prev_sequence_count + 1:
-                    prev_sequence_count = c.get_sequence_count()
+                if c._get_sequence_count() == prev_sequence_count + 1:
+                    prev_sequence_count = c._get_sequence_count()
                 else:
                     is_run = False
                     break

@@ -40,12 +40,12 @@ class Test_CribbageCombination(unittest.TestCase):
         
         # Is the first permutation as expected?
         exp_val = ('2', '6')
-        act_val = (permutations[0][0].get_pips(), permutations[0][1].get_pips())
+        act_val = (permutations[0][0].pips, permutations[0][1].pips)
         self.assertEqual(exp_val, act_val)
 
         # Is the last permutation as expected?
         exp_val = ('K', '6')
-        act_val = (permutations[len(permutations)-1][0].get_pips(), permutations[len(permutations)-1][1].get_pips())
+        act_val = (permutations[len(permutations)-1][0].pips, permutations[len(permutations)-1][1].pips)
         self.assertTupleEqual(exp_val, act_val)
 
     def test_permutations_size_5(self):
@@ -64,8 +64,8 @@ class Test_CribbageCombination(unittest.TestCase):
         
         # Is the first (and only) permutation as expected?
         exp_val = ('2', '6', '2', 'K', '6')
-        act_val = (permutations[0][0].get_pips(), permutations[0][1].get_pips(), permutations[0][2].get_pips(),
-                   permutations[0][3].get_pips(), permutations[0][4].get_pips())
+        act_val = (permutations[0][0].pips, permutations[0][1].pips, permutations[0][2].pips,
+                   permutations[0][3].pips, permutations[0][4].pips)
         self.assertEqual(exp_val, act_val)
 
     def test_permutations_size_6(self):

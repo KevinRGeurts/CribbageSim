@@ -1,11 +1,9 @@
 # Standard imports
-from enum import Enum
 import random
 
 # Local imports
-import UserQueryReceiver # Leave this like it is, so that import can be used to do a swap out of the UserQueryReceiver between base and child if needed
-from UserQueryCommand import UserQueryCommandMenu
-from CribbageCombination import CribbageComboInfo
+import UserResponseCollector.UserQueryReceiver # Leave this like it is, so that import can be used to do a swap out of the UserQueryReceiver between base and child if needed
+from UserResponseCollector.UserQueryCommand import UserQueryCommandMenu
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
 from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
 from hand import Hand
@@ -406,78 +404,78 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
 
             have_pair_of_c = False
             for pair in pair_info.instance_list:
-                if c.get_pips() == pair[0].get_pips():
+                if c.pips == pair[0].pips:
                     # We have a pair of c's in the hand
                     have_pair_of_c = True
-                    ratings_list.append((c, pair_ratings_map[c.get_pips()]))
+                    ratings_list.append((c, pair_ratings_map[c.pips]))
                     break # Don't need to look at any more pairs in pair_info
             if have_pair_of_c: continue # Greedy algorith, so done rating the card
 
             # If card c is an 8, do we also have a 6? {scenario (2)}
-            if c.get_pips() == '8':
+            if c.pips == '8':
                 # Card c is an 8
-                list_of_6s = [c6 for c6 in hand if c6.get_pips()=='6']
+                list_of_6s = [c6 for c6 in hand if c6.pips=='6']
                 if len(list_of_6s) > 0:
                     # We also have one or more 6's in the hand
                     ratings_list.append((c, 16))
                     continue # Greedy algorith, so done rating the card
 
             # If card c is a 7, do we also have a 9? {scenario (3)}
-            if c.get_pips() == '7':
+            if c.pips == '7':
                 # Card c is an 7
-                list_of_9s = [c9 for c9 in hand if c9.get_pips()=='9']
+                list_of_9s = [c9 for c9 in hand if c9.pips=='9']
                 if len(list_of_9s) > 0:
                     # We also have one or more 9's in the hand
                     ratings_list.append((c, 15))
                     continue # Greedy algorith, so done rating the card
 
             # If card c is a 10, J, Q, or K, do we also have a 5? {scenario (4)}
-            if c.get_pips() == '10' or c.get_pips() == 'J' or c.get_pips() == 'Q' or c.get_pips() == 'K':
+            if c.pips == '10' or c.pips == 'J' or c.pips == 'Q' or c.pips == 'K':
                 # Card c is an 10 or Face
-                list_of_5s = [c5 for c5 in hand if c5.get_pips()=='5']
+                list_of_5s = [c5 for c5 in hand if c5.pips=='5']
                 if len(list_of_5s) > 0:
                     # We also have one or more 5's in the hand
                     ratings_list.append((c, 14))
                     continue # Greedy algorith, so done rating the card
 
             # If card c is a 9, do we also have a 6? {scenario (5a)}
-            if c.get_pips() == '9':
+            if c.pips == '9':
                 # Card c is an 9
-                list_of_6s = [c6 for c6 in hand if c6.get_pips()=='6']
+                list_of_6s = [c6 for c6 in hand if c6.pips=='6']
                 if len(list_of_6s) > 0:
                     # We also have one or more 6's in the hand
                     ratings_list.append((c, 13))
                     continue # Greedy algorith, so done rating the card
 
             # If card c is an 8, do we also have a 7? {scenario (5b)}
-            if c.get_pips() == '8':
+            if c.pips == '8':
                 # Card c is an 8
-                list_of_7s = [c7 for c7 in hand if c7.get_pips()=='7']
+                list_of_7s = [c7 for c7 in hand if c7.pips=='7']
                 if len(list_of_7s) > 0:
                     # We also have one or more 7's in the hand
                     ratings_list.append((c, 12))
                     continue # Greedy algorith, so done rating the card
             
             # If card c is a 7, do we also have a 8? {scenario (5c)}
-            if c.get_pips() == '7':
+            if c.pips == '7':
                 # Card c is a 7
-                list_of_8s = [c8 for c8 in hand if c8.get_pips()=='8']
+                list_of_8s = [c8 for c8 in hand if c8.pips=='8']
                 if len(list_of_8s) > 0:
                     # We also have one or more 8's in the hand
                     ratings_list.append((c, 11))
                     continue # Greedy algorith, so done rating the card
 
             # If card c is a 6, do we also have a 9? {scenario (5d)}
-            if c.get_pips() == '6':
+            if c.pips == '6':
                 # Card c is a 6
-                list_of_9s = [c9 for c9 in hand if c9.get_pips()=='9']
+                list_of_9s = [c9 for c9 in hand if c9.pips=='9']
                 if len(list_of_9s) > 0:
                     # We also have one or more 9's in the hand
                     ratings_list.append((c, 10))
                     continue # Greedy algorith, so done rating the card
 
             # Lastly, rate the card as a singleton {scenario (6) and (7)}
-            ratings_list.append((c, singleton_ratings_map[c.get_pips()]))
+            ratings_list.append((c, singleton_ratings_map[c.pips]))
         
         return ratings_list
 
@@ -664,7 +662,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         # We're interactive here, so ask the user which cards from their hand they want in the crib
 
         # Build a query for the user to obtain a decision on first card to put in the crib
-        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+        receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         h = Hand()
         h.add_cards(get_hand_callback())
         query_preface = f"Your hand: {str(h)}\nWhat is the first card you wish to place in the crib?"
@@ -723,7 +721,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         valid_choice = False
         
         # Build a query for the user to obtain a decision on card to play
-        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+        receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         query_preface = 'Current play count is ' + str(go_count) + '. What card do you wish to play?'
         query_dic = {}
         position = 0
@@ -799,7 +797,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
             # We're interactive here, so ask the user which card from playable they want to play
 
             # Build a query for the user to obtain a decision on card to play
-            receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+            receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
             query_preface = 'Opponent has declared GO. Current play count is ' + str(play_count) + '. What card do you wish to play?'
             query_dic = {}
             position = 0
@@ -836,7 +834,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
         or if game play should be ended without saving current game state.
         :return: Tuple (Continue Game True/False, Save Game State True/False). If first tuple value is True, second tuple value should be ignored.
         """
-        receiver = UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
+        receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
         query_preface = f"Do you wish to keep playing?"
         query_dic = {'c':'Continue game', 's':'Save and end game', 'e':'End game'}
         command = UserQueryCommandMenu(receiver, query_preface, query_dic)

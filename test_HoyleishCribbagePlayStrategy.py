@@ -637,13 +637,13 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         # Do we have the expected first card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('C', '3')
-        act_val = (crib[0].get_suit(), crib[0].get_pips())
+        act_val = (crib[0].suit, crib[0].pips)
         self.assertTupleEqual(exp_val, act_val)
 
         # Do we have the expected second card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('H', '8')
-        act_val = (crib[1].get_suit(), crib[1].get_pips())
+        act_val = (crib[1].suit, crib[1].pips)
         self.assertTupleEqual(exp_val, act_val)
 
     def test_dealer_form_crib_max_hand_crib(self):
@@ -664,13 +664,13 @@ class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):
         # Do we have the expected first card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('C', '8')
-        act_val = (crib[0].get_suit(), crib[0].get_pips())
+        act_val = (crib[0].suit, crib[0].pips)
         self.assertTupleEqual(exp_val, act_val)
 
         # Do we have the expected second card in the crib?
         crib = deal._crib_hand.get_cards()
         exp_val = ('H', '8')
-        act_val = (crib[1].get_suit(), crib[1].get_pips())
+        act_val = (crib[1].suit, crib[1].pips)
         self.assertTupleEqual(exp_val, act_val)
 
     def test_player_form_crib_max_hand_less_crib(self):

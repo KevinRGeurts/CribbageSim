@@ -549,7 +549,7 @@ class CribbageDeal:
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_STARTER, starter=str(starter)))
         # To facilitate creating a unit test from the deal
         logger.debug(f"Starter card: {repr(starter)}")
-        if starter.get_pips() == 'J':
+        if starter.pips == 'J':
             # Peg 2 for dealer
             logger.info('Dealer scores 2 because the starter is a Jack, a.k.a. His Heels.')
             deal_info.dealer_his_heals_score += 2

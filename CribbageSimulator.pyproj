@@ -5,7 +5,8 @@
     <ProjectGuid>43389354-4bfc-42a1-a70d-b110f06b7e63</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>main.py</StartupFile>
-    <SearchPath>..\HandsDecksCards\src\HandsDecksCards</SearchPath>
+    <SearchPath>
+    </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>CribbageSimulator</Name>
@@ -24,18 +25,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\BlackJackSim\card.py">
-      <Link>card.py</Link>
-    </Compile>
-    <Compile Include="..\BlackJackSim\deck.py">
-      <Link>deck.py</Link>
-    </Compile>
-    <Compile Include="..\BlackJackSim\hand.py">
-      <Link>hand.py</Link>
-    </Compile>
-    <Compile Include="..\BlackJackSim\UserResponseCollector.py">
-      <Link>UserResponseCollector.py</Link>
-    </Compile>
     <Compile Include="CribbageBoard.py" />
     <Compile Include="CribbageCombination.py" />
     <Compile Include="CribbageDeal.py" />

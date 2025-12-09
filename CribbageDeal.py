@@ -3,9 +3,9 @@ import logging
 from enum import Enum
 
 # Local imports
-from card import Card
-from deck import Deck, StackedDeck
-from hand import Hand
+from HandsDecksCards.card import Card
+from HandsDecksCards.deck import Deck, StackedDeck
+from HandsDecksCards.hand import Hand
 from CribbagePlayStrategy import CribbagePlayStrategy
 from CribbageCombination import CribbageCombinationShowing, CribbageComboInfo, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
 from CribbageCombination import CribFlushCombination

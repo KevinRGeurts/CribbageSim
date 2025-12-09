@@ -2,9 +2,9 @@
 import unittest
 
 # Local
-from card import Card
-from hand import Hand
-from deck import StackedDeck
+from HandsDecksCards.card import Card
+from HandsDecksCards.hand import Hand
+from HandsDecksCards.deck import StackedDeck
 from CribbagePlayStrategy import HoyleishCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 

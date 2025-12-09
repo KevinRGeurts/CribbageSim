@@ -2,8 +2,8 @@
 from itertools import combinations
 
 # Local imports
-from card import Card
-from hand import Hand
+from HandsDecksCards.card import Card
+from HandsDecksCards.hand import Hand
 
 class CribbageComboInfo(object):
     """

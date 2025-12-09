@@ -3,9 +3,9 @@ import unittest
 from random import seed
 
 # Local
-from card import Card
-from hand import Hand
-from deck import StackedDeck
+from HandsDecksCards.card import Card
+from HandsDecksCards.hand import Hand
+from HandsDecksCards.deck import StackedDeck
 from CribbagePlayStrategy import RandomCribbagePlayStrategy
 from CribbageDeal import CribbageDeal
 

@@ -2,8 +2,8 @@
 import unittest
 
 # Local
-from card import Card
-from hand import Hand
+from HandsDecksCards.card import Card
+from HandsDecksCards.hand import Hand
 from CribbageCombination import PairCombinationPlaying
 
 class Test_PairCombinationPlaying(unittest.TestCase):

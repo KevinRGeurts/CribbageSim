@@ -6,7 +6,7 @@ import UserResponseCollector.UserQueryReceiver # Leave this like it is, so that 
 from UserResponseCollector.UserQueryCommand import UserQueryCommandMenu
 from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
 from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
-from hand import Hand
+from HandsDecksCards.hand import Hand
 from exceptions import CribbageGameOverError
 
 

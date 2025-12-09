@@ -5,8 +5,8 @@ import io
 from unittest.mock import patch
 
 # Local
-from card import Card
-from deck import StackedDeck
+from HandsDecksCards.card import Card
+from HandsDecksCards.deck import StackedDeck
 from CribbageSimulator import CribbageSimulator
 from CribbageGame import CribbageGame
 from CribbagePlayStrategy import InteractiveCribbagePlayStrategy

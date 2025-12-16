@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 /.vs/CribbageSimulator
 /Documentation/~$UI_WireFrame.pptx
+/src/CribbageSimulator/.vs/CribbageSimulator

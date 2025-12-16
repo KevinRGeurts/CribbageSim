@@ -1,3 +1,24 @@
+"""
+Defines classes used to represent and play through a single deal of a game of cribbage.
+
+Exported Classes:
+    CribbagePlayers - Enumeration of the participants in a cribbage game.
+    CribbageRole - Enumeration of the roles of players in a cribbage deal. On alternating deals the enumerated
+                    CribbagePlayers will alternate CribbageRole's.
+    CribbageDealInfo -  Used to return information about the results of a cribbage deal, from CribbageDeal.play(...).
+    CribbageDeal - Represents a single deal in cribbage, to be played out by a dealer and a player.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    Uses a logger named 'cribbage_logger' for providing game output to the user. This logger is configured
+    by calling CribbageSimulator.setup_logging(...).
+ """
+
 # Standard imports
 import logging
 from enum import Enum
@@ -16,7 +37,7 @@ from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, Cribb
 
 class CribbagePlayers(Enum):
     """
-    An enumeration of the participants in a cribbage simulator.
+    An enumeration of the participants in a cribbage game.
     """
     PLAYER_1 = 1 
     PLAYER_2 = 2
@@ -24,7 +45,7 @@ class CribbagePlayers(Enum):
 
 class CribbageRole(Enum):
     """
-    An enumeration of the roles of participants in a cribbage simulator.
+    An enumeration of the roles of participants in a cribbage game.
     """
     DEALER = 1 
     PLAYER = 2
@@ -88,6 +109,7 @@ class CribbageDeal:
         :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
         :parameter player_participant: Which game participant is the player for this deal?, CribbagePlayers Enum
         :parameter dealer_participant: Which game participant is the dealer for this deal?, CribbagePlayers Enum
+        :return: None
         """
         # If a StackDeck has been injected, for example as part of unit testing, then leave it in place
         if not isinstance(self._deck, StackedDeck): self._deck = Deck(isInfinite = False)
@@ -108,6 +130,7 @@ class CribbageDeal:
         self._dealer_peg_callback = dealer_peg_callback
         self._participant_player = player_participant
         self._participant_dealer = dealer_participant
+        return None
         
     def last_card_played(self, combined_pile = None):
         """
@@ -353,7 +376,7 @@ class CribbageDeal:
     def xfer_player_card_to_crib(self, index = 0):
         """
         Transfer the card at index location in the player's hand to the crib. Remove it from the player's hand.
-        NOTE: Be very careful about calling this twice in a row without calling get_player_hand(...) and determing the index you want to transfer
+        NOTE: Be very careful about calling this twice in a row without calling get_player_hand(...) and determining the index you want to transfer
         from that returned list of Cards, since removing Cards from Hand will change indexing if not moving exclusively from higher to lower indices.
         :parameter index: The index location in the player's hand of the card to play, int [0...number of cards in hand - 1]
         :return None:
@@ -511,6 +534,7 @@ class CribbageDeal:
         logger.debug(f"     Play count after card played: {go_round_count}")
         return None
 
+    # TODO: play() is very long. It would be good to refactor and break it apart into some smaller units.
     def play(self):
         """
         Play the cribbage deal.

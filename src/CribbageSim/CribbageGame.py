@@ -1,3 +1,22 @@
+"""
+Defines the CribbageGame class, which represents a cribbage game to be played by two players.
+
+Exported Classes:
+    CribbageGameInfo - Used to return information about the results of a cribbage game from CribbageGame.play(...).
+    CribbageGame: Represents a cribbage game, to be played out by two players, player1 and player2.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    Uses a logger named 'cribbage_logger' for providing game output to the user. This logger is configured
+    by calling CribbageSimulator.setup_logging(...).
+ """
+
+
 # Standard imports
 import logging
 import shelve
@@ -10,6 +29,7 @@ from CribbageSim.exceptions import CribbageGameOverError
 from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 from UserResponseCollector.UserQueryCommand import UserQueryCommandPathOpen, UserQueryCommandPathSave
 import UserResponseCollector.UserQueryReceiver
+
 
 class CribbageGameInfo:
     """
@@ -348,5 +368,3 @@ class CribbageGame:
                                         score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[0])))
 
         return None
-
-

@@ -1,18 +1,36 @@
 """
-The following is a list of CribbageGameOutputEvents and the attributes that are expect to be provided values in CribbageGameLogInfo\n
-START_GAME: name_player1, name_player2
-START_DEAL: name_dealer
-UPDATE_PLAYER1_HAND: hand_player1
-UPDATE_PLAYER2_HAND: hand_player2
-UPDATE_STARTER: starter 
-UPDATE_CRIB: crib
-UPDATE_PILE_COMBINED: pile_combined, go_round_count
-UPDATE_PLAYER1_PILE: pile_player1
-UPDATE_PLAYER2_PILE: pile_player2
-UPDATE_SCORE_PLAYER1: score_player1, score_record
-UPDATE_SCORE_PLAYER2: score_player2, score_record
-END_GAME: 
+Defines a couple of classes used to provide "structured" output of results during game play. This structured information
+could, for example, be used by a GUI to provide visual updates to the user of game results.
+
+Exported Classes:
+    CribbageGameOutputEvents - Enumerated list of output (results) events during a cribbage game.
+    CribbageGameLogInfo - Used as objectified message when logging from GribbageGame.play().
+
+    The following is a list of CribbageGameOutputEvents and the attributes that are expect to be provided values in CribbageGameLogInfo:
+        0. NO_EVENT:
+        1. START_GAME: name_player1, name_player2
+        2. START_DEAL: name_dealer
+        3. UPDATE_PLAYER1_HAND: hand_player1
+        4. UPDATE_PLAYER2_HAND: hand_player2
+        5. UPDATE_STARTER: starter 
+        6. UPDATE_CRIB: crib
+        7. UPDATE_PILE_COMBINED: pile_combined, go_round_count
+        8. UPDATE_PLAYER1_PILE: pile_player1
+        9. UPDATE_PLAYER2_PILE: pile_player2
+        10. UPDATE_SCORE_PLAYER1: score_player1, score_record
+        11. UPDATE_SCORE_PLAYER2: score_player2, score_record
+        12. END_GAME: 
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    None
 """
+
 
 # Standard imports
 from enum import Enum
@@ -46,7 +64,7 @@ class CribbageGameLogInfo:
     def __init__(self, **kwargs):
         """
         Create and initialize attributes. Which attributes are poplulated depends on event_type
-        :parameeter event_type: The type of output event this is created for, as CribbageGameOutputEvents Enum
+        :parameter event_type: The type of output event this is created for, as CribbageGameOutputEvents Enum
         """
         self.event_type = CribbageGameOutputEvents.NO_EVENT
         self.name_player1 = ''
@@ -74,7 +92,7 @@ class CribbageGameLogInfo:
 
     def __str__(self):
         """
-        In order to support standard logging, such as to a StreamHandler, just return self.message.
+        In order to support standard logging, such as to a StreamHandler, just return self.message, as string
         """
         return str(self.event_type)
 
@@ -90,7 +108,6 @@ class CribbageGameLogInfo:
 
     def __iter__(self):
         return iter(self.__dict__)
-
 
 
 # (1) Start a new game (names of players, who will deal first, reset board score to 0-0)

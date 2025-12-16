@@ -1,3 +1,37 @@
+"""
+This moduel defines playing strategies for cribbage games, by defining the abstract base class CribbagePlayStrategy,
+which follows a Strategy design pattern. It also defines several concrete child implementations.
+
+Concrete implementation child classes must:
+    (1) Implement the method form_crib(...) for selecting two cards from the dealt six to be placed in the crib.
+    (2) Implement the method follow(...) for selecting cards to play after the lead, up until a declaration of "go" by opponent.
+    (3) Implement the method go(...) for playing out as many cards as possible after the opponent has declared "go".
+    (4) Implement the method continue_save_end(...) for deciding whether to continue playing another deal, saving the
+        game state and ending the game, or ending the game without saving the game state.
+Concrete implementation child classes may:
+    (5) Provide an __init__(...) to initialize any required attributes, for example.
+
+Exported Classes:
+    CribbageCribOption - Attributes are structured information about possible options for forming a crib.
+                         Used by HoyleishXCribbagePlayStrategy class methods.
+    CribbagePlayStrategy - Following a Strategy design pattern, this is the interface class for all cribbage hand playing strategies.
+    HoyleishCribbagePlayStrategy - Base class for dealer and player play strategies based initially/roughly on "Strategy for Cribbage" described in Hoyle.
+    HoyleishDealerCribbagePlayStrategy - Dealer implementation of form_crib(...) method allows for dealer to place points in the crib.
+    HoyleishPlayerCribbagePlayStrategy - Player implementation of form_crib(...) method typically avoids the player placing points in the crib.
+    InteractiveCribbagePlayStrategy - Strategy for a human player, where the user is consulted for playing choices.
+    RandomCribbagePlayStrategy - CribbagePlayStrategy that simply chooses randomly from hand to form crib, and randomly from playable cards to follow or go.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    None
+"""
+
+
 # Standard imports
 import random
 
@@ -49,7 +83,6 @@ class CribbagePlayStrategy:
         continue_save_end(...) - For deciding weether to continue by playing another deal, saving the game state and ending, or ending without
             saving the game state.
     """
-    
     def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
         """
         This is an abstract method that MUST be implemented by children. If called, it will raise NotImplementedError
@@ -122,7 +155,7 @@ class CribbagePlayStrategy:
         return (False, False)
 
 
-    # Note: Will need separate strategies for dealer and player, since, for example, form_crib(...) logic will depend heavily on who dealt
+# Note: For Hoyleish play strategy, Will need separate implementations for dealer and player, since form_crib(...) logic will be different for each.
 
 class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
     """
@@ -535,6 +568,7 @@ class HoyleishCribbagePlayStrategy(CribbagePlayStrategy):
     # What is the EV for a 2 card sequence with gap of one inbetween? Etc. If this is implemented, the concept is it is a secondary prioritization
     # for crib forming, over guaranteed points available in the hand. It might also be used to help determine what card to follow or go.
 
+
 class HoyleishDealerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
     """
     Dealer play strategy based initially/roughly on "Strategy for Cribbage" described in Hoyle. The "ish" implies that not all recommendations
@@ -640,11 +674,11 @@ class HoyleishPlayerCribbagePlayStrategy(HoyleishCribbagePlayStrategy):
  
         return None
 
+
 class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
     """
     Implementation of CribbagePlayStrategy where a human player is asked to decide what to do.
     """
-    
     def form_crib(self, xfer_to_crib_callback, get_hand_callback, play_recorder_callback=None):
         """
         Ask human player which cards from the hand to place in the crib.
@@ -852,6 +886,7 @@ class InteractiveCribbagePlayStrategy(CribbagePlayStrategy):
                 pass
         
         return (keep_playing, save_state)
+
 
 class RandomCribbagePlayStrategy(CribbagePlayStrategy):
     """

@@ -1,19 +1,43 @@
+"""
+Defines the CribbageSimulator class, which actually has little responsibility. Conceptually it is a level above CribbageGame,
+with the idea that it could be used to have multiple games played automatically, for example to generate game-play statistics.
+Right now it's utility is to set up logging.
 
-# Standard
+Note that logging is critical because it is the mechanism that provides output to the console for the user to see.
+
+Exported Classes:
+    CribbageSimulator: Defines setup_logging(...) method to configure logging for a cribbage game.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    A logger named 'cribbage_logger' is created and configured in CribbageSimulator.setup_logging(...).
+    It logs to stderr through a stream handler. Default logging level is logging.INFO, but can be set to logging.DEBUG by passing
+    debug=True in method call.
+    
+    If queue=<Queue object> is passed into the method call, then a queue handler will also be set up, and could then be
+    used by a tkAppFramework.tkSimulatorApp implementation to capture game output.
+ """
+
+
+# Standard imports
 import logging
 from logging.handlers import QueueHandler as QueueHandler
 import sys
 
-# Local
+# Local imports
 
 
 class CribbageSimulator:
 
     """
     This class does very little currently. Conceptually it is a level above CribbageGame, with the idea that it could be used to have multiple
-    games played automatically, for some reason. Right now it's utility is a top sort of level to set up logging.
+    games played automatically, for example to generate game-play statistics. Right now it's utility is to set up logging.
     """
-
     def setup_logging(self, debug = False, queue = None):
         """
         This method configures logging. It should be called ahead of any calls to CribbageGame.play() or CribbageDeal.play() to ensure the

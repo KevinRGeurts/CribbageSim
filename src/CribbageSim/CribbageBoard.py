@@ -1,3 +1,21 @@
+"""
+Defines the CribbageBoard class, which represents a cribbage board, for tracking scores for both players.
+
+Exported Classes:
+    CribbageBoard - Represents a cribbage board, for tracking scores for both players.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    Uses a logger named 'cribbage_logger' for providing game output to the user. This logger is configured
+    by calling CribbageSimulator.setup_logging(...).
+ """
+
+
 # Standard imports
 import logging
 
@@ -27,7 +45,7 @@ class CribbageBoard(object):
         """
         Utility function that converts a list of CribbageComboInfo objects to a string.
         :parameter reasons: List of CribbageComboInfo objects
-        :returnb reasons_string: A string representing the list of reasons
+        :return reasons_string: A string representing the list of reasons
         """
         reasons_string=''
         for reason in reasons:
@@ -112,9 +130,3 @@ class CribbageBoard(object):
         s = f"Player 1: Current = {self._player1_current}, Previous = {self._player1_previous}\n"
         s += f"Player 2: Current = {self._player2_current}, Previous = {self._player2_previous}"
         return s
-        
-        
-
-
-
-

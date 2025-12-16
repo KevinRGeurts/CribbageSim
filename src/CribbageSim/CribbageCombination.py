@@ -1,3 +1,42 @@
+"""
+This module defines classes representing the combinations of playing cards that score points both during 
+the play of cribbage and during the showing of hands and the crib.
+
+It defines the base class, CribbageCombination, and abstract children of that base class, CribbageCombinationPlaying
+and CribbageCombinationShowing. The two abstract children follow Strategy design patterns.
+
+Concrete implementation child classes of CribbageCombinationPlaying and CribbageCombinationShowing must:
+    (1) Implement the method score(...):
+        (a) For Playing, score(...) searches the play pile for the existence of scoring combinations.
+        (b) For Showing, score(...) searches a hand or the crib(+starter) for the existence of scoring combinations.
+    (2) Implement __init__() to set self._combo_name, and self._score_per_combo attribute values from the base class.
+
+Exported Classes:
+    CribbageComboInfo - Contains info about a particular scoring combination's presence in a cribbage hand, crib, or the play pile.
+    CribbageCombination - Base class for all cribbage card scoring combinations.
+    CribbageCombinationPlaying - Abstract interface for all scoring combinations during play.
+        PairCombinationPlaying - Intended to search for, find, and score pairs in a cribbage play pile.
+        RunCombinationPlaying - Intended to search for, find, and score runs in a cribbage play pile.
+        FifteenCombinationPlaying - Intended to search for, find, and score 15's in a cribbage play pile.
+    CribbageCombinationShowing - Abstract interface for all scoring combinations during play.
+        PairCombination - Intended to search for, find, and score pairs in a cribbage hand.
+        FlushCombination - Intended to search for, find, and score pairs in a cribbage hand, but not in the crib.
+        CribFlushCombination - Intended to search for, find, and score pairs in the cribbage crib, but not in a cribbage hand.
+        HisNobsCombination - Intended to search for, find, and score "his nobs" (Jack same suit as starter) in a cribbage hand.
+        FifteenCombination - Intended to search for, find, and score 15's in a cribbage hand.
+        RunCombination - Intended to search for, find, and score runs in a cribbage hand.
+
+Exported Exceptions:
+    None    
+ 
+Exported Functions:
+    None
+
+Logging:
+    None
+"""
+
+
 # Standard imports
 from itertools import combinations
 
@@ -5,11 +44,11 @@ from itertools import combinations
 from HandsDecksCards.card import Card
 from HandsDecksCards.hand import Hand
 
+
 class CribbageComboInfo(object):
     """
     A class with all public members, containing information about a particular scoring combination's presence in a cribbage hand.
     """
-    
     def __init__(self):
         """
         combo_name: The name of the cribbage scoring combination, string
@@ -36,7 +75,8 @@ class CribbageComboInfo(object):
         return s
 
 
-
+# TODO: Should score() be moved up to this class, so it becomes abstract? I think I put score() at the first child level
+# because the Playing version and the Showing version require different arguments.
 class CribbageCombination(object):
     """
     This is the base class for cribbage card scoring combinations of types playing and showing.  It's immediate children follow strategy design
@@ -53,6 +93,9 @@ class CribbageCombination(object):
         self._score_per_combo = 0
         
     def get_name(self):
+        """
+        :return: The name of the scoring combination, e.g. 'pair', string
+        """
         return self._combo_name
 
 
@@ -65,7 +108,6 @@ class CribbageCombinationPlaying(CribbageCombination):
     The concept for using this class is that a client could hold a list of instances of children of this class, one for each scoring combination,
     and the client would iterate through that list, calling score(...) method for each one, to tally up the score after playing a card to the play pile.
     """
-    
     def __init__(self):
         """
         Construct the base class for a cribbage scoring combination.
@@ -91,7 +133,6 @@ class CribbageCombinationShowing(CribbageCombination):
     The concept for using this class is that a client could hold a list of instances of children of this class, one for each scoring combination,
     and the client would iterate through that list, calling score(...) method for each one, to tally up the score when showing a hand.
     """
-    
     def __init__(self):
         """
         Construct the base class for a cribbage scoring combination.
@@ -149,7 +190,6 @@ class PairCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the pairs in the hand, CribbageComboInfo object
         """
-
         # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
         # assert(hand.get_num_cards() == 4)
         
@@ -181,7 +221,6 @@ class FlushCombination(CribbageCombinationShowing):
     Intended to search for, find, and score pairs in a cribbage hand, but not in the crib.
     Because ... the rules for a flush are different in a hand than in the crib.
     """
-    
     def __init__(self):
         """
         Construct the class for pair scoring combination in cribbage hand.
@@ -196,7 +235,6 @@ class FlushCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the flush in the hand, CribbageComboInfo object
         """
-        
         # This is a cribbage hand, so make sure it has 4 cards
         # This is the correct assert to use, since flush is not a scoring combination during play, when we might not have 4 cards in the pile
         assert(hand.get_num_cards() == 4)
@@ -226,12 +264,12 @@ class FlushCombination(CribbageCombinationShowing):
         
         return info
 
+
 class CribFlushCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score pairs in the cribbage crib, but not in a cribbage hand.
     Because ... the rules for a flush are different in the crib than in a hand.
     """
-    
     def __init__(self):
         """
         Construct the class for pair scoring combination in cribbage crib.
@@ -246,7 +284,6 @@ class CribFlushCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the flush in the crib, CribbageComboInfo object
         """
-        
         # This is a cribbage crib, so make sure it has 4 cards
         # This is the correct assert to use, since flush is not a scoring combination during play, when we might not have 4 cards in the pile
         assert(hand.get_num_cards() == 4)
@@ -278,7 +315,6 @@ class HisNobsCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score "his nobs" (Jack same suit as starter) in a cribbage hand.
     """
-    
     def __init__(self):
         """
         Construct the class for his nobs scoring combination in cribbage hand.
@@ -293,7 +329,6 @@ class HisNobsCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about his nobs in the hand, CribbageComboInfo object
         """
-        
         # This is a cribbage hand, so make sure it has 4 cards
         # This is the correct assert to use, since his nobs is not a scoring combination during play, when we might not have 4 cards in the pile
         assert(hand.get_num_cards() == 4)
@@ -327,7 +362,6 @@ class FifteenCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score 15's in a cribbage hand.
     """
-    
     def __init__(self):
         """
         Construct the class for 15's scoring combination in cribbage hand.
@@ -342,7 +376,6 @@ class FifteenCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the fifteens in the hand, CribbageComboInfo object
         """
-
         # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
         # assert(hand.get_num_cards() == 4)
         
@@ -374,11 +407,11 @@ class FifteenCombination(CribbageCombinationShowing):
         
         return info
 
+
 class RunCombination(CribbageCombinationShowing):
     """
     Intended to search for, find, and score runs in a cribbage hand.
     """
-    
     def __init__(self):
         """
         Construct the class for run scoring combination in cribbage hand.
@@ -393,7 +426,6 @@ class RunCombination(CribbageCombinationShowing):
         :parameter starter: The starter card, Card object
         :return: CribbageComboInfo object with information about the runs in the hand, CribbageComboInfo object
         """
-
         # This is a cribbage hand, so make sure it has 4 cards ... NO ... pile during play may be more or less than 4
         # assert(hand.get_num_cards() == 4)
         
@@ -448,7 +480,6 @@ class PairCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score pairs in a cribbage play pile.
     """
-    
     def __init__(self):
         """
         Construct the class for pair scoring combination in cribbage play pile.
@@ -462,7 +493,6 @@ class PairCombinationPlaying(CribbageCombinationPlaying):
         :parameter hand: The play pile to search for pairs, Hand object
         :return: CribbageComboInfo object with information about the pairs in the play pile, CribbageComboInfo object
         """
-
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
         
@@ -493,7 +523,6 @@ class RunCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score runs in a cribbage play pile.
     """
-    
     def __init__(self):
         """
         Construct the class for run scoring combination in cribbage play pile.
@@ -507,7 +536,6 @@ class RunCombinationPlaying(CribbageCombinationPlaying):
         :parameter hand: The play pile to search for runs, Hand object
         :return: CribbageComboInfo object with information about the runs in the play pile, CribbageComboInfo object
         """
-
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
 
@@ -560,7 +588,6 @@ class FifteenCombinationPlaying(CribbageCombinationPlaying):
     """
     Intended to search for, find, and score 15's in a cribbage play pile.
     """
-    
     def __init__(self):
         """
         Construct the class for fifteen scoring combination in cribbage play pile.
@@ -576,7 +603,6 @@ class FifteenCombinationPlaying(CribbageCombinationPlaying):
         :parameter hand: The play pile to test for a fifteen, Hand object
         :return: CribbageComboInfo object with information about the fifteen in the pile, CribbageComboInfo object
         """
-
         info = CribbageComboInfo()
         info.combo_name = self._combo_name
         
@@ -590,7 +616,3 @@ class FifteenCombinationPlaying(CribbageCombinationPlaying):
                 info.instance_list.append(pile)
 
         return info
-
-
-
-

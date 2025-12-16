@@ -3,11 +3,11 @@ import logging
 import shelve
 
 # Local imports
-from CribbageBoard import CribbageBoard
-from CribbageDeal import CribbageDeal, CribbagePlayers
-from CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
-from exceptions import CribbageGameOverError
-from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+from CribbageSim.CribbageBoard import CribbageBoard
+from CribbageSim.CribbageDeal import CribbageDeal, CribbagePlayers
+from CribbageSim.CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
+from CribbageSim.exceptions import CribbageGameOverError
+from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 from UserResponseCollector.UserQueryCommand import UserQueryCommandPathOpen, UserQueryCommandPathSave
 import UserResponseCollector.UserQueryReceiver
 

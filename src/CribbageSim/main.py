@@ -2,10 +2,10 @@
 
 
 # Local
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
-from CribbageDeal import CribbageDeal
-from CribbageGame import CribbageGame
-from CribbageSimulator import CribbageSimulator
+from CribbageSim.CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
+from CribbageSim.CribbageDeal import CribbageDeal
+from CribbageSim.CribbageGame import CribbageGame
+from CribbageSim.CribbageSimulator import CribbageSimulator
 from UserResponseCollector.UserQueryCommand import UserQueryCommandMenu
 import UserResponseCollector.UserQueryReceiver
 

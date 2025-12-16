@@ -2,8 +2,8 @@
 import unittest
 
 # Local
-from CribbagePlayStrategy import CribbagePlayStrategy, CribbageCribOption
-from CribbageDeal import CribbageDeal
+from CribbageSim.CribbagePlayStrategy import CribbagePlayStrategy, CribbageCribOption
+from CribbageSim.CribbageDeal import CribbageDeal
 from HandsDecksCards.card import Card
 
 class Test_CribbagePlayStrategy(unittest.TestCase):

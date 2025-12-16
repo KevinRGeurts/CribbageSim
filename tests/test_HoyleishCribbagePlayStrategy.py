@@ -5,8 +5,8 @@ import unittest
 from HandsDecksCards.card import Card
 from HandsDecksCards.hand import Hand
 from HandsDecksCards.deck import StackedDeck
-from CribbagePlayStrategy import HoyleishCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
-from CribbageDeal import CribbageDeal
+from CribbageSim.CribbagePlayStrategy import HoyleishCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
+from CribbageSim.CribbageDeal import CribbageDeal
 
 
 class Test_HoyleishCribbagePlayStrategy(unittest.TestCase):

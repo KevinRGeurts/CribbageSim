@@ -6,12 +6,12 @@ from enum import Enum
 from HandsDecksCards.card import Card
 from HandsDecksCards.deck import Deck, StackedDeck
 from HandsDecksCards.hand import Hand
-from CribbagePlayStrategy import CribbagePlayStrategy
-from CribbageCombination import CribbageCombinationShowing, CribbageComboInfo, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
-from CribbageCombination import CribFlushCombination
-from CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
-from exceptions import CribbageGameOverError
-from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+from CribbageSim.CribbagePlayStrategy import CribbagePlayStrategy
+from CribbageSim.CribbageCombination import CribbageCombinationShowing, CribbageComboInfo, PairCombination, FifteenCombination, RunCombination, FlushCombination, HisNobsCombination
+from CribbageSim.CribbageCombination import CribFlushCombination
+from CribbageSim.CribbageCombination import CribbageCombinationPlaying, FifteenCombinationPlaying, PairCombinationPlaying, RunCombinationPlaying
+from CribbageSim.exceptions import CribbageGameOverError
+from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 
 
 class CribbagePlayers(Enum):

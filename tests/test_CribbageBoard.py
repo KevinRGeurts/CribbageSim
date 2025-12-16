@@ -2,7 +2,7 @@
 import unittest
 
 # Local
-from CribbageBoard import CribbageBoard
+from CribbageSim.CribbageBoard import CribbageBoard
 
 class Test_CribbageBoard(unittest.TestCase):
     

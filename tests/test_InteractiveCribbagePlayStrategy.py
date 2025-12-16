@@ -4,7 +4,7 @@ import io
 from unittest.mock import patch
 
 # Local
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy
+from CribbageSim.CribbagePlayStrategy import InteractiveCribbagePlayStrategy
 
 
 class Test_test_InteractiveCribbagePlayStrategy(unittest.TestCase):

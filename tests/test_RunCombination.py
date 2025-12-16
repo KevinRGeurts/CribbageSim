@@ -4,7 +4,7 @@ import unittest
 # Local
 from HandsDecksCards.card import Card
 from HandsDecksCards.hand import Hand
-from CribbageCombination import RunCombination
+from CribbageSim.CribbageCombination import RunCombination
 
 class Test_RunCombination(unittest.TestCase):
     

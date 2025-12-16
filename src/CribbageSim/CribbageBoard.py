@@ -1,11 +1,10 @@
 # Standard imports
 import logging
-from xml.dom.expatbuilder import ParseEscape
-from CribbageCombination import CribbageComboInfo
 
 # Local imports
-from exceptions import CribbageGameOverError
-from CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+from CribbageSim.CribbageCombination import CribbageComboInfo
+from CribbageSim.exceptions import CribbageGameOverError
+from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
 
 
 class CribbageBoard(object):

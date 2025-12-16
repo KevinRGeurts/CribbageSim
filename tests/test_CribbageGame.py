@@ -6,8 +6,8 @@ from unittest.mock import patch
 # Local
 from HandsDecksCards.card import Card
 from HandsDecksCards.deck import StackedDeck
-from CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
-from CribbageGame import CribbageGame, CribbageGameInfo
+from CribbageSim.CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
+from CribbageSim.CribbageGame import CribbageGame, CribbageGameInfo
 
 class Test_CribbageGame(unittest.TestCase):
     

@@ -16,7 +16,6 @@ END_GAME:
 
 # Standard imports
 from enum import Enum
-from uuid import uuid4
 
 # Local imports
 

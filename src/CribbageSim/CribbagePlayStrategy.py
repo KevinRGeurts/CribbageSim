@@ -4,10 +4,10 @@ import random
 # Local imports
 import UserResponseCollector.UserQueryReceiver # Leave this like it is, so that import can be used to do a swap out of the UserQueryReceiver between base and child if needed
 from UserResponseCollector.UserQueryCommand import UserQueryCommandMenu
-from CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
-from CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
+from CribbageSim.CribbageCombination import CribbageCombinationShowing, PairCombination, FifteenCombination, RunCombination, FlushCombination
+from CribbageSim.CribbageCombination import CribbageCombinationPlaying, PairCombinationPlaying, FifteenCombinationPlaying, RunCombinationPlaying
 from HandsDecksCards.hand import Hand
-from exceptions import CribbageGameOverError
+from CribbageSim.exceptions import CribbageGameOverError
 
 
 class CribbageCribOption:

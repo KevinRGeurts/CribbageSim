@@ -6,8 +6,8 @@ from random import seed
 from HandsDecksCards.card import Card
 from HandsDecksCards.hand import Hand
 from HandsDecksCards.deck import StackedDeck
-from CribbagePlayStrategy import RandomCribbagePlayStrategy
-from CribbageDeal import CribbageDeal
+from CribbageSim.CribbagePlayStrategy import RandomCribbagePlayStrategy
+from CribbageSim.CribbageDeal import CribbageDeal
 
 class Test_RandomCribbagePlayStrategy(unittest.TestCase):
     

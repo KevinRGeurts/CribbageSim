@@ -5,15 +5,14 @@
     <ProjectGuid>43389354-4bfc-42a1-a70d-b110f06b7e63</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>main.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>..\..\tests</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>CribbageSimulator</Name>
     <RootNamespace>CribbageSimulator</RootNamespace>
     <TestFramework>unittest</TestFramework>
     <UnitTestPattern>test*.py</UnitTestPattern>
-    <UnitTestRootDirectory>.</UnitTestRootDirectory>
+    <UnitTestRootDirectory>..\..\tests</UnitTestRootDirectory>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -38,50 +37,6 @@
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="test_CribbageBoard.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_CribbageGame.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_CribbagePlayStrategy.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_CribbageSimulator.py" />
-    <Compile Include="test_CribFlushCombo.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_FifteenComboPlaying.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_HoyleishCribbagePlayStrategy.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_InteractiveCribbagePlayStrategy.py" />
-    <Compile Include="test_RandomCribbagePlayStrategy.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_RunComboPlaying.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_CribbageDeal.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_FifteenCombination.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_HisNobsCombination.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_FlushCombination.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_CribbageCombination.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_PairCombination.py" />
-    <Compile Include="test_PairComboPlaying.py" />
-    <Compile Include="test_RunCombination.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Documentation\" />

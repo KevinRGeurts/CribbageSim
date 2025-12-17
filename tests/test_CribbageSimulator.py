@@ -44,8 +44,9 @@ class Test_CribbageSimulator(unittest.TestCase):
             game.play()
         
         # Test that the info messages sent to the logger are as expected
-        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player human_player will deal.')    
-        self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Starter card: 5H')
+        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Starting a new game of cribbage with human_player vs machine_player.')    
+        self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Player human_player will deal.')
+        self.assertEqual(cm.output[2], 'INFO:cribbage_logger:Hand for CribbagePlayers.PLAYER_1 after dealing: QS 7H 6C AD 10H KS')
         
     # Patch results in dealer scoring a pair with their first card played, and winning the game.
     @patch('sys.stdin', io.StringIO('4\n3\n2\n1\n0\n2\n'))
@@ -78,9 +79,9 @@ class Test_CribbageSimulator(unittest.TestCase):
             game.play()
         
         # Test that the debug messages sent to the logger are as expected
-        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Player human_player will deal.')    
-        self.assertEqual(cm.output[1], 'DEBUG:cribbage_logger:Dealt player hand: 10S 5C 10D 3C 8H KH')
-        self.assertEqual(cm.output[2], 'DEBUG:cribbage_logger:Dealt player hand: [Card(\'S\',\'10\'), Card(\'C\',\'5\'), Card(\'D\',\'10\'), Card(\'C\',\'3\'), Card(\'H\',\'8\'), Card(\'H\',\'K\')]')
+        self.assertEqual(cm.output[0], 'INFO:cribbage_logger:Starting a new game of cribbage with human_player vs machine_player.')    
+        self.assertEqual(cm.output[1], 'INFO:cribbage_logger:Player human_player will deal.')    
+        self.assertEqual(cm.output[2], 'DEBUG:cribbage_logger:Hand for CribbagePlayers.PLAYER_2 after deal: 10S 5C 10D 3C 8H KH')
 
 
 if __name__ == '__main__':

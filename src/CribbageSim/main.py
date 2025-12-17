@@ -1,7 +1,24 @@
-# Standard
+"""
+The functions in this module execute various use cases of the cribbage game simulator. 
+
+Exported Classes:
+    None
+
+Exported Exceptions:
+    None
+ 
+Exported Functions:
+    play_interactive_game() - Human user plays interactive cribbage game against computer player.
+    play_interactive_deal() - Human user plays one cribbage deal against computer player.
+    play_auto_game() - Automatically plays one game of cribbage with two computer players.
+    play_auto_deal() - Automaticaly plays one cribbage deal with two computer players.
+    __main__ -- Query user for a use case, and then call the appropriate function.
+"""
+
+# Standard imports
 
 
-# Local
+# Local imports
 from CribbageSim.CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbageSim.CribbageDeal import CribbageDeal
 from CribbageSim.CribbageGame import CribbageGame
@@ -13,6 +30,7 @@ import UserResponseCollector.UserQueryReceiver
 def play_interactive_game():
     """
     Use CribbageSimulator to play an interactive game as player 1.
+    :return: None
     """
     
     # Ask user if they want to unshelve a shelved game
@@ -37,6 +55,7 @@ def play_interactive_game():
 def play_interactive_deal():
     """
     Use CribbageSimulator to play an interactive deal, as the dealer.
+    :return: None
     """
 
     print('You are playing a deal as the dealer, against a machine player.')
@@ -48,6 +67,7 @@ def play_interactive_deal():
 def play_auto_game():
         """
         Use CribbageSimulator to play a completely automatic game.
+        :return: None
         """
         
         game = CribbageGame(player_strategy1 = HoyleishPlayerCribbagePlayStrategy(), player_strategy2 = HoyleishPlayerCribbagePlayStrategy(),
@@ -58,7 +78,8 @@ def play_auto_game():
 
 def play_auto_deal():
     """
-    Use CribbageSimulator to play a completely automatic deal. 
+    Use CribbageSimulator to play a completely automatic deal.
+    :return: None
     """
     # Seed the random number generator
     from random import seed
@@ -72,6 +93,7 @@ def play_auto_deal():
 def play_debug():
     """
     Use CribbageSimulator to set up and execute a debugging scenario.
+    :return: None
     """
 
     # Seed the primary random number generator

@@ -26,7 +26,7 @@ from CribbageSim.CribbageBoard import CribbageBoard
 from CribbageSim.CribbageDeal import CribbageDeal, CribbagePlayers
 from CribbageSim.CribbagePlayStrategy import CribbagePlayStrategy, InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy
 from CribbageSim.exceptions import CribbageGameOverError
-from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo, CribbageDealPhase
 from UserResponseCollector.UserQueryCommand import UserQueryCommandPathOpen, UserQueryCommandPathSave
 import UserResponseCollector.UserQueryReceiver
 
@@ -110,23 +110,25 @@ class CribbageGame:
         """
         return self._board.get_scores()
         
-    def peg_for_player1(self, count = 1, reason = []):
+    def peg_for_player1(self, count = 1, reason = [], during = CribbageDealPhase.NO_PHASE):
         """
         Peg on the board count for player1.
         :parameter count: The count to peg for player1 on the board, int
         :parameter reason: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: Current peg total for player1 after pegging count, int
         """
-        return self._board.peg_for_player1(count, reason)
+        return self._board.peg_for_player1(count, reason, during)
         
-    def peg_for_player2(self, count = 1, reason = []):
+    def peg_for_player2(self, count = 1, reason = [], during = CribbageDealPhase.NO_PHASE):
         """
         Peg on the board count for player2.
         :parameter count: The count to peg for player2 on the board, int
         :parameter reason: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: Current peg total for player2 after pegging count, int
         """
-        return self._board.peg_for_player2(count, reason)
+        return self._board.peg_for_player2(count, reason, during)
         
     def play(self, load_game=False):
         """

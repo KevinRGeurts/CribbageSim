@@ -22,7 +22,7 @@ import logging
 # Local imports
 from CribbageSim.CribbageCombination import CribbageComboInfo
 from CribbageSim.exceptions import CribbageGameOverError
-from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo
+from CribbageSim.CribbageGameOutputEvents import CribbageGameOutputEvents, CribbageGameLogInfo, CribbageDealPhase
 
 
 class CribbageBoard(object):
@@ -52,11 +52,12 @@ class CribbageBoard(object):
             reasons_string += f"{str(reason)}\n"
         return reasons_string
 
-    def peg_for_player1(self, points = 1, reasons = []):
+    def peg_for_player1(self, points = 1, reasons = [], during = CribbageDealPhase.NO_PHASE):
         """
         Peg the argument points for player 1, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int
         :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: The current score for player 1, after pegging points, int
         """
         assert(points>0)
@@ -74,14 +75,15 @@ class CribbageBoard(object):
         logger.info(f"Player 1 peg locations: {self._player1_current},{self._player1_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
                                               score_player1=(self._player1_current,self._player1_previous),
-                                              score_record=reasons))
+                                              score_record=reasons, score_while=str(during)))
         return self._player1_current
         
-    def peg_for_player2(self, points = 1, reasons = []):
+    def peg_for_player2(self, points = 1, reasons = [], during = CribbageDealPhase.NO_PHASE):
         """
         Peg the argument points for player 2, by leapfrogging the trailing peg points number of holes past the leading peg.
         :parameter points: The number of points to peg, int
         :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: The current score for player 2, after pegging points, int
         """
         assert(points>0)
@@ -99,7 +101,7 @@ class CribbageBoard(object):
         logger.info(f"Player 2 peg locations: {self._player2_current},{self._player2_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
                                               score_player2=(self._player2_current,self._player2_previous),
-                                              score_record=reasons))
+                                              score_record=reasons, score_while=str(during)))
         return self._player2_current
     
     def get_scores(self):

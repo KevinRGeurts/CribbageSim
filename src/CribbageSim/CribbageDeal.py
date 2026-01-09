@@ -24,6 +24,7 @@ import logging
 from enum import Enum
 
 # Local imports
+from CribbageSim.CribbageGameOutputEvents import CribbageDealPhase
 from HandsDecksCards.card import Card
 from HandsDecksCards.deck import Deck, StackedDeck
 from HandsDecksCards.hand import Hand
@@ -86,8 +87,8 @@ class CribbageDeal:
             during play. Expect individual piles to be displayed such as during interactive play.
         :parameter player_strategy: CribbagePlayStrategy instance used to play player hand, CribbagePlayStrategy or child instance
         :parameter dealerer_strategy: CribbagePlayStrategy instance used to play dealer hand, CribbagePlayStrategy or child instance
-        :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageDeal.peg_for_player1
-        :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageDeal.peg_for_player2
+        :parameter player_peg_callback: Bound method for communicating scoring for player back to a game, e.g. CribbageGame.peg_for_player1
+        :parameter dealer_peg_callback: Bound method for communicating scoring for dealer back to a game, e.g. CribbageGame.peg_for_player2
         :parameter player_participant: Which game participant is the player for this deal?, CribbagePlayers Enum
         :parameter dealer_participant: Which game participant is the dealer for this deal?, CribbagePlayers Enum
         """
@@ -333,11 +334,12 @@ class CribbageDeal:
             reasons_string += f"{str(reason)}\n"
         return reasons_string
 
-    def peg_for_player(self, count = 1, reasons = []):
+    def peg_for_player(self, count = 1, reasons = [], during = CribbageDealPhase.NO_PHASE):
         """
         Add count to the player's score.
         :parameter count: The number of pegs (points) to add to the player's score, int
         :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: The current player point score, int
         """
         if count > 0:
@@ -345,7 +347,7 @@ class CribbageDeal:
             self._player_score += count
             # Update score for the game
             if (self._player_peg_callback):
-                self._player_peg_callback(count, reasons)
+                self._player_peg_callback(count, reasons, during)
             else:
                 # No callback available to peg for player, so, log scoring info from here
                 # Get the logger 'cribbage_logger'
@@ -353,11 +355,12 @@ class CribbageDeal:
                 logger.info(f"Player pegs a total of {count} for:\n{self._make_reasons_string(reasons)}")
         return self._player_score
 
-    def peg_for_dealer(self, count = 1, reasons = []):
+    def peg_for_dealer(self, count = 1, reasons = [], during = CribbageDealPhase.NO_PHASE):
         """
         Add count to the dealer's score.
         :parameter count: The number of pegs (points) to add to the dealer's score, int
         :parameter reasons: Why the points are being pegged, list of CribbageComboInfo objects
+        :parameter during: Optional value indicating during which phase of a deal the pegging is occurring, as CribbageDealPhase Enum
         :return: The current dealer point score, int
         """
         if count > 0:
@@ -365,7 +368,7 @@ class CribbageDeal:
             self._dealer_score += count
             # Update score for the game
             if (self._dealer_peg_callback):
-                self._dealer_peg_callback(count, reasons)
+                self._dealer_peg_callback(count, reasons, during)
             else:
                 # No callback available to peg for dealer, so, log scoring info from here
                 # Get the logger 'cribbage_logger'
@@ -584,7 +587,7 @@ class CribbageDeal:
             reason.score=2
             reason.instance_list=[[starter]]
             try:
-                self.peg_for_dealer(2, [reason])
+                self.peg_for_dealer(2, [reason], during = CribbageDealPhase.PLAYING_DEAL)
             except CribbageGameOverError as e:
                 # (except covered by unit test)
                 # Output the play record to facilitate unit test creation
@@ -625,7 +628,7 @@ class CribbageDeal:
                             score = self.determine_score_playing(self._combined_pile, next_to_play, reasons)
                             deal_info.player_play_score += score
                             try:
-                                self.peg_for_player(score, reasons)
+                                self.peg_for_player(score, reasons, during=CribbageDealPhase.PLAYING_DEAL)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -644,7 +647,7 @@ class CribbageDeal:
                             score = self.determine_score_playing(self._combined_pile, next_to_play, reasons)
                             deal_info.dealer_play_score += score
                             try:
-                                self.peg_for_dealer(score, reasons)
+                                self.peg_for_dealer(score, reasons, during=CribbageDealPhase.PLAYING_DEAL)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -671,8 +674,9 @@ class CribbageDeal:
                             reason.combo_name='Go 31'
                             reason.number_instances=1
                             reason.score=2
+                            reason.instance_list=[self._combined_pile.get_cards()]
                             try:
-                                self.peg_for_dealer(2, [reason])
+                                self.peg_for_dealer(2, [reason], during=CribbageDealPhase.PLAYING_DEAL)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -688,8 +692,9 @@ class CribbageDeal:
                             reason.combo_name='Go 31'
                             reason.number_instances=1
                             reason.score=2
+                            reason.instance_list=[self._combined_pile.get_cards()]
                             try:
-                                self.peg_for_player(2, [reason])
+                                self.peg_for_player(2, [reason], during=CribbageDealPhase.PLAYING_DEAL)
                             except CribbageGameOverError as e:
                                 # (except covered by unit test)
                                 # Output the play record to facilitate unit test creation
@@ -731,8 +736,9 @@ class CribbageDeal:
                                 reason.combo_name='Go 31'
                                 reason.number_instances=1
                                 reason.score=2
+                                reason.instance_list=[self._combined_pile.get_cards()]
                                 try:
-                                    self.peg_for_player(2, [reason])
+                                    self.peg_for_player(2, [reason], during=CribbageDealPhase.PLAYING_DEAL)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -746,8 +752,9 @@ class CribbageDeal:
                                 reason.combo_name='Go <31'
                                 reason.number_instances=1
                                 reason.score=1
+                                reason.instance_list=[self._combined_pile.get_cards()]
                                 try:
-                                    self.peg_for_player(1, [reason])
+                                    self.peg_for_player(1, [reason], during=CribbageDealPhase.PLAYING_DEAL)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -786,6 +793,7 @@ class CribbageDeal:
                                 reason.combo_name='Go 31'
                                 reason.number_instances=1
                                 reason.score=2
+                                reason.instance_list=[self._combined_pile.get_cards()]
                                 try:
                                     self.peg_for_dealer(2, [reason])
                                 except CribbageGameOverError as e:
@@ -801,8 +809,9 @@ class CribbageDeal:
                                 reason.combo_name='Go <31'
                                 reason.number_instances=1
                                 reason.score=1
+                                reason.instance_list=[self._combined_pile.get_cards()]
                                 try:
-                                    self.peg_for_dealer(1, [reason])
+                                    self.peg_for_dealer(1, [reason], during=CribbageDealPhase.PLAYING_DEAL)
                                 except CribbageGameOverError as e:
                                     # (except covered by unit test)
                                     # Output the play record to facilitate unit test creation
@@ -831,7 +840,7 @@ class CribbageDeal:
         logger.info(f"     Total player score from showing hand: {score}")
         deal_info.player_show_score += score
         try:
-            self.peg_for_player(score, reasons)
+            self.peg_for_player(score, reasons, during=CribbageDealPhase.SHOWING_HAND)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation
@@ -846,7 +855,7 @@ class CribbageDeal:
         logger.info(f"     Total dealer score from showing hand: {score}")
         deal_info.dealer_show_score += score
         try:
-            self.peg_for_dealer(score, reasons)
+            self.peg_for_dealer(score, reasons, during=CribbageDealPhase.SHOWING_HAND)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation
@@ -862,7 +871,7 @@ class CribbageDeal:
         logger.info(f"     Total dealer score from showing crib: {score}")
         deal_info.dealer_crib_score += score
         try:
-            self.peg_for_dealer(score, reasons)
+            self.peg_for_dealer(score, reasons, during=CribbageDealPhase.SHOWING_CRIB)
         except CribbageGameOverError as e:
             # (except covered by unit test)
             # Output the play record to facilitate unit test creation

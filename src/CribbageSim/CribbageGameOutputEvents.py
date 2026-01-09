@@ -4,6 +4,7 @@ could, for example, be used by a GUI to provide visual updates to the user of ga
 
 Exported Classes:
     CribbageGameOutputEvents - Enumerated list of output (results) events during a cribbage game.
+    CribbageDealPhase - Enumerated list of phases within a deal of a cribbage game, used to indicate when scores are made.
     CribbageGameLogInfo - Used as objectified message when logging from GribbageGame.play().
 
     The following is a list of CribbageGameOutputEvents and the attributes that are expect to be provided values in CribbageGameLogInfo:
@@ -33,7 +34,7 @@ Logging:
 
 
 # Standard imports
-from enum import Enum
+from enum import Enum, StrEnum
 
 # Local imports
 
@@ -57,6 +58,17 @@ class CribbageGameOutputEvents(Enum):
     END_GAME = 12 # Sent when game engine ends game.
 
 
+class CribbageDealPhase(StrEnum):
+    """
+    An enumeration of the phases within a deal of a cribbage game, used to indicate when scores are made.
+    """
+    NO_PHASE = 'unknown'
+    CUTTING_FOR_STARTER = 'cutting starter'
+    PLAYING_DEAL = 'playing' 
+    SHOWING_HAND = 'showing hand'
+    SHOWING_CRIB = 'showing crib'
+
+
 class CribbageGameLogInfo:
     """
     A class with all members/attributes considered public. Used as objectified message when logging. with GribbageGame.play() and below.
@@ -70,8 +82,8 @@ class CribbageGameLogInfo:
         self.name_player1 = ''
         self.name_player2 = ''
         self.name_dealer = ''
-        self.hand_player1 = '' # String like 'KH'
-        self.hand_player2 = [] # List of strings like ['KH', 'AD', '2S', 'JC', '5H', '4H']
+        self.hand_player1 = '' # String like 'KH AD 2S'
+        self.hand_player2 = '' # String like 'KH AD 2S'
         self.starter = '' # String like 'KH'
         self.crib = '' # String like 'KH AD 2S JC'
         self.pile_combined = '' # String like 'KH AD 2S JC'
@@ -81,6 +93,7 @@ class CribbageGameLogInfo:
         self.score_player1 = None # Tuple (leading peg position as int, trailing peg position as int)
         self.score_player2 = None # Tuple (leading peg position as int, trailing peg position as int)
         self.score_record = [] # List of CribbageComboInfo objects associated with the score
+        self.score_while = '' # String describing what was happening when the score was made, like 'playing", 'showing hand', 'showing crib'
 
         # Now process any kwargs to populate some of the attributes
         for k,v in kwargs.items():

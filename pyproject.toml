@@ -8,9 +8,9 @@ source-includes = ["tests/", "src/CribbageSim/Documentation/Developer_Documentat
 
 [project]
 name = "CribbageSim"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
-	"UserResponseCollector>=1.0.4",
+	"UserResponseCollector>=1.0.6",
 	"HandsDecksCards>=1.0.0"
 ]
 authors = [

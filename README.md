@@ -15,7 +15,7 @@ a play strategy based on that described by Hoyle's Rules of Games, supplemented 
 - The ```HoyleishCribbagePlayStrategy``` class implements a player strategy that is similar to the one described in "Hoyle's Rules of Games," by A.H. Morehead and G. Mott-Smith, second revised edition, published by Signet, 1983. However, significant additions have been made based on the experience of the developer.
 
 ## Requirements
-- UserResponseCollector>=1.0.4: [GitHub](https://github.com/KevinRGeurts/UserResponseCollector), [PyPi](https://pypi.org/project/UserResponseCollector/)
+- UserResponseCollector>=1.1.0: [GitHub](https://github.com/KevinRGeurts/UserResponseCollector), [PyPi](https://pypi.org/project/UserResponseCollector/)
 - HandsDecksCards>=1.0.0: [GitHub](https://github.com/KevinRGeurts/HandsDecksCards), [PyPi](https://pypi.org/project/HandsDecksCards/)
 
 ## Usage

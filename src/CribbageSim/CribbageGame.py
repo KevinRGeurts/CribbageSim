@@ -92,6 +92,7 @@ class CribbageGame:
         self._deal = CribbageDeal(self._player2_player_strategy, self._player1_dealer_strategy)
         self._next_to_deal = CribbagePlayers.PLAYER_1
         self._deal_count = 0
+        self._game_stats = CribbageGameInfo()
 
     def get_player1_name(self):
         """
@@ -157,7 +158,6 @@ class CribbageGame:
             # Consider that this predictability is beneficial to unit testing.
             self._next_to_deal = CribbagePlayers.PLAYER_1
 
-        return_val = CribbageGameInfo()
         game_over = False
         
         while not game_over:
@@ -192,55 +192,55 @@ class CribbageGame:
                 match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
-                        return_val.player1_total_play_score += deal_info.player_play_score
-                        return_val.player1_total_show_score += deal_info.player_show_score
-                        return_val.player2_total_play_score += deal_info.dealer_play_score
-                        return_val.player2_total_his_heals_score += deal_info.dealer_his_heals_score
-                        return_val.player2_total_show_score += deal_info.dealer_show_score
-                        return_val.player2_total_crib_score += deal_info.dealer_crib_score
+                        self._game_stats.player1_total_play_score += deal_info.player_play_score
+                        self._game_stats.player1_total_show_score += deal_info.player_show_score
+                        self._game_stats.player2_total_play_score += deal_info.dealer_play_score
+                        self._game_stats.player2_total_his_heals_score += deal_info.dealer_his_heals_score
+                        self._game_stats.player2_total_show_score += deal_info.dealer_show_score
+                        self._game_stats.player2_total_crib_score += deal_info.dealer_crib_score
                     case CribbagePlayers.PLAYER_2:
                         # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
-                        return_val.player2_total_play_score += deal_info.player_play_score
-                        return_val.player2_total_show_score += deal_info.player_show_score
-                        return_val.player1_total_play_score += deal_info.dealer_play_score
-                        return_val.player1_total_his_heals_score += deal_info.dealer_his_heals_score
-                        return_val.player1_total_show_score += deal_info.dealer_show_score
-                        return_val.player1_total_crib_score += deal_info.dealer_crib_score
+                        self._game_stats.player2_total_play_score += deal_info.player_play_score
+                        self._game_stats.player2_total_show_score += deal_info.player_show_score
+                        self._game_stats.player1_total_play_score += deal_info.dealer_play_score
+                        self._game_stats.player1_total_his_heals_score += deal_info.dealer_his_heals_score
+                        self._game_stats.player1_total_show_score += deal_info.dealer_show_score
+                        self._game_stats.player1_total_crib_score += deal_info.dealer_crib_score
             except CribbageGameOverError as e:
                 # Log why the game ended, for example, that it ended while the crib was being shown. This information is obtained from the exception.
                 logger.info(e.args[0])
                 # Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception ending the game.
                 (p1_score, p2_score) = self._board.get_scores()
                 if p1_score == 121:
-                    return_val.winning_player = self._player1
-                    return_val.winning_player_final_score = p1_score
-                    return_val.losing_player_final_score = p2_score
-                    return_val.deals_in_game = self._deal_count
+                    self._game_stats.winning_player = self._player1
+                    self._game_stats.winning_player_final_score = p1_score
+                    self._game_stats.losing_player_final_score = p2_score
+                    self._game_stats.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player1} wins the game.")
                 else:
-                    return_val.winning_player = self._player2
-                    return_val.winning_player_final_score = p2_score
-                    return_val.losing_player_final_score = p1_score
-                    return_val.deals_in_game = self._deal_count
+                    self._game_stats.winning_player = self._player2
+                    self._game_stats.winning_player_final_score = p2_score
+                    self._game_stats.losing_player_final_score = p1_score
+                    self._game_stats.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player2} wins the game.")
                 # Handle accumulating deal info that arrived in CribbageGameOverError into game info
                 match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
-                        return_val.player1_total_play_score += e.deal_info.player_play_score
-                        return_val.player1_total_show_score += e.deal_info.player_show_score
-                        return_val.player2_total_play_score += e.deal_info.dealer_play_score
-                        return_val.player2_total_his_heals_score += e.deal_info.dealer_his_heals_score
-                        return_val.player2_total_show_score += e.deal_info.dealer_show_score
-                        return_val.player2_total_crib_score += e.deal_info.dealer_crib_score
+                        self._game_stats.player1_total_play_score += e.deal_info.player_play_score
+                        self._game_stats.player1_total_show_score += e.deal_info.player_show_score
+                        self._game_stats.player2_total_play_score += e.deal_info.dealer_play_score
+                        self._game_stats.player2_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        self._game_stats.player2_total_show_score += e.deal_info.dealer_show_score
+                        self._game_stats.player2_total_crib_score += e.deal_info.dealer_crib_score
                     case CribbagePlayers.PLAYER_2:
                         # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
-                        return_val.player2_total_play_score += e.deal_info.player_play_score
-                        return_val.player2_total_show_score += e.deal_info.player_show_score
-                        return_val.player1_total_play_score += e.deal_info.dealer_play_score
-                        return_val.player1_total_his_heals_score += e.deal_info.dealer_his_heals_score
-                        return_val.player1_total_show_score += e.deal_info.dealer_show_score
-                        return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
+                        self._game_stats.player2_total_play_score += e.deal_info.player_play_score
+                        self._game_stats.player2_total_show_score += e.deal_info.player_show_score
+                        self._game_stats.player1_total_play_score += e.deal_info.dealer_play_score
+                        self._game_stats.player1_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        self._game_stats.player1_total_show_score += e.deal_info.dealer_show_score
+                        self._game_stats.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
         
             except UserResponseCollector.UserQueryReceiver.UserQueryReceiverTerminateQueryingThreadError as e:
@@ -281,23 +281,23 @@ class CribbageGame:
         # Log end of game results
         logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
-        logger.info(f"     Winning Player: {return_val.winning_player}")
-        logger.info(f"     Winning Player Final Score: {return_val.winning_player_final_score}")
-        logger.info(f"     Losing Player Final Score: {return_val.losing_player_final_score}")
+        logger.info(f"     Winning Player: {self._game_stats.winning_player}")
+        logger.info(f"     Winning Player Final Score: {self._game_stats.winning_player_final_score}")
+        logger.info(f"     Losing Player Final Score: {self._game_stats.losing_player_final_score}")
         logger.info(f"Statistics for {self._player1}:")
-        logger.info(f"     Total Play Score: {return_val.player1_total_play_score}")
-        logger.info(f"     Total His Heals Score: {return_val.player1_total_his_heals_score}")
-        logger.info(f"     Total Show Score: {return_val.player1_total_show_score}")
-        logger.info(f"     Total Crib Score: {return_val.player1_total_crib_score}")
-        logger.info(f"     Check Sum: {return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score}")
+        logger.info(f"     Total Play Score: {self._game_stats.player1_total_play_score}")
+        logger.info(f"     Total His Heals Score: {self._game_stats.player1_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {self._game_stats.player1_total_show_score}")
+        logger.info(f"     Total Crib Score: {self._game_stats.player1_total_crib_score}")
+        logger.info(f"     Check Sum: {self._game_stats.player1_total_play_score + self._game_stats.player1_total_his_heals_score + self._game_stats.player1_total_show_score + self._game_stats.player1_total_crib_score}")
         logger.info(f"Statistics for {self._player2}:")
-        logger.info(f"     Total Play Score: {return_val.player2_total_play_score}")
-        logger.info(f"     Total His Heals Score: {return_val.player2_total_his_heals_score}")
-        logger.info(f"     Total Show Score: {return_val.player2_total_show_score}")
-        logger.info(f"     Total Crib Score: {return_val.player2_total_crib_score}")
-        logger.info(f"     Check Sum: {return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score}")
+        logger.info(f"     Total Play Score: {self._game_stats.player2_total_play_score}")
+        logger.info(f"     Total His Heals Score: {self._game_stats.player2_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {self._game_stats.player2_total_show_score}")
+        logger.info(f"     Total Crib Score: {self._game_stats.player2_total_crib_score}")
+        logger.info(f"     Check Sum: {self._game_stats.player2_total_play_score + self._game_stats.player2_total_his_heals_score + self._game_stats.player2_total_show_score + self._game_stats.player2_total_crib_score}")
 
-        return return_val
+        return self._game_stats
 
     def writeGameToFile(self, file, filetype) -> None:
         """
@@ -320,6 +320,13 @@ class CribbageGame:
         # Game state data
         data['next_to_deal']=str(self._next_to_deal)
         data['deal_count']=self._deal_count
+        # Game stats data
+        stats_list = dir(self._game_stats)
+        for stat in stats_list:
+            if not stat.startswith('__') and not stat.endswith('__'):
+                key = f"game_stats_{stat}"
+                value = self._game_stats.__getattribute__(stat)
+                data[key]=value
         # Cribbage board data
         (cur,pre)=self._board.get_player1_status()
         data['player1_current']=cur
@@ -362,6 +369,19 @@ class CribbageGame:
                 case 'CribbagePlayers.PLAYER_2':
                     self._next_to_deal=CribbagePlayers.PLAYER_2
             self._deal_count=data['deal_count']
+            # Game stats data
+            self._game_stats.player1_total_play_score=data['game_stats_player1_total_play_score']
+            self._game_stats.player1_total_his_heals_score=data['game_stats_player1_total_his_heals_score']
+            self._game_stats.player1_total_show_score=data['game_stats_player1_total_show_score']
+            self._game_stats.player1_total_crib_score=data['game_stats_player1_total_crib_score']
+            self._game_stats.player2_total_play_score=data['game_stats_player2_total_play_score']
+            self._game_stats.player2_total_his_heals_score=data['game_stats_player2_total_his_heals_score']
+            self._game_stats.player2_total_show_score=data['game_stats_player2_total_show_score']
+            self._game_stats.player2_total_crib_score=data['game_stats_player2_total_crib_score']
+            self._game_stats.winning_player=data['game_stats_winning_player']
+            self._game_stats.winning_player_final_score=data['game_stats_winning_player_final_score']
+            self._game_stats.losing_player_final_score=data['game_stats_losing_player_final_score']
+            self._game_stats.deals_in_game=data['game_stats_deals_in_game']
             # Cribbage board data
             self._board._player1_current=data['player1_current']
             self._board._player1_previous=data['player1_previous']

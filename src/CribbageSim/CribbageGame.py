@@ -280,7 +280,7 @@ class CribbageGame:
  
         # Log end of game results
         logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}",
-                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME, name_winner=self._game_stats.winning_player))
         logger.info(f"     Winning Player: {self._game_stats.winning_player}")
         logger.info(f"     Winning Player Final Score: {self._game_stats.winning_player_final_score}")
         logger.info(f"     Losing Player Final Score: {self._game_stats.losing_player_final_score}")

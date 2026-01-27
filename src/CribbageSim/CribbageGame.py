@@ -19,7 +19,8 @@ Logging:
 
 # Standard imports
 import logging
-import shelve
+import os
+import json
 
 # Local imports
 from CribbageSim.CribbageBoard import CribbageBoard
@@ -298,10 +299,82 @@ class CribbageGame:
 
         return return_val
 
+    def writeGameToFile(self, file, filetype) -> None:
+        """
+        Write the game data to a file-like object.
+        :parameter file: A file-like object to which to write the game data.
+        :parameter filetype: A string indicating the type of file (e.g., '.json', '.xml', etc.).
+        :return: None
+        """
+        if filetype != '.json':
+            raise ValueError('CribbageGame.writeGameToFile() only supports filetype ".json"')
+        # Add the game data to a dictionary
+        data={}
+        # Boilerplate data so we know what "generator" created the file, and what the version number of the
+        # schema is.
+        data['archive_generator']='CribbageSimulator'
+        data['archive_schema_version']=1
+        # Player name data
+        data['player1_name']=self.get_player1_name()
+        data['player2_name']=self.get_player2_name()
+        # Game state data
+        data['next_to_deal']=str(self._next_to_deal)
+        data['deal_count']=self._deal_count
+        # Cribbage board data
+        (cur,pre)=self._board.get_player1_status()
+        data['player1_current']=cur
+        data['player1_previous']=pre
+        (cur,pre)=self._board.get_player2_status()
+        data['player2_current']=cur
+        data['player2_previous']=pre
+        # Convert the data dictionary to a JSON string
+        json_string = json.dumps(data)
+        # Write the JSON string to the file-like object
+        file.write(json_string)
+        return None
+
+    def readGameFromFile(self, file, filetype) -> None:
+        """
+        Read the game data from a file-like object.
+        :parameter file: A file-like object from which to read the game data.
+        :parameter filetype: A string indicating the type of file (e.g., '.json', '.xml', etc.).
+        :return: None
+        """
+        # Read the JSON string from the file-like object
+        if filetype != '.json':
+            raise ValueError('CribbageGame.readGameFromFile() only supports filetype ".json"')
+        json_string = file.read()
+        # Convert the JSON string to a dictionary
+        data = json.loads(json_string)
+        # Check that the file we loaded was created by the expected archive generator.
+        if data['archive_generator'] != 'CribbageSimulator':
+            raise ValueError(f"CribbageGame.readGameFromFile() attempted to read archive created by unexpected generator {data['archive_generator']}.")
+        # Map the data dictionary to the game object attributes, respecting vatiations in archive schema version.
+        if data['archive_schema_version'] == 1:
+            # Player name data
+            self._player1=data['player1_name']
+            self._player2=data['player2_name']
+            # Game state data
+            dealer = data['next_to_deal']
+            match dealer:
+                case 'CribbagePlayers.PLAYER_1':
+                    self._next_to_deal=CribbagePlayers.PLAYER_1
+                case 'CribbagePlayers.PLAYER_2':
+                    self._next_to_deal=CribbagePlayers.PLAYER_2
+            self._deal_count=data['deal_count']
+            # Cribbage board data
+            self._board._player1_current=data['player1_current']
+            self._board._player1_previous=data['player1_previous']
+            self._board._player2_current=data['player2_current']
+            self._board._player2_previous=data['player2_previous']
+        else:
+            raise ValueError(f"CribbageGame.readGameFromFile() attempted to read archive with unexpected schema version {data['archive_schema_version']}.")
+        return None 
+
     def shelve_game(self, path=None):
         """
-        Save the game by shelving/pickleing it.
-        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+        Save the game by writing it to a json file.
+        :parameter path: The path to the json file. This should have a .json extension, and all backslashes should be escaped., as String
             If no path is provided, then user will be queried.
         :return None:
         """
@@ -310,30 +383,25 @@ class CribbageGame:
 
         if path is None:
             receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
-            query_preface = 'Where do you want to save the game?'
+            query_preface = 'Where do you want to save the game? Provide the path to a .json file.'
             command = UserQueryCommandPathSave(receiver, query_preface)
             save_path = command.Execute()
+            save_path = str(save_path)
         else:
             save_path = path
 
         logger.info(f"Saving game to path: {save_path}")
 
-        # Note that this does not shelve the play strategy attributes of the game.
-
-        file = shelve.open(str(save_path))
+        if len(save_path)>0:
+            with open(save_path, mode='w') as f:
+                self.writeGameToFile(f, os.path.splitext(save_path)[1])
         
-        file['board']=self._board
-        file['player1']=self._player1
-        file['player2']=self._player2
-        file['next_to_deal']=self._next_to_deal
-        file['deal_count']=self._deal_count
-
         return None
 
     def un_shelve_game(self, path=None):
         """
-        Resotre the game by un-shelving/pickleing it.
-        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+        Restore the game data by reading it from a json file.
+        :parameter path: The path to the json file. This should have a .json extension, and all backslashes should be escaped., as String
             If no path is provided, then user will be queried.
         :return None:
         """
@@ -343,30 +411,25 @@ class CribbageGame:
 
         if path is None:
             receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
-            query_preface = 'Which saved game do you want to open?'
+            query_preface = 'Which saved game do you want to open? Provide the path to a .json file.'
             command = UserQueryCommandPathOpen(receiver, query_preface)
             load_path = command.Execute()
+            load_path = str(load_path)
         else:
             load_path = path
 
         logger.info(f"Loading game from path: {load_path}")
 
-        # Note that this does not un-shelve the play strategy attributes of the game.
-
-        file = shelve.open(str(load_path))
-        
-        self._board=file['board']
-        self._player1=file['player1']
-        self._player2=file['player2']
-        self._next_to_deal=file['next_to_deal']
-        self._deal_count=file['deal_count']
+        if len(load_path)>0:
+            with open(load_path) as f:
+                self.readGameFromFile(f, os.path.splitext(load_path)[1])
 
         logger.info(f"Player 1 peg locations: {self._board.get_player1_status()[0]},{self._board.get_player1_status()[1]}",
             extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
-                                        score_player1=(self._board.get_player1_status()[0],self._board.get_player1_status()[0])))
+                                        score_player1=(self._board.get_player1_status()[0],self._board.get_player1_status()[1])))
 
         logger.info(f"Player 2 peg locations: {self._board.get_player2_status()[0]},{self._board.get_player2_status()[1]}",
             extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
-                                        score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[0])))
+                                        score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[1])))
 
         return None

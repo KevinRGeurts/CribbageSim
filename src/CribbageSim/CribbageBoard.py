@@ -69,13 +69,13 @@ class CribbageBoard(object):
 
         self._player1_previous = self._player1_current
         self._player1_current += points
-        if self._player1_current >= 121:
-            self._player1_current = 121
-            raise CribbageGameOverError
         logger.info(f"Player 1 peg locations: {self._player1_current},{self._player1_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
                                               score_player1=(self._player1_current,self._player1_previous),
                                               score_record=reasons, score_while=str(during)))
+        if self._player1_current >= 121:
+            self._player1_current = 121
+            raise CribbageGameOverError
         return self._player1_current
         
     def peg_for_player2(self, points = 1, reasons = [], during = CribbageDealPhase.NO_PHASE):
@@ -95,13 +95,13 @@ class CribbageBoard(object):
 
         self._player2_previous = self._player2_current
         self._player2_current += points
-        if self._player2_current >= 121:
-            self._player2_current = 121
-            raise CribbageGameOverError
         logger.info(f"Player 2 peg locations: {self._player2_current},{self._player2_previous} After pegging:\n{self._make_reasons_string(reasons)}",
                     extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
                                               score_player2=(self._player2_current,self._player2_previous),
                                               score_record=reasons, score_while=str(during)))
+        if self._player2_current >= 121:
+            self._player2_current = 121
+            raise CribbageGameOverError
         return self._player2_current
     
     def get_scores(self):

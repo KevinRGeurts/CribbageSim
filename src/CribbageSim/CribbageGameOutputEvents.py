@@ -20,7 +20,7 @@ Exported Classes:
         9. UPDATE_PLAYER2_PILE: pile_player2
         10. UPDATE_SCORE_PLAYER1: score_player1, score_record
         11. UPDATE_SCORE_PLAYER2: score_player2, score_record
-        12. END_GAME: 
+        12. END_GAME: name_winner (name_player1 or name_player2 or 'nobody' if game ended before completing)
 
 Exported Exceptions:
     None    
@@ -94,6 +94,7 @@ class CribbageGameLogInfo:
         self.score_player2 = None # Tuple (leading peg position as int, trailing peg position as int)
         self.score_record = [] # List of CribbageComboInfo objects associated with the score
         self.score_while = '' # String describing what was happening when the score was made, like 'playing", 'showing hand', 'showing crib'
+        self.name_winner = 'nobody' # String with name of player who won a completed game. 'nobody' indicates game not played to completion.
 
         # Now process any kwargs to populate some of the attributes
         for k,v in kwargs.items():

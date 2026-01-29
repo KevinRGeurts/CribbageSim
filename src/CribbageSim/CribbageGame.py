@@ -19,7 +19,8 @@ Logging:
 
 # Standard imports
 import logging
-import shelve
+import os
+import json
 
 # Local imports
 from CribbageSim.CribbageBoard import CribbageBoard
@@ -91,6 +92,7 @@ class CribbageGame:
         self._deal = CribbageDeal(self._player2_player_strategy, self._player1_dealer_strategy)
         self._next_to_deal = CribbagePlayers.PLAYER_1
         self._deal_count = 0
+        self._game_stats = CribbageGameInfo()
 
     def get_player1_name(self):
         """
@@ -156,7 +158,6 @@ class CribbageGame:
             # Consider that this predictability is beneficial to unit testing.
             self._next_to_deal = CribbagePlayers.PLAYER_1
 
-        return_val = CribbageGameInfo()
         game_over = False
         
         while not game_over:
@@ -191,55 +192,55 @@ class CribbageGame:
                 match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
-                        return_val.player1_total_play_score += deal_info.player_play_score
-                        return_val.player1_total_show_score += deal_info.player_show_score
-                        return_val.player2_total_play_score += deal_info.dealer_play_score
-                        return_val.player2_total_his_heals_score += deal_info.dealer_his_heals_score
-                        return_val.player2_total_show_score += deal_info.dealer_show_score
-                        return_val.player2_total_crib_score += deal_info.dealer_crib_score
+                        self._game_stats.player1_total_play_score += deal_info.player_play_score
+                        self._game_stats.player1_total_show_score += deal_info.player_show_score
+                        self._game_stats.player2_total_play_score += deal_info.dealer_play_score
+                        self._game_stats.player2_total_his_heals_score += deal_info.dealer_his_heals_score
+                        self._game_stats.player2_total_show_score += deal_info.dealer_show_score
+                        self._game_stats.player2_total_crib_score += deal_info.dealer_crib_score
                     case CribbagePlayers.PLAYER_2:
                         # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
-                        return_val.player2_total_play_score += deal_info.player_play_score
-                        return_val.player2_total_show_score += deal_info.player_show_score
-                        return_val.player1_total_play_score += deal_info.dealer_play_score
-                        return_val.player1_total_his_heals_score += deal_info.dealer_his_heals_score
-                        return_val.player1_total_show_score += deal_info.dealer_show_score
-                        return_val.player1_total_crib_score += deal_info.dealer_crib_score
+                        self._game_stats.player2_total_play_score += deal_info.player_play_score
+                        self._game_stats.player2_total_show_score += deal_info.player_show_score
+                        self._game_stats.player1_total_play_score += deal_info.dealer_play_score
+                        self._game_stats.player1_total_his_heals_score += deal_info.dealer_his_heals_score
+                        self._game_stats.player1_total_show_score += deal_info.dealer_show_score
+                        self._game_stats.player1_total_crib_score += deal_info.dealer_crib_score
             except CribbageGameOverError as e:
                 # Log why the game ended, for example, that it ended while the crib was being shown. This information is obtained from the exception.
                 logger.info(e.args[0])
                 # Accumulate deal info for last deal of the game into game info, because it will not have happened above, due to the exception ending the game.
                 (p1_score, p2_score) = self._board.get_scores()
                 if p1_score == 121:
-                    return_val.winning_player = self._player1
-                    return_val.winning_player_final_score = p1_score
-                    return_val.losing_player_final_score = p2_score
-                    return_val.deals_in_game = self._deal_count
+                    self._game_stats.winning_player = self._player1
+                    self._game_stats.winning_player_final_score = p1_score
+                    self._game_stats.losing_player_final_score = p2_score
+                    self._game_stats.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player1} wins the game.")
                 else:
-                    return_val.winning_player = self._player2
-                    return_val.winning_player_final_score = p2_score
-                    return_val.losing_player_final_score = p1_score
-                    return_val.deals_in_game = self._deal_count
+                    self._game_stats.winning_player = self._player2
+                    self._game_stats.winning_player_final_score = p2_score
+                    self._game_stats.losing_player_final_score = p1_score
+                    self._game_stats.deals_in_game = self._deal_count
                     logger.info(f"Player {self._player2} wins the game.")
                 # Handle accumulating deal info that arrived in CribbageGameOverError into game info
                 match self._next_to_deal:
                     case CribbagePlayers.PLAYER_1:
                         # Since we already rotated next_to_deal above, Player_1 was the player for the deal we just played
-                        return_val.player1_total_play_score += e.deal_info.player_play_score
-                        return_val.player1_total_show_score += e.deal_info.player_show_score
-                        return_val.player2_total_play_score += e.deal_info.dealer_play_score
-                        return_val.player2_total_his_heals_score += e.deal_info.dealer_his_heals_score
-                        return_val.player2_total_show_score += e.deal_info.dealer_show_score
-                        return_val.player2_total_crib_score += e.deal_info.dealer_crib_score
+                        self._game_stats.player1_total_play_score += e.deal_info.player_play_score
+                        self._game_stats.player1_total_show_score += e.deal_info.player_show_score
+                        self._game_stats.player2_total_play_score += e.deal_info.dealer_play_score
+                        self._game_stats.player2_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        self._game_stats.player2_total_show_score += e.deal_info.dealer_show_score
+                        self._game_stats.player2_total_crib_score += e.deal_info.dealer_crib_score
                     case CribbagePlayers.PLAYER_2:
                         # Since we already rotated next_to_deal above, Player_1 was the dealer for the deal we just played
-                        return_val.player2_total_play_score += e.deal_info.player_play_score
-                        return_val.player2_total_show_score += e.deal_info.player_show_score
-                        return_val.player1_total_play_score += e.deal_info.dealer_play_score
-                        return_val.player1_total_his_heals_score += e.deal_info.dealer_his_heals_score
-                        return_val.player1_total_show_score += e.deal_info.dealer_show_score
-                        return_val.player1_total_crib_score += e.deal_info.dealer_crib_score
+                        self._game_stats.player2_total_play_score += e.deal_info.player_play_score
+                        self._game_stats.player2_total_show_score += e.deal_info.player_show_score
+                        self._game_stats.player1_total_play_score += e.deal_info.dealer_play_score
+                        self._game_stats.player1_total_his_heals_score += e.deal_info.dealer_his_heals_score
+                        self._game_stats.player1_total_show_score += e.deal_info.dealer_show_score
+                        self._game_stats.player1_total_crib_score += e.deal_info.dealer_crib_score
                 break
         
             except UserResponseCollector.UserQueryReceiver.UserQueryReceiverTerminateQueryingThreadError as e:
@@ -279,29 +280,121 @@ class CribbageGame:
  
         # Log end of game results
         logger.info(f"At game end, after {self._deal_count} deals:\n{str(self._board)}",
-                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME))
-        logger.info(f"     Winning Player: {return_val.winning_player}")
-        logger.info(f"     Winning Player Final Score: {return_val.winning_player_final_score}")
-        logger.info(f"     Losing Player Final Score: {return_val.losing_player_final_score}")
+                    extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.END_GAME, name_winner=self._game_stats.winning_player))
+        logger.info(f"     Winning Player: {self._game_stats.winning_player}")
+        logger.info(f"     Winning Player Final Score: {self._game_stats.winning_player_final_score}")
+        logger.info(f"     Losing Player Final Score: {self._game_stats.losing_player_final_score}")
         logger.info(f"Statistics for {self._player1}:")
-        logger.info(f"     Total Play Score: {return_val.player1_total_play_score}")
-        logger.info(f"     Total His Heals Score: {return_val.player1_total_his_heals_score}")
-        logger.info(f"     Total Show Score: {return_val.player1_total_show_score}")
-        logger.info(f"     Total Crib Score: {return_val.player1_total_crib_score}")
-        logger.info(f"     Check Sum: {return_val.player1_total_play_score + return_val.player1_total_his_heals_score + return_val.player1_total_show_score + return_val.player1_total_crib_score}")
+        logger.info(f"     Total Play Score: {self._game_stats.player1_total_play_score}")
+        logger.info(f"     Total His Heals Score: {self._game_stats.player1_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {self._game_stats.player1_total_show_score}")
+        logger.info(f"     Total Crib Score: {self._game_stats.player1_total_crib_score}")
+        logger.info(f"     Check Sum: {self._game_stats.player1_total_play_score + self._game_stats.player1_total_his_heals_score + self._game_stats.player1_total_show_score + self._game_stats.player1_total_crib_score}")
         logger.info(f"Statistics for {self._player2}:")
-        logger.info(f"     Total Play Score: {return_val.player2_total_play_score}")
-        logger.info(f"     Total His Heals Score: {return_val.player2_total_his_heals_score}")
-        logger.info(f"     Total Show Score: {return_val.player2_total_show_score}")
-        logger.info(f"     Total Crib Score: {return_val.player2_total_crib_score}")
-        logger.info(f"     Check Sum: {return_val.player2_total_play_score + return_val.player2_total_his_heals_score + return_val.player2_total_show_score + return_val.player2_total_crib_score}")
+        logger.info(f"     Total Play Score: {self._game_stats.player2_total_play_score}")
+        logger.info(f"     Total His Heals Score: {self._game_stats.player2_total_his_heals_score}")
+        logger.info(f"     Total Show Score: {self._game_stats.player2_total_show_score}")
+        logger.info(f"     Total Crib Score: {self._game_stats.player2_total_crib_score}")
+        logger.info(f"     Check Sum: {self._game_stats.player2_total_play_score + self._game_stats.player2_total_his_heals_score + self._game_stats.player2_total_show_score + self._game_stats.player2_total_crib_score}")
 
-        return return_val
+        return self._game_stats
+
+    def writeGameToFile(self, file, filetype) -> None:
+        """
+        Write the game data to a file-like object.
+        :parameter file: A file-like object to which to write the game data.
+        :parameter filetype: A string indicating the type of file (e.g., '.json', '.xml', etc.).
+        :return: None
+        """
+        if filetype != '.json':
+            raise ValueError('CribbageGame.writeGameToFile() only supports filetype ".json"')
+        # Add the game data to a dictionary
+        data={}
+        # Boilerplate data so we know what "generator" created the file, and what the version number of the
+        # schema is.
+        data['archive_generator']='CribbageSimulator'
+        data['archive_schema_version']=1
+        # Player name data
+        data['player1_name']=self.get_player1_name()
+        data['player2_name']=self.get_player2_name()
+        # Game state data
+        data['next_to_deal']=str(self._next_to_deal)
+        data['deal_count']=self._deal_count
+        # Game stats data
+        stats_list = dir(self._game_stats)
+        for stat in stats_list:
+            if not stat.startswith('__') and not stat.endswith('__'):
+                key = f"game_stats_{stat}"
+                value = self._game_stats.__getattribute__(stat)
+                data[key]=value
+        # Cribbage board data
+        (cur,pre)=self._board.get_player1_status()
+        data['player1_current']=cur
+        data['player1_previous']=pre
+        (cur,pre)=self._board.get_player2_status()
+        data['player2_current']=cur
+        data['player2_previous']=pre
+        # Convert the data dictionary to a JSON string
+        json_string = json.dumps(data)
+        # Write the JSON string to the file-like object
+        file.write(json_string)
+        return None
+
+    def readGameFromFile(self, file, filetype) -> None:
+        """
+        Read the game data from a file-like object.
+        :parameter file: A file-like object from which to read the game data.
+        :parameter filetype: A string indicating the type of file (e.g., '.json', '.xml', etc.).
+        :return: None
+        """
+        # Read the JSON string from the file-like object
+        if filetype != '.json':
+            raise ValueError('CribbageGame.readGameFromFile() only supports filetype ".json"')
+        json_string = file.read()
+        # Convert the JSON string to a dictionary
+        data = json.loads(json_string)
+        # Check that the file we loaded was created by the expected archive generator.
+        if data['archive_generator'] != 'CribbageSimulator':
+            raise ValueError(f"CribbageGame.readGameFromFile() attempted to read archive created by unexpected generator {data['archive_generator']}.")
+        # Map the data dictionary to the game object attributes, respecting vatiations in archive schema version.
+        if data['archive_schema_version'] == 1:
+            # Player name data
+            self._player1=data['player1_name']
+            self._player2=data['player2_name']
+            # Game state data
+            dealer = data['next_to_deal']
+            match dealer:
+                case 'CribbagePlayers.PLAYER_1':
+                    self._next_to_deal=CribbagePlayers.PLAYER_1
+                case 'CribbagePlayers.PLAYER_2':
+                    self._next_to_deal=CribbagePlayers.PLAYER_2
+            self._deal_count=data['deal_count']
+            # Game stats data
+            self._game_stats.player1_total_play_score=data['game_stats_player1_total_play_score']
+            self._game_stats.player1_total_his_heals_score=data['game_stats_player1_total_his_heals_score']
+            self._game_stats.player1_total_show_score=data['game_stats_player1_total_show_score']
+            self._game_stats.player1_total_crib_score=data['game_stats_player1_total_crib_score']
+            self._game_stats.player2_total_play_score=data['game_stats_player2_total_play_score']
+            self._game_stats.player2_total_his_heals_score=data['game_stats_player2_total_his_heals_score']
+            self._game_stats.player2_total_show_score=data['game_stats_player2_total_show_score']
+            self._game_stats.player2_total_crib_score=data['game_stats_player2_total_crib_score']
+            self._game_stats.winning_player=data['game_stats_winning_player']
+            self._game_stats.winning_player_final_score=data['game_stats_winning_player_final_score']
+            self._game_stats.losing_player_final_score=data['game_stats_losing_player_final_score']
+            self._game_stats.deals_in_game=data['game_stats_deals_in_game']
+            # Cribbage board data
+            self._board._player1_current=data['player1_current']
+            self._board._player1_previous=data['player1_previous']
+            self._board._player2_current=data['player2_current']
+            self._board._player2_previous=data['player2_previous']
+        else:
+            raise ValueError(f"CribbageGame.readGameFromFile() attempted to read archive with unexpected schema version {data['archive_schema_version']}.")
+        return None 
 
     def shelve_game(self, path=None):
         """
-        Save the game by shelving/pickleing it.
-        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+        Save the game by writing it to a json file.
+        :parameter path: The path to the json file. This should have a .json extension, and all backslashes should be escaped., as String
             If no path is provided, then user will be queried.
         :return None:
         """
@@ -310,30 +403,25 @@ class CribbageGame:
 
         if path is None:
             receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
-            query_preface = 'Where do you want to save the game?'
+            query_preface = 'Where do you want to save the game? Provide the path to a .json file.'
             command = UserQueryCommandPathSave(receiver, query_preface)
             save_path = command.Execute()
+            save_path = str(save_path)
         else:
             save_path = path
 
         logger.info(f"Saving game to path: {save_path}")
 
-        # Note that this does not shelve the play strategy attributes of the game.
-
-        file = shelve.open(str(save_path))
+        if len(save_path)>0:
+            with open(save_path, mode='w') as f:
+                self.writeGameToFile(f, os.path.splitext(save_path)[1])
         
-        file['board']=self._board
-        file['player1']=self._player1
-        file['player2']=self._player2
-        file['next_to_deal']=self._next_to_deal
-        file['deal_count']=self._deal_count
-
         return None
 
     def un_shelve_game(self, path=None):
         """
-        Resotre the game by un-shelving/pickleing it.
-        :parameter path: The path to the shelve file. This should not have an extension, and all backslashes should be excaped., as String
+        Restore the game data by reading it from a json file.
+        :parameter path: The path to the json file. This should have a .json extension, and all backslashes should be escaped., as String
             If no path is provided, then user will be queried.
         :return None:
         """
@@ -343,30 +431,25 @@ class CribbageGame:
 
         if path is None:
             receiver = UserResponseCollector.UserQueryReceiver.UserQueryReceiver_GetCommandReceiver()
-            query_preface = 'Which saved game do you want to open?'
+            query_preface = 'Which saved game do you want to open? Provide the path to a .json file.'
             command = UserQueryCommandPathOpen(receiver, query_preface)
             load_path = command.Execute()
+            load_path = str(load_path)
         else:
             load_path = path
 
         logger.info(f"Loading game from path: {load_path}")
 
-        # Note that this does not un-shelve the play strategy attributes of the game.
-
-        file = shelve.open(str(load_path))
-        
-        self._board=file['board']
-        self._player1=file['player1']
-        self._player2=file['player2']
-        self._next_to_deal=file['next_to_deal']
-        self._deal_count=file['deal_count']
+        if len(load_path)>0:
+            with open(load_path) as f:
+                self.readGameFromFile(f, os.path.splitext(load_path)[1])
 
         logger.info(f"Player 1 peg locations: {self._board.get_player1_status()[0]},{self._board.get_player1_status()[1]}",
             extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER1,
-                                        score_player1=(self._board.get_player1_status()[0],self._board.get_player1_status()[0])))
+                                        score_player1=(self._board.get_player1_status()[0],self._board.get_player1_status()[1])))
 
         logger.info(f"Player 2 peg locations: {self._board.get_player2_status()[0]},{self._board.get_player2_status()[1]}",
             extra=CribbageGameLogInfo(event_type=CribbageGameOutputEvents.UPDATE_SCORE_PLAYER2,
-                                        score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[0])))
+                                        score_player2=(self._board.get_player2_status()[0],self._board.get_player2_status()[1])))
 
         return None

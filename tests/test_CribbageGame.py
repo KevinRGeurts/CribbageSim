@@ -1,4 +1,5 @@
 # Standard
+from os import write
 import unittest
 import io
 from unittest.mock import patch
@@ -8,8 +9,43 @@ from HandsDecksCards.card import Card
 from HandsDecksCards.deck import StackedDeck
 from CribbageSim.CribbagePlayStrategy import InteractiveCribbagePlayStrategy, HoyleishPlayerCribbagePlayStrategy, HoyleishDealerCribbagePlayStrategy
 from CribbageSim.CribbageGame import CribbageGame, CribbageGameInfo
+from CribbageSim.CribbageDeal import CribbagePlayers
 
 class Test_CribbageGame(unittest.TestCase):
+
+    def test_writeGameToFile(self):
+        write_buffer = io.StringIO()
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
+        game.writeGameToFile(write_buffer, '.json')
+        exp_val = '{"archive_generator": "CribbageSimulator", "archive_schema_version": 1, "player1_name": "human_player", "player2_name": "machine_player", "next_to_deal": "CribbagePlayers.PLAYER_1", "deal_count": 0, "game_stats_deals_in_game": 0, "game_stats_losing_player_final_score": 0, "game_stats_player1_total_crib_score": 0, "game_stats_player1_total_his_heals_score": 0, "game_stats_player1_total_play_score": 0, "game_stats_player1_total_show_score": 0, "game_stats_player2_total_crib_score": 0, "game_stats_player2_total_his_heals_score": 0, "game_stats_player2_total_play_score": 0, "game_stats_player2_total_show_score": 0, "game_stats_winning_player": "", "game_stats_winning_player_final_score": 0, "player1_current": 0, "player1_previous": 0, "player2_current": 0, "player2_previous": 0}'
+        act_val = write_buffer.getvalue()
+        self.assertEqual(exp_val, act_val)
+
+    def test_readGameFromFile(self):
+        js = '{"archive_generator": "CribbageSimulator", "archive_schema_version": 1, "player1_name": "human_player", "player2_name": "machine_player", "next_to_deal": "CribbagePlayers.PLAYER_1", "deal_count": 1, "game_stats_deals_in_game": 1, "game_stats_losing_player_final_score": 0, "game_stats_player1_total_crib_score": 4, "game_stats_player1_total_his_heals_score": 0, "game_stats_player1_total_play_score": 3, "game_stats_player1_total_show_score": 8, "game_stats_player2_total_crib_score": 0, "game_stats_player2_total_his_heals_score": 0, "game_stats_player2_total_play_score": 2, "game_stats_player2_total_show_score": 6, "game_stats_winning_player": "", "game_stats_winning_player_final_score": 0, "player1_current": 15, "player1_previous": 11, "player2_current": 8, "player2_previous": 2}'
+        read_buffer = io.StringIO(js)
+        game = CribbageGame(player_strategy1 = InteractiveCribbagePlayStrategy(), player_strategy2 = InteractiveCribbagePlayStrategy())
+        game.readGameFromFile(read_buffer, '.json')
+        self.assertEqual('human_player',game._player1)
+        self.assertEqual('machine_player',game._player2)
+        self.assertEqual(CribbagePlayers.PLAYER_1, game._next_to_deal)
+        self.assertEqual(1,game._deal_count)
+        self.assertEqual(3,game._game_stats.player1_total_play_score)
+        self.assertEqual(0,game._game_stats.player1_total_his_heals_score)
+        self.assertEqual(8,game._game_stats.player1_total_show_score)
+        self.assertEqual(4,game._game_stats.player1_total_crib_score)
+        self.assertEqual(2,game._game_stats.player2_total_play_score)
+        self.assertEqual(0,game._game_stats.player2_total_his_heals_score)
+        self.assertEqual(6,game._game_stats.player2_total_show_score)
+        self.assertEqual(0,game._game_stats.player2_total_crib_score)
+        self.assertEqual('',game._game_stats.winning_player)
+        self.assertEqual(0,game._game_stats.winning_player_final_score)
+        self.assertEqual(0,game._game_stats.losing_player_final_score)
+        self.assertEqual(1,game._game_stats.deals_in_game)
+        self.assertEqual(15,game._board._player1_current)
+        self.assertEqual(11,game._board._player1_previous)
+        self.assertEqual(8,game._board._player2_current)
+        self.assertEqual(2,game._board._player2_previous)
     
     # Patch results in dealer scoring a pair with their first card played, and winning the game.
     @patch('sys.stdin', io.StringIO('4\n3\n2\n1\n0\n2\n'))
